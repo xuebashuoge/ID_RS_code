@@ -62,3 +62,12 @@ Total Message Space: 2^336
 Simulating n = 14 bits...
 Rate: 0.599451
 Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.007799, Error: 0.007799
+ Baseline FN: 0.000000, FP: 0.000000, Error: 0.000000
+Expected FP: 0.007812
+Message Length: m = 672 bits (r=8, K=84), Codeword Length: 256
+Total Message Space: 2^672
+
+Simulating n = 16 bits...
+Rate: 0.587020
+Hamming weight of boolean function (S): 1

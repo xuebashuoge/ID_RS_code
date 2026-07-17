@@ -37,7 +37,8 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
 
     total_fp = 0;
     total_fn = 0;
-    total_actual_f_1 = 0;
+    total_fp_baseline = 0;
+    total_fn_baseline = 0;
 
     for b = 1:num_batches
         % Determine current batch size
@@ -81,14 +82,19 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
         lookup_indices = sub2ind([L, 2^r], U, received_symbols_x + 1);
         decoded_f = valid_lookup(lookup_indices);
 
+        % add an always decodes 0 baseline
+        decoded_f_baseline = false(curr_batch_size, 1); % always decodes 0
+
         % Tally metrics
         fp_count = sum((actual_f == 0) & (decoded_f == 1));
         fn_count = sum((actual_f == 1) & (decoded_f == 0));
-        actual_f_1_count = sum(actual_f == 1);
+        fp_count_baseline = sum((actual_f == 0) & (decoded_f_baseline == 1));
+        fn_count_baseline = sum((actual_f == 1) & (decoded_f_baseline == 0));
 
         total_fp = total_fp + fp_count;
         total_fn = total_fn + fn_count;
-        total_actual_f_1 = total_actual_f_1 + actual_f_1_count;
+        total_fp_baseline = total_fp_baseline + fp_count_baseline;
+        total_fn_baseline = total_fn_baseline + fn_count_baseline;
     end
 
     % Calculate final conditional probabilities
@@ -96,9 +102,9 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
     fn_prob = total_fn / num_trials;
     error_prob = (total_fp + total_fn) / num_trials;
     
-    fp_prob_baseline = 0;
-    fn_prob_baseline = total_actual_f_1 / num_trials;
-    error_prob_baseline = total_actual_f_1 / num_trials;
+    fp_prob_baseline = total_fp_baseline / num_trials;
+    fn_prob_baseline = total_fn_baseline / num_trials;
+    error_prob_baseline = (total_fp_baseline + total_fn_baseline) / num_trials;
     
     stat = struct('fp_prob', fp_prob, 'fn_prob', fn_prob, 'error_prob', error_prob, ...
                   'fp_prob_baseline', fp_prob_baseline, 'fn_prob_baseline', fn_prob_baseline, ...

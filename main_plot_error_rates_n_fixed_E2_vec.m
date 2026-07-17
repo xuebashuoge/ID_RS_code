@@ -86,7 +86,7 @@ for i = 1:length(n_list_sim)
     sim_error_prob(i) = stat.error_prob;
     sim_error_prob_baseline(i) = stat.error_prob_baseline;
     
-    fprintf('Proposed FN: %.6f, FP: %.6f, Error: %.6f\n Baseline FN: %.6f, FP: %.6f, Error: %.6f\nExpected FP: %.6f\n', stat.fn_prob, stat.fp_prob, stat.error_prob, stat.fn_prob_baseline, stat.fp_prob_baseline, stat.error_prob_baseline, expected_FP_rates(i));
+    fprintf('Proposed FN: %.6f, FP: %.6f, Error: %.6f\nBaseline FN: %.6f, FP: %.6f, Error: %.6f\nExpected FP: %.6f\n', stat.fn_prob, stat.fp_prob, stat.error_prob, stat.fn_prob_baseline, stat.fp_prob_baseline, stat.error_prob_baseline, expected_FP_rates(i));
 end
 
 % --- 4. Compute Theoretical Bounds (Separated Calculation) ---
