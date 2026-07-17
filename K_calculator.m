@@ -15,13 +15,16 @@ function K = K_calculator(n, E2, params, func_type)
             beta = params.beta;
             K = floor((factorial(beta) * (2/n)^beta * base_term)^(1/(beta+1)));
         case 'at-most-threshold'
+            beta = params.beta;
             K = floor(((beta/exp(1))^beta * (2/n)^beta * base_term)^(1/(beta+1)));
         case 'bit-query'
             K = floor(2/(n*log(2)) * lambertw(n*log(2)*base_term));
         case 'and-subset'
+            k = length(params.S_k);
             K = floor(2/(n*log(2)) * lambertw(n*log(2)*base_term*2^(k-1)));
         case 'rank'
-            K = floor(2*base_term/(n+2));
+            rank = params.rank;
+            K = floor(base_term/(rank+1));
         otherwise
             error('Unknown boolean function type.');
     end
