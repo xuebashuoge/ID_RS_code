@@ -56,9 +56,10 @@ for i = 1:length(n_list_sim)
 
     num_trials = min(1e7, max(1e6, 10 * 2^m));
     
+    fprintf('\nSimulating n = %d bits...\n', n);   
     fprintf('Message Length: m = %d bits (r=%d, K=%d), Codeword Length: %d\n', m, r, K, L);
     fprintf('Total Message Space: 2^%d\n', m);
-    fprintf('\nSimulating n = %d bits...\n', n);
+
 
     % construct id message
     params.target = randi([0 1], 1, m);   % Fallback for 'id'
