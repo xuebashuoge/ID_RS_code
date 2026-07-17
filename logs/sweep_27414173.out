@@ -1,0 +1,64 @@
+MATLAB is selecting SOFTWARE rendering.
+Opening log file:  /home/yangshuo/java.log.14940
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2024 The MathWorks, Inc.
+             R2024b Update 3 (24.2.0.2806996) 64-bit (glnxa64)
+                             November 26, 2024
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+>> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> === BFC Plotting Simulation ===
+>> >> >> >> >> >> >> >> >> >> >> >> >> >> >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Message Length: m = 6 bits (r=2, K=3), Codeword Length: 4
+Total Message Space: 2^6
+
+Simulating n = 4 bits...
+Rate: 0.646241
+Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.234126, Error: 0.234126
+ Baseline FN: 0.015420, FP: 0.000000, Error: 0.015420
+Expected FP: 0.234375
+Message Length: m = 15 bits (r=3, K=5), Codeword Length: 8
+Total Message Space: 2^15
+
+Simulating n = 6 bits...
+Rate: 0.651148
+Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.124856, Error: 0.124856
+ Baseline FN: 0.000028, FP: 0.000000, Error: 0.000028
+Expected FP: 0.124969
+Message Length: m = 36 bits (r=4, K=9), Codeword Length: 16
+Total Message Space: 2^36
+
+Simulating n = 8 bits...
+Rate: 0.646241
+Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.062506, Error: 0.062506
+ Baseline FN: 0.000000, FP: 0.000000, Error: 0.000000
+Expected FP: 0.062500
+Message Length: m = 80 bits (r=5, K=16), Codeword Length: 32
+Total Message Space: 2^80
+
+Simulating n = 10 bits...
+Rate: 0.632193
+Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.031258, Error: 0.031258
+ Baseline FN: 0.000000, FP: 0.000000, Error: 0.000000
+Expected FP: 0.031250
+Message Length: m = 162 bits (r=6, K=27), Codeword Length: 64
+Total Message Space: 2^162
+
+Simulating n = 12 bits...
+Rate: 0.611654
+Hamming weight of boolean function (S): 1
+Proposed FN: 0.000000, FP: 0.015625, Error: 0.015625
+ Baseline FN: 0.000000, FP: 0.000000, Error: 0.000000
+Expected FP: 0.015625
+Message Length: m = 336 bits (r=7, K=48), Codeword Length: 128
+Total Message Space: 2^336
+
+Simulating n = 14 bits...
+Rate: 0.599451
+Hamming weight of boolean function (S): 1
