@@ -22,7 +22,7 @@ end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 4:2:20;  % start from at least L <= 2^r - 1
+n_list_sim = 24:2:30;  % start from at least L <= 2^r - 1
 
 
 
@@ -34,7 +34,7 @@ n_list_sim = 4:2:20;  % start from at least L <= 2^r - 1
 % 'rank (int(b) <= rank)'         
 
 % --- 2. Boolean Function Setup ---
-func_type = 'id';  % Choose the boolean function type
+func_type = 'exact-threshold';  % Choose the boolean function type
 params.beta = 2;                      % Target threshold
 % params.target = randi([0 1], 1, m);   % Fallback for 'id'
 params.t = 3;                         % Fallback for 'bit-query'
@@ -65,7 +65,7 @@ for i = 1:length(n_list_sim)
     sim_K_vals(i) = K;
     m = r*K;       % Total message length in bits 
 
-    num_trials = min(1e7, max(1e6, 10 * 2^m));
+    num_trials = min(1e8, max(1e6, 10 * 2^m));
     
     fprintf('\nSimulating n = %d bits...\n', n);   
     fprintf('Message Length: m = %d bits, Alphabet Size: 2^%d, (%d,%d)-RS code\n', m, r, L, K);
@@ -79,11 +79,12 @@ for i = 1:length(n_list_sim)
     [D, S_curr, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params);
 
     % calculate expected FP rate based on D_ratio (for debugging)
-    if m < 50
-        expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
-    else
-        expected_FP_rates(i) = mean(D_ratio);
-    end
+    % if m < 50
+    %     expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
+    % else
+    %     expected_FP_rates(i) = mean(D_ratio);
+    % end
+    expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
     
     sim_rates(i) = rate_calculation(n, m, func_type);
     fprintf('Rate: %.6f\n', sim_rates(i));
