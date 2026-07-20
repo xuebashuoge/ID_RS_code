@@ -8,6 +8,17 @@
 % =========================================================================
 clear; close all;
 tic
+
+% --- 0. Initialize Parallel Pool ---
+if isempty(gcp('nocreate'))
+    try
+        num_workers = feature('numcores');
+        parpool('local', num_workers);
+        fprintf('Parallel pool started with %d workers.\n', num_workers);
+    catch ME
+        fprintf('Warning: Could not start parallel pool (%s). Running serially.\n', ME.message);
+    end
+end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols

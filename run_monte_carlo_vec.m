@@ -1,5 +1,5 @@
 function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
-    % run_monte_carlo: Estimates Empirical FP and FN rates (Vectorized)
+    % run_monte_carlo: Estimates Empirical FP and FN rates (Vectorized + Parallel)
     
     % 1. Pre-build the Vandermonde matrix X once to speed up batched RS encoding
     alpha = gf(2, r);
@@ -29,9 +29,30 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
             idx = (k-1)*r + 1 : k*r;
             target_symbols(k) = sum(params.target(idx) .* weights);
         end
+    else
+        target_symbols = [];  % unused, but parfor needs it defined
     end
 
-    % 4. Batch Loop setup
+    % 4. Pre-extract Vandermonde as raw integer matrix for GF table lookup
+    % Instead of broadcasting the GF object X into parfor, we pre-compute
+    % the full GF multiplication table and use integer-only ops inside parfor.
+    % GF(2^r) multiplication lookup table: gf_mul(a+1, b+1) = a*b in GF(2^r)
+    field_size = 2^r;
+    gf_mul = zeros(field_size, field_size, 'uint32');
+    gf_elems = gf(0:(field_size-1), r);
+    for a = 0:(field_size-1)
+        products = gf_elems(a+1) * gf_elems;
+        gf_mul(a+1, :) = products.x;
+    end
+
+    % Pre-extract X as raw integers
+    X_raw = uint32(X.x);  % [K x L]
+
+    % GF(2^r) addition is XOR (bitxor)
+    % Matrix multiply P_raw * X_raw in GF(2^r) using lookup:
+    %   C(i,l) = sum_k P(i,k)*X(k,l) = XOR_k gf_mul(P(i,k), X(k,l))
+
+    % 5. Parallel Batch Loop
     batch_size = 100000; % process 10^5 trials at a time to save memory
     num_batches = ceil(num_trials / batch_size);
 
@@ -40,14 +61,13 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
     total_fp_baseline = 0;
     total_fn_baseline = 0;
 
-    for b = 1:num_batches
+    parfor b = 1:num_batches
         % Determine current batch size
         curr_batch_size = min(batch_size, num_trials - (b - 1) * batch_size);
 
         if strcmpi(func_type, 'id')
-            % Generate random messages directly as symbols in GF(2^r) to avoid huge binary matrix allocation
-            symbols = randi([0, 2^r - 1], curr_batch_size, K);
-            P = gf(symbols, r);
+            % Generate random messages directly as symbols in GF(2^r)
+            symbols = randi([0, field_size - 1], curr_batch_size, K);
             actual_f = all(bsxfun(@eq, symbols, target_symbols), 2);
         else
             b_matrix = randi([0, 1], curr_batch_size, r*K);
@@ -60,12 +80,20 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
                 idx = (k-1)*r + 1 : k*r;
                 symbols(:, k) = sum(b_matrix(:, idx) .* weights_sym, 2);
             end
-            P = gf(symbols, r);
         end
 
-        % Encode batch (P * X)
-        C = P * X;
-        C_ints = C.x;
+        % Encode batch using pre-computed GF multiplication table (no GF objects)
+        % C_ints(i, l) = XOR over k of gf_mul(symbols(i,k)+1, X_raw(k,l)+1)
+        C_ints = zeros(curr_batch_size, L, 'uint32');
+        for k = 1:K
+            % For each symbol position k, look up gf_mul(symbols(:,k), X_raw(k,:))
+            % symbols(:,k) is [N x 1], X_raw(k,:) is [1 x L]
+            sym_col = uint32(symbols(:, k)) + 1;  % [N x 1], 1-indexed
+            x_row = X_raw(k, :);                   % [1 x L], 0-indexed raw GF values
+            % Vectorized lookup: for each (i,l), get gf_mul(sym_col(i), x_row(l)+1)
+            mul_result = gf_mul(sym_col, x_row + 1);  % [N x L] via indexing
+            C_ints = bitxor(C_ints, mul_result);       % GF addition = XOR
+        end
 
         % Choose uniform indices u from {1...L} for each trial in the batch
         U = randi([1, L], curr_batch_size, 1);
@@ -76,13 +104,13 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
         received_symbols_x = C_ints(linear_indices);
 
         % Check if received symbols are valid using lookup table
-        lookup_indices = sub2ind([L, 2^r], U, received_symbols_x + 1);
+        lookup_indices = sub2ind([L, field_size], U, double(received_symbols_x) + 1);
         decoded_f = valid_lookup(lookup_indices);
 
         % add an always decodes 0 baseline
         decoded_f_baseline = false(curr_batch_size, 1); % always decodes 0
 
-        % Tally metrics
+        % Tally metrics (reduction variables for parfor)
         fp_count = sum((actual_f == 0) & (decoded_f == 1));
         fn_count = sum((actual_f == 1) & (decoded_f == 0));
         fp_count_baseline = sum((actual_f == 0) & (decoded_f_baseline == 1));
