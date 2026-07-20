@@ -11,7 +11,7 @@ tic
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 24:2:50;  % start from at least L <= 2^r - 1
+n_list_sim = 4:2:20;  % start from at least L <= 2^r - 1
 
 
 
@@ -23,7 +23,7 @@ n_list_sim = 24:2:50;  % start from at least L <= 2^r - 1
 % 'rank (int(b) <= rank)'         
 
 % --- 2. Boolean Function Setup ---
-func_type = 'exact-threshold';  % Choose the boolean function type
+func_type = 'id';  % Choose the boolean function type
 params.beta = 2;                      % Target threshold
 % params.target = randi([0 1], 1, m);   % Fallback for 'id'
 params.t = 3;                         % Fallback for 'bit-query'
@@ -50,7 +50,7 @@ for i = 1:length(n_list_sim)
     sim_r_vals(i) = r;
     L = 2^r;
     sim_L_vals(i) = L;
-    K = K_calulation(n, E2, params, func_type);
+    K = K_calculator(n, E2, params, func_type);
     sim_K_vals(i) = K;
     m = r*K;       % Total message length in bits 
 
