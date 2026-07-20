@@ -119,11 +119,11 @@ for t = 1:length(test_configs)
     end
     
     m = r * K;
-    [D, S, ~] = build_decoding_regions_vec(r, K, L, cfg.func_type, cfg.params);
+    [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, cfg.func_type, cfg.params);
     
     % Run with a fixed seed for reproducibility check
     num_trials = 100000;
-    stat = run_monte_carlo_vec(D, r, K, L, cfg.func_type, cfg.params, num_trials);
+    stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, cfg.func_type, cfg.params, num_trials);
     
     fprintf('  Config %d (%s, n=%d, K=%d): FP=%.6f, FN=%.6f, Error=%.6f\n', ...
         t, cfg.func_type, n, K, stat.fp_prob, stat.fn_prob, stat.error_prob);

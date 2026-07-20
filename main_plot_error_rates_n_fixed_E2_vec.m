@@ -76,14 +76,8 @@ for i = 1:length(n_list_sim)
     params.target = randi([0 1], 1, m);   % Fallback for 'id'
     
     % Build decoding regions for this specific L
-    [D, S_curr, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params);
+    [S_curr, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, func_type, params);
 
-    % calculate expected FP rate based on D_ratio (for debugging)
-    % if m < 50
-    %     expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
-    % else
-    %     expected_FP_rates(i) = mean(D_ratio);
-    % end
     expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
     
     sim_rates(i) = rate_calculation(n, m, func_type);
@@ -94,7 +88,7 @@ for i = 1:length(n_list_sim)
 
 
     % Run Monte Carlo
-    stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials);
+    stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, params, num_trials);
     sim_error_prob(i) = stat.error_prob;
     sim_error_prob_baseline(i) = stat.error_prob_baseline;
     

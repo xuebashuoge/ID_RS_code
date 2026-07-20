@@ -1,31 +1,23 @@
-function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params)
-    % build_decoding_regions: Determines valid GF symbols at each position
+function [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, func_type, params)
+    % build_decoding_regions_vec: Determines valid GF symbols at each position
+    % (Optimized for memory and large n/L)
     %
     % Inputs:
     %   r, K, L, func_type, params - Configuration
     %
     % Outputs:
-    %   D - Cell array of size [1 x L]. D{l} contains a GF array of symbols
     %   S - Hamming weight of the boolean function
-    %   D_ratio - Ratio of valid symbols to total symbols in each decoding region
-    
-    % Initialize D as empty Galois Field arrays
-    D = cell(1, L);
-    for l = 1:L
-        D{l} = gf([], r);
-    end
+    %   D_ratio - Ratio of valid symbols to total symbols in each decoding region [1 x L]
+    %   valid_c_matrix_uint32 - Valid codewords matrix [S x L] uint32
 
     m = r * K;  % Total message length in bits
 
     switch lower(func_type)
         case 'id'
-            % For 'id', the only valid message is the target message itself
             valid_b_matrix = params.target;
             S = 1;
 
         case 'exact-threshold'
-            % Pre-image: all binary vectors of length m with Hamming weight == beta
-            % Generate directly via nchoosek instead of enumerating all 2^m messages
             beta = params.beta;
             if beta > m
                 valid_b_matrix = zeros(0, m);
@@ -34,8 +26,8 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
                 valid_b_matrix = zeros(1, m);
                 S = 1;
             else
-                combos = nchoosek(1:m, beta);  % Each row: indices of the 1-bits
-                S = size(combos, 1);            % = C(m, beta)
+                combos = nchoosek(1:m, beta);
+                S = size(combos, 1);
                 valid_b_matrix = zeros(S, m);
                 for i = 1:S
                     valid_b_matrix(i, combos(i, :)) = 1;
@@ -43,12 +35,9 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
             end
 
         case 'at-most-threshold'
-            % Pre-image: all binary vectors of length m with Hamming weight <= beta
-            % Generate directly for each weight 0..beta via nchoosek
             beta = params.beta;
-            beta = min(beta, m);  % Clamp to message length
+            beta = min(beta, m);
 
-            % Count total valid messages: sum of C(m, j) for j = 0..beta
             S = 0;
             for j = 0:beta
                 S = S + nchoosek(m, j);
@@ -57,8 +46,8 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
             valid_b_matrix = zeros(S, m);
             row = 1;
 
-            % Weight 0: the all-zeros vector
-            row = row + 1;  % First row is already all zeros
+            % Weight 0
+            row = row + 1;
 
             % Weights 1..beta
             for j = 1:beta
@@ -71,8 +60,6 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
             end
 
         case 'bit-query'
-            % Pre-image: all binary vectors with bit t == 1
-            % S = 2^(m-1), which can be very large
             S = 2^(m - 1);
             if S > 1e8
                 error('Message space for bit-query (S=2^%d) is too large to enumerate.', m-1);
@@ -86,8 +73,6 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
             S = size(valid_b_matrix, 1);
 
         case 'and-subset'
-            % Pre-image: all binary vectors with all bits in S_k set to 1
-            % S = 2^(m - |S_k|), which can be very large
             k_size = length(params.S_k);
             S = 2^(m - k_size);
             if S > 1e8
@@ -102,7 +87,6 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
             S = size(valid_b_matrix, 1);
 
         case 'rank'
-            % Pre-image: first rank+1 binary vectors (int(b) <= rank)
             S = params.rank + 1;
             if S > 1e8
                 error('Message space for rank (S=%d) is too large to enumerate.', S);
@@ -118,18 +102,20 @@ function [D, S, D_ratio] = build_decoding_regions_vec(r, K, L, func_type, params
     % Handle edge case: no valid messages
     if S == 0
         D_ratio = zeros(1, L);
+        valid_c_matrix_uint32 = zeros(0, L, 'uint32');
         return;
     end
 
     % Encode valid messages to get codewords
     valid_c_matrix = rs_encode_polynomial_vec(valid_b_matrix, r, K, L);
+    valid_c_matrix_uint32 = uint32(valid_c_matrix.x);
 
-    % Add symbols to respective decoding regions
+    % Compute D_ratio efficiently for each position l
     D_ratio = zeros(1, L);
-    for l = 1:L
-        valid_c_ints = valid_c_matrix(:, l);
-        unique_ints = unique(valid_c_ints.x);
-        D{l} = gf(unique_ints, r);
-        D_ratio(l) = size(unique_ints, 1) / 2^r;
+    field_size = 2^r;
+    
+    % If S is small, computing unique length per column is very fast
+    parfor l = 1:L
+        D_ratio(l) = length(unique(valid_c_matrix_uint32(:, l))) / field_size;
     end
 end
