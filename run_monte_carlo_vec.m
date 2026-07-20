@@ -50,10 +50,7 @@ function stat = run_monte_carlo_vec(D, r, K, L, func_type, params, num_trials)
             P = gf(symbols, r);
             actual_f = all(bsxfun(@eq, symbols, target_symbols), 2);
         else
-            max_msg = 2^(r * K) - 1;
-            msg_ints = randi([0, max_msg], curr_batch_size, 1);
-            weights_b = 2.^((r*K-1):-1:0);
-            b_matrix = rem(floor(msg_ints ./ weights_b), 2);
+            b_matrix = randi([0, 1], curr_batch_size, r*K);
             actual_f = evaluate_boolean_function_vec(b_matrix, func_type, params);
 
             % Convert to symbols for RS encoding
