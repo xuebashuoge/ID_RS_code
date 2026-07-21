@@ -22,7 +22,7 @@ end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 24:2:30;  % start from at least L <= 2^r - 1
+n_list_sim = 24:2:50;  % start from at least L <= 2^r - 1
 
 
 
@@ -41,7 +41,13 @@ params.t = 3;                         % Fallback for 'bit-query'
 params.S_k = [1, 2];                  % Fallback for 'and-subset'
 params.rank = 1000;                   % Fallback for 'rank'
 
+% --- Setup Output Directory ---
+results_dir = fullfile('results', sprintf('%s_E2_%.2f', func_type, E2));
+if ~exist(results_dir, 'dir')
+    mkdir(results_dir);
+end
 fprintf('=== BFC Plotting Simulation ===\n');
+fprintf('Results will be saved to: %s\n', results_dir);
 
 % --- 3. Run Empirical Simulations ---
 sim_r_vals = zeros(1, length(n_list_sim));
@@ -65,7 +71,7 @@ for i = 1:length(n_list_sim)
     sim_K_vals(i) = K;
     m = r*K;       % Total message length in bits 
 
-    num_trials = min(1e8, max(1e6, 10 * 2^m));
+    num_trials = min(1e9, max(1e6, 10 * 2^m));
     
     fprintf('\nSimulating n = %d bits...\n', n);   
     fprintf('Message Length: m = %d bits, Alphabet Size: 2^%d, (%d,%d)-RS code\n', m, r, L, K);
@@ -93,6 +99,11 @@ for i = 1:length(n_list_sim)
     sim_error_prob_baseline(i) = stat.error_prob_baseline;
     
     fprintf('Proposed FN: %.6f, FP: %.6f, Error: %.6f\nBaseline FN: %.6f, FP: %.6f, Error: %.6f\nExpected FP: %.6f\n', stat.fn_prob, stat.fp_prob, stat.error_prob, stat.fn_prob_baseline, stat.fp_prob_baseline, stat.error_prob_baseline, expected_FP_rates(i));
+
+    % Save individual result for this n
+    res_n = struct('n', n, 'r', r, 'L', L, 'K', K, 'm', m, 'S', S_curr, 'rate', sim_rates(i), 'stat', stat, 'expected_FP', expected_FP_rates(i));
+    save(fullfile(results_dir, sprintf('result_n_%d.mat', n)), '-struct', 'res_n');
+    fprintf('Saved result for n = %d to %s\n', n, fullfile(results_dir, sprintf('result_n_%d.mat', n)));
 end
 
 % --- 4. Compute Theoretical Bounds (Separated Calculation) ---
@@ -100,8 +111,10 @@ end
 
 % 4a. Upper Bound: S * (K - 1) / L
 % Back-calculate continuous L from n: L = 2^(n - r)
-theory_upper_bound = (sim_S_weights * (K - 1)) ./ sim_L_vals;
+theory_upper_bound = (sim_S_weights * (sim_K_vals - 1)) ./ sim_L_vals;
 
+% Save all summary vectors
+save(fullfile(results_dir, 'summary_all_n.mat'), 'n_list_sim', 'sim_r_vals', 'sim_K_vals', 'sim_L_vals', 'sim_error_prob', 'sim_error_prob_baseline', 'sim_S_weights', 'sim_rates', 'expected_FP_rates', 'theory_upper_bound');
 
 
 % --- 5. Plotting ---
@@ -135,13 +148,14 @@ grid on;
 grid minor;
 xlabel('n = log_2(L) + r', 'FontSize', 12, 'FontWeight', 'bold');
 ylabel('Error Probability (Log Scale)', 'FontSize', 12, 'FontWeight', 'bold');
-title(sprintf('BFC Error Rate vs. n (K=%d, %s)', K, func_type), 'FontSize', 14);
+title(sprintf('BFC Error Rate vs. n (E2=%.2f, %s)', E2, func_type), 'FontSize', 14);
 legend('Location', 'southwest', 'FontSize', 11);
 xlim([floor(n_list_sim(1)), ceil(n_list_sim(end))]);
 
 % Enforce limits to make the plot visually clean
 ylim([max(1e-6, min(sim_error_prob(sim_error_prob>0)) * 0.1), 1]);
-saveas(gcf, sprintf('BFC_Error_Rates_%s_K%d_vec.png', func_type, K));
 
-fprintf('\n=== Simulation Complete ===\nPlot has been generated.\n');
+fig_filename = fullfile(results_dir, sprintf('BFC_Error_Rates_%s_E2_%.2f.png', func_type, E2));
+saveas(gcf, fig_filename);
+fprintf('\n=== Simulation Complete ===\nPlot saved to %s\n', fig_filename);
 toc
