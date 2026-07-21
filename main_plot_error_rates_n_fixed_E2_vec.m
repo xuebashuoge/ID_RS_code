@@ -22,7 +22,7 @@ end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 24:2:50;  % start from at least L <= 2^r - 1
+n_list_sim = 24:2:42;  % start from at least L <= 2^r - 1
 
 
 
@@ -39,7 +39,7 @@ params.beta = 2;                      % Target threshold
 % params.target = randi([0 1], 1, m);   % Fallback for 'id'
 params.t = 3;                         % Fallback for 'bit-query'
 params.S_k = [1, 2];                  % Fallback for 'and-subset'
-params.rank = 1000;                   % Fallback for 'rank'
+params.rank = 20;                   % Fallback for 'rank'
 
 % --- Setup Output Directory ---
 results_dir = fullfile('results', sprintf('%s_E2_%.2f', func_type, E2));
@@ -69,7 +69,7 @@ for i = 1:length(n_list_sim)
     sim_K_vals(i) = K;
     m = r*K;       % Total message length in bits 
 
-    num_trials = min(1e9, max(1e6, 10 * 2^m));
+    num_trials = min(1e8, max(1e6, 10 * 2^m));
     
     fprintf('\nSimulating n = %d bits...\n', n);   
     fprintf('Message Length: m = %d bits, Alphabet Size: 2^%d, (%d,%d)-RS code\n', m, r, L, K);
