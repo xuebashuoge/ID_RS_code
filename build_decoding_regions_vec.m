@@ -107,8 +107,7 @@ function [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, 
     end
 
     % Encode valid messages to get codewords
-    valid_c_matrix = rs_encode_polynomial_vec(valid_b_matrix, r, K, L);
-    valid_c_matrix_uint32 = uint32(valid_c_matrix.x);
+    valid_c_matrix_uint32 = uint32(rs_encode_polynomial_vec(valid_b_matrix, r, K, L));
 
     % Compute D_ratio efficiently for each position l
     D_ratio = zeros(1, L);

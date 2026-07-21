@@ -95,7 +95,7 @@ for i = 1:length(test_cases)
     fprintf('Test %2d: %-45s ... ', i, tc.label);
 
     % Run new implementation
-    [D_new, S_new, D_ratio_new] = build_decoding_regions_vec(tc.r, tc.K, tc.L, tc.func_type, tc.params);
+    [S_new, D_ratio_new, valid_c_matrix_uint32] = build_decoding_regions_vec(tc.r, tc.K, tc.L, tc.func_type, tc.params);
 
     % Run brute-force reference
     [D_ref, S_ref, D_ratio_ref] = build_decoding_regions_bruteforce(tc.r, tc.K, tc.L, tc.func_type, tc.params);

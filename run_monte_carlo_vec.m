@@ -1,7 +1,6 @@
 function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, params, num_trials)
     % run_monte_carlo: Estimates Empirical FP and FN rates
-    % Optimized for huge n (evaluates RS polynomial ONLY at position U_i per trial,
-    % avoiding massive N x L matrix allocations and giant lookup tables).
+    % Supports any r (1..32) without relying on MATLAB's built-in gf object.
 
     S = size(valid_c_matrix_uint32, 1);
     if S == 0
@@ -11,23 +10,37 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
         return;
     end
 
+    prim_poly = get_primpoly(r);
+
     % 1. Pre-build the Vandermonde matrix X_raw [K x L] uint32
-    alpha = gf(2, r);
-    X = gf(zeros(K, L), r);
+    % X(k, l) = alpha^(l * (k - 1)) in GF(2^r) where alpha = 2
+    X_raw = zeros(K, L, 'uint32');
+    alpha = uint32(2);
+    alpha_powers = zeros(1, L, 'uint32');
+    curr = uint32(1);
+    for l = 1:L
+        curr = gf_mul_vec(curr, alpha, r, prim_poly);
+        alpha_powers(l) = curr;
+    end
     for k = 1:K
-        for l = 1:L
-            X(k, l) = alpha ^ (l * (k - 1));
+        if k == 1
+            X_raw(1, :) = uint32(1);
+        else
+            power_val = uint32(1);
+            for p = 1:(k-1)
+                power_val = gf_mul_vec(power_val, alpha_powers, r, prim_poly);
+            end
+            X_raw(k, :) = power_val;
         end
     end
-    X_raw = uint32(X.x);  % [K x L] uint32
 
     % 2. Convert target to symbol format once if func_type is 'id'
     if strcmpi(func_type, 'id')
-        target_symbols = zeros(1, K);
+        target_symbols = zeros(1, K, 'uint32');
         weights = 2.^((r-1):-1:0);
         for k = 1:K
             idx = (k-1)*r + 1 : k*r;
-            target_symbols(k) = sum(params.target(idx) .* weights);
+            target_symbols(k) = uint32(sum(params.target(idx) .* weights));
         end
     else
         target_symbols = [];
@@ -47,17 +60,17 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
         curr_batch_size = min(batch_size, num_trials - (b - 1) * batch_size);
 
         if strcmpi(func_type, 'id')
-            symbols = randi([0, field_size - 1], curr_batch_size, K);
+            symbols = uint32(randi([0, field_size - 1], curr_batch_size, K));
             actual_f = all(bsxfun(@eq, symbols, target_symbols), 2);
         else
             b_matrix = randi([0, 1], curr_batch_size, r*K);
             actual_f = evaluate_boolean_function_vec(b_matrix, func_type, params);
 
-            symbols = zeros(curr_batch_size, K);
+            symbols = zeros(curr_batch_size, K, 'uint32');
             weights_sym = 2.^((r-1):-1:0);
             for k = 1:K
                 idx = (k-1)*r + 1 : k*r;
-                symbols(:, k) = sum(b_matrix(:, idx) .* weights_sym, 2);
+                symbols(:, k) = uint32(sum(b_matrix(:, idx) .* weights_sym, 2));
             end
         end
 
@@ -65,18 +78,16 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
         U = randi([1, L], curr_batch_size, 1);
 
         % Evaluate RS polynomial ONLY at the single selected channel position U_i for each trial
-        % x_eval is [K x curr_batch_size] containing evaluation factors alpha^(U_i*(k-1))
-        x_eval = X_raw(:, U);
+        x_eval = X_raw(:, U);  % [K x curr_batch_size] uint32
 
         % Compute received symbol Y_i in GF(2^r) for each trial
-        rec_gf = gf(zeros(curr_batch_size, 1), r);
+        received_symbols_x = zeros(curr_batch_size, 1, 'uint32');
         for k = 1:K
-            rec_gf = rec_gf + gf(symbols(:, k), r) .* gf(x_eval(k, :)', r);
+            term_k = gf_mul_vec(symbols(:, k), x_eval(k, :)', r, prim_poly);
+            received_symbols_x = bitxor(received_symbols_x, term_k);
         end
-        received_symbols_x = uint32(rec_gf.x);  % [curr_batch_size x 1] uint32
 
         % Check if received symbol matches ANY valid codeword symbol at position U_i
-        % C_valid_sampled is [S x curr_batch_size] uint32
         C_valid_sampled = valid_c_matrix_uint32(:, U);
 
         % decoded_f(i) is true if received_symbols_x(i) matches C_valid_sampled(s, i) for any s=1..S
