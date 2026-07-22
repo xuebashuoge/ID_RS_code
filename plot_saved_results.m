@@ -11,7 +11,7 @@
 clear; close all;
 
 % --- 1. Simulation / Result Parameters ---
-func_type = 'exact-threshold';  % Function type: 'exact-threshold', 'id', etc.
+func_type = 'rank';  % Function type: 'exact-threshold', 'id', etc.
 E2 = 0.10;                      % Parameter E2
 
 % Target results directory
