@@ -10,14 +10,14 @@ function C = gf_mul_vec(A, B, r, prim_poly)
     % Output:
     %   C         - uint32 result array of GF multiplication
 
-    mask = uint64(2^r - 1);
-    poly_trunc = uint64(bitand(prim_poly, uint64(2^r - 1)));
+    mask = uint32(2^r - 1);
+    poly_trunc = uint32(bitand(uint64(prim_poly), uint64(2^r - 1)));
 
-    A = uint64(A);
-    B = uint64(B);
-    
+    A = uint32(A);
+    B = uint32(B);
+
     % Allocate output C with implicit size broadcasting between A and B
-    C = zeros(max(size(A,1), size(B,1)), max(size(A,2), size(B,2)), 'uint64');
+    C = zeros(max(size(A,1), size(B,1)), max(size(A,2), size(B,2)), 'uint32');
 
     for bit = 0:(r-1)
         mask_bit = bitget(B, bit + 1);
@@ -27,6 +27,5 @@ function C = gf_mul_vec(A, B, r, prim_poly)
         A = bitand(bitshift(A, 1), mask);
         A = bitxor(A, poly_trunc .* msb);
     end
-
-    C = uint32(C);
 end
+

@@ -1,8 +1,9 @@
-function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, params, num_trials)
+function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, params, num_trials)
     % run_monte_carlo: Estimates Empirical FP and FN rates
     % Supports any r (1..32) without relying on MATLAB's built-in gf object.
+    % Memory-optimized by computing sampled valid codewords on-the-fly.
 
-    S = size(valid_c_matrix_uint32, 1);
+    S = size(valid_symbols_uint32, 1);
     if S == 0
         stat = struct('fp_prob', 0, 'fn_prob', 0, 'error_prob', 0, ...
                       'fp_prob_baseline', 0, 'fn_prob_baseline', 0, ...
@@ -46,9 +47,9 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
         target_symbols = [];
     end
 
-    % 3. Batch Loop setup
+    % 3. Batch Loop setup with dynamic batch size to constrain peak worker memory
     field_size = 2^r;
-    batch_size = 1000; % process 10^5 trials at a time
+    batch_size = min(50000, max(1000, floor(1e8 / max(1, S))));
     num_batches = ceil(num_trials / batch_size);
 
     total_fp = 0;
@@ -87,8 +88,12 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
             received_symbols_x = bitxor(received_symbols_x, term_k);
         end
 
-        % Check if received symbol matches ANY valid codeword symbol at position U_i
-        C_valid_sampled = valid_c_matrix_uint32(:, U);
+        % Compute valid codeword symbols at position U_i on-the-fly: [S x curr_batch_size]
+        C_valid_sampled = zeros(S, curr_batch_size, 'uint32');
+        for k = 1:K
+            term_k = gf_mul_vec(valid_symbols_uint32(:, k), x_eval(k, :), r, prim_poly);
+            C_valid_sampled = bitxor(C_valid_sampled, term_k);
+        end
 
         % decoded_f(i) is true if received_symbols_x(i) matches C_valid_sampled(s, i) for any s=1..S
         decoded_f = any(bsxfun(@eq, received_symbols_x', C_valid_sampled), 1)';

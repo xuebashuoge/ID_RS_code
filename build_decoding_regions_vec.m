@@ -1,6 +1,6 @@
-function [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, func_type, params)
+function [S, D_ratio, valid_symbols_uint32] = build_decoding_regions_vec(r, K, L, func_type, params)
     % build_decoding_regions_vec: Determines valid GF symbols at each position
-    % (Optimized for memory and large n/L)
+    % (Optimized for memory and large n/L up to n=50)
     %
     % Inputs:
     %   r, K, L, func_type, params - Configuration
@@ -8,7 +8,7 @@ function [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, 
     % Outputs:
     %   S - Hamming weight of the boolean function
     %   D_ratio - Ratio of valid symbols to total symbols in each decoding region [1 x L]
-    %   valid_c_matrix_uint32 - Valid codewords matrix [S x L] uint32
+    %   valid_symbols_uint32 - Valid message symbols matrix [S x K] uint32
 
     m = r * K;  % Total message length in bits
 
@@ -102,19 +102,60 @@ function [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, 
     % Handle edge case: no valid messages
     if S == 0
         D_ratio = zeros(1, L);
-        valid_c_matrix_uint32 = zeros(0, L, 'uint32');
+        valid_symbols_uint32 = zeros(0, K, 'uint32');
         return;
     end
 
-    % Encode valid messages to get codewords
-    valid_c_matrix_uint32 = uint32(rs_encode_polynomial_vec(valid_b_matrix, r, K, L));
+    % Group bits into K blocks of length r for all S valid messages -> [S x K] uint32
+    valid_symbols_uint32 = zeros(S, K, 'uint32');
+    weights_sym = 2.^((r-1):-1:0);
+    for k = 1:K
+        idx = (k-1)*r + 1 : k*r;
+        valid_symbols_uint32(:, k) = uint32(sum(valid_b_matrix(:, idx) .* weights_sym, 2));
+    end
 
-    % Compute D_ratio efficiently for each position l
+    % Compute D_ratio efficiently using chunking over L
     D_ratio = zeros(1, L);
     field_size = 2^r;
-    
-    % If S is small, computing unique length per column is very fast
-    parfor l = 1:L
-        D_ratio(l) = length(unique(valid_c_matrix_uint32(:, l))) / field_size;
+
+    if S == 1
+        D_ratio(:) = 1 / field_size;
+    else
+        prim_poly = get_primpoly(r);
+        alpha = uint32(2);
+        alpha_powers = zeros(1, L, 'uint32');
+        curr = uint32(1);
+        for l = 1:L
+            curr = gf_mul_vec(curr, alpha, r, prim_poly);
+            alpha_powers(l) = curr;
+        end
+
+        chunk_size = 2000;
+        for c_start = 1:chunk_size:L
+            c_end = min(c_start + chunk_size - 1, L);
+            cols = c_start:c_end;
+            num_cols = length(cols);
+
+            X_chunk = zeros(K, num_cols, 'uint32');
+            X_chunk(1, :) = uint32(1);
+            if K > 1
+                p_val = alpha_powers(cols);
+                X_chunk(2, :) = p_val;
+                for k = 3:K
+                    p_val = gf_mul_vec(p_val, alpha_powers(cols), r, prim_poly);
+                    X_chunk(k, :) = p_val;
+                end
+            end
+
+            c_chunk = zeros(S, num_cols, 'uint32');
+            for k = 1:K
+                term = gf_mul_vec(valid_symbols_uint32(:, k), X_chunk(k, :), r, prim_poly);
+                c_chunk = bitxor(c_chunk, term);
+            end
+
+            for idx = 1:num_cols
+                D_ratio(cols(idx)) = length(unique(c_chunk(:, idx))) / field_size;
+            end
+        end
     end
 end

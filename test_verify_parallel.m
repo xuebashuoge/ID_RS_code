@@ -55,10 +55,10 @@ for t = 1:length(test_configs)
     fprintf('  Config %d: n=%d, r=%d, L=%d, K=%d, m=%d (%s) ... ', ...
         t, n, r, L, K, m, cfg.func_type);
     
-    [S, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, cfg.func_type, cfg.params);
+    [S, D_ratio, valid_symbols_uint32] = build_decoding_regions_vec(r, K, L, cfg.func_type, cfg.params);
     
     num_trials = 10000;
-    stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, cfg.func_type, cfg.params, num_trials);
+    stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, cfg.func_type, cfg.params, num_trials);
     
     fprintf('FP=%.6f, FN=%.6f, Error=%.6f -> PASS\n', stat.fp_prob, stat.fn_prob, stat.error_prob);
     

@@ -79,7 +79,7 @@ for i = 1:length(n_list_sim)
     params.target = randi([0 1], 1, m);   % Fallback for 'id'
     
     % Build decoding regions for this specific L
-    [S_curr, D_ratio, valid_c_matrix_uint32] = build_decoding_regions_vec(r, K, L, func_type, params);
+    [S_curr, D_ratio, valid_symbols_uint32] = build_decoding_regions_vec(r, K, L, func_type, params);
 
     expected_FP_rates(i) = mean(D_ratio) - S_curr / 2^m;
     
@@ -90,7 +90,7 @@ for i = 1:length(n_list_sim)
     fprintf('Hamming weight of boolean function (S): %d\n', S_curr);
 
     % Run Monte Carlo
-    stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, params, num_trials);
+    stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, params, num_trials);
     sim_error_prob(i) = stat.error_prob;
     sim_error_prob_baseline(i) = stat.error_prob_baseline;
     
