@@ -22,7 +22,7 @@ end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 24:2:42;  % start from at least L <= 2^r - 1
+n_list_sim = 44:2:50;  % start from at least L <= 2^r - 1
 
 
 
