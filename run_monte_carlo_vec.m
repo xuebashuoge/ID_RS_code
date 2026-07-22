@@ -48,7 +48,7 @@ function stat = run_monte_carlo_vec(valid_c_matrix_uint32, r, K, L, func_type, p
 
     % 3. Batch Loop setup
     field_size = 2^r;
-    batch_size = 10000; % process 10^5 trials at a time
+    batch_size = 1000; % process 10^5 trials at a time
     num_batches = ceil(num_trials / batch_size);
 
     total_fp = 0;
