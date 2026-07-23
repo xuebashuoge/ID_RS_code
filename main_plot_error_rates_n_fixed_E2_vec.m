@@ -22,7 +22,7 @@ end
 % --- 1. Simulation Parameters ---
 % We MUST choose K=2 so that max(n) = log2(2^r - 1) + r ~ 2r = m
 E2 = 0.1;           % Number of symbols
-n_list_sim = 44:2:50;  % start from at least L <= 2^r - 1
+n_list_sim = 4:2:20;  % start from at least L <= 2^r - 1
 
 
 
@@ -34,7 +34,7 @@ n_list_sim = 44:2:50;  % start from at least L <= 2^r - 1
 % 'rank (int(b) <= rank)'         
 
 % --- 2. Boolean Function Setup ---
-func_type = 'exact-threshold';  % Choose the boolean function type
+func_type = 'id';  % Choose the boolean function type
 params.beta = 2;                      % Target threshold
 % params.target = randi([0 1], 1, m);   % Fallback for 'id'
 params.t = 3;                         % Fallback for 'bit-query'
@@ -42,7 +42,7 @@ params.S_k = [1, 2];                  % Fallback for 'and-subset'
 params.rank = 20;                   % Fallback for 'rank'
 
 % --- Setup Output Directory ---
-results_dir = fullfile('results', sprintf('%s_E2_%.2f', func_type, E2));
+results_dir = fullfile('results_temp', sprintf('%s_E2_%.2f', func_type, E2));
 if ~exist(results_dir, 'dir')
     mkdir(results_dir);
 end
@@ -107,7 +107,7 @@ end
 
 % 4a. Upper Bound: S * (K - 1) / L
 % Back-calculate continuous L from n: L = 2^(n - r)
-theory_upper_bound = (sim_S_weights * (sim_K_vals - 1)) ./ sim_L_vals;
+theory_upper_bound = (sim_S_weights .* (sim_K_vals - 1)) ./ sim_L_vals;
 
 % Save all summary vectors
 save(fullfile(results_dir, 'summary_all_n.mat'), 'n_list_sim', 'sim_r_vals', 'sim_K_vals', 'sim_L_vals', 'sim_error_prob', 'sim_error_prob_baseline', 'sim_S_weights', 'sim_rates', 'expected_FP_rates', 'theory_upper_bound');
