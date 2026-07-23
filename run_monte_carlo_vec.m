@@ -13,26 +13,13 @@ function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, pa
 
     prim_poly = get_primpoly(r);
 
-    % 1. Pre-build the Vandermonde matrix X_raw [K x L] uint32
-    % X(k, l) = alpha^(l * (k - 1)) in GF(2^r) where alpha = 2
-    X_raw = zeros(K, L, 'uint32');
+    % 1. Pre-compute evaluation points alpha_powers(l) = alpha^l for l = 1..L
     alpha = uint32(2);
     alpha_powers = zeros(1, L, 'uint32');
     curr = uint32(1);
     for l = 1:L
         curr = gf_mul_vec(curr, alpha, r, prim_poly);
         alpha_powers(l) = curr;
-    end
-    for k = 1:K
-        if k == 1
-            X_raw(1, :) = uint32(1);
-        else
-            power_val = uint32(1);
-            for p = 1:(k-1)
-                power_val = gf_mul_vec(power_val, alpha_powers, r, prim_poly);
-            end
-            X_raw(k, :) = power_val;
-        end
     end
 
     % 2. Convert target to symbol format once if func_type is 'id'
@@ -77,26 +64,32 @@ function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, pa
 
         % Choose uniform indices U from {1...L} for each trial in the batch
         U = randi([1, L], curr_batch_size, 1);
+        x_val = alpha_powers(U)'; % [curr_batch_size x 1] evaluation points
 
-        % Evaluate RS polynomial ONLY at the single selected channel position U_i for each trial
-        x_eval = X_raw(:, U);  % [K x curr_batch_size] uint32
-
-        % Compute received symbol Y_i in GF(2^r) for each trial
-        received_symbols_x = zeros(curr_batch_size, 1, 'uint32');
-        for k = 1:K
-            term_k = gf_mul_vec(symbols(:, k), x_eval(k, :)', r, prim_poly);
-            received_symbols_x = bitxor(received_symbols_x, term_k);
+        % Compute received symbol Y_i in GF(2^r) using Horner's method
+        received_symbols_x = symbols(:, K);
+        for k = (K-1):-1:1
+            received_symbols_x = bitxor(gf_mul_vec(received_symbols_x, x_val, r, prim_poly), symbols(:, k));
         end
 
-        % Compute valid codeword symbols at position U_i on-the-fly: [S x curr_batch_size]
-        C_valid_sampled = zeros(S, curr_batch_size, 'uint32');
-        for k = 1:K
-            term_k = gf_mul_vec(valid_symbols_uint32(:, k), x_eval(k, :), r, prim_poly);
-            C_valid_sampled = bitxor(C_valid_sampled, term_k);
+        % Group sampled channel positions to evaluate valid symbols ONCE per unique position
+        [u_unique, ~, u_map] = unique(U);
+        num_u = length(u_unique);
+        x_u_pts = alpha_powers(u_unique); % [1 x num_u] evaluation points
+
+        % Compute valid codeword symbols for the unique evaluation points: [S x num_u]
+        C_valid_u = repmat(valid_symbols_uint32(:, K), 1, num_u);
+        for k = (K-1):-1:1
+            C_valid_u = bitxor(gf_mul_vec(C_valid_u, x_u_pts, r, prim_poly), valid_symbols_uint32(:, k));
         end
 
-        % decoded_f(i) is true if received_symbols_x(i) matches C_valid_sampled(s, i) for any s=1..S
-        decoded_f = any(bsxfun(@eq, received_symbols_x', C_valid_sampled), 1)';
+        % Fast membership check: test if received_symbols_x(i) belongs to unique valid symbols for position U_i
+        decoded_f = false(curr_batch_size, 1);
+        for u_idx = 1:num_u
+            trial_mask = (u_map == u_idx);
+            valid_set_idx = unique(C_valid_u(:, u_idx));
+            decoded_f = decoded_f | (trial_mask & ismember(received_symbols_x, valid_set_idx));
+        end
 
         decoded_f_baseline = false(curr_batch_size, 1);
 

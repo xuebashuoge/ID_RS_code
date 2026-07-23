@@ -33,8 +33,8 @@ function [D, S, D_ratio] = build_decoding_regions_bruteforce(r, K, L, func_type,
     D_ratio = zeros(1, L);
     for l = 1:L
         valid_c_ints = valid_c_matrix(:, l);
-        unique_ints = unique(valid_c_ints.x);
-        D{l} = gf(unique_ints, r);
+        unique_ints = unique(valid_c_ints);
+        D{l} = unique_ints;
         D_ratio(l) = size(unique_ints, 1) / 2^r;
     end
 end
