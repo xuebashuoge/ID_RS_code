@@ -1,8 +1,7 @@
 % =========================================================================
 % main_plot_error_rates_fixed_msg.m
 %
-% Plots empirical false-positive probabilities for FIXED messages against
-% theoretical upper bounds and expected FP rates.
+% Runs simulation for EXACTLY ONE FIXED MESSAGE per n value.
 % Position evaluation is vectorized and parallelized across position batches.
 % =========================================================================
 clear; close all;
@@ -22,8 +21,7 @@ end
 % --- 1. Simulation Parameters ---
 E2 = 0.1;             % Code parameter
 n_list_sim = 4:2:20;  % List of n values
-num_fixed_msgs = 100; % Number of fixed messages to sample for multi-message evaluation
-num_trials_pos = 1e6; % Position Monte Carlo trials per message
+num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 
 func_type = 'id';
 params.beta = 2;
@@ -33,7 +31,7 @@ results_dir = fullfile('results_temp', sprintf('fixed_msg_%s_E2_%.2f', func_type
 if ~exist(results_dir, 'dir')
     mkdir(results_dir);
 end
-fprintf('=== Fixed Message BFC Plotting Simulation ===\n');
+fprintf('=== Single Fixed Message BFC Plotting Simulation ===\n');
 fprintf('Results will be saved to: %s\n', results_dir);
 
 % --- 2. Run Simulations ---
@@ -41,11 +39,9 @@ sim_r_vals = zeros(1, length(n_list_sim));
 sim_K_vals = zeros(1, length(n_list_sim));
 sim_L_vals = zeros(1, length(n_list_sim));
 
-single_fixed_fp_exact = zeros(1, length(n_list_sim));
-single_fixed_fp_mc    = zeros(1, length(n_list_sim));
-multi_fixed_fp_mean   = zeros(1, length(n_list_sim));
-multi_fixed_fp_max    = zeros(1, length(n_list_sim));
-multi_fixed_fp_min    = zeros(1, length(n_list_sim));
+fixed_fp_exact       = zeros(1, length(n_list_sim));
+fixed_fp_mc          = zeros(1, length(n_list_sim));
+fixed_R_vals         = zeros(1, length(n_list_sim));
 
 expected_FP_rates    = zeros(1, length(n_list_sim));
 theory_upper_bound   = zeros(1, length(n_list_sim));
@@ -75,8 +71,7 @@ for i = 1:length(n_list_sim)
     expected_FP_rates(i) = mean(D_ratio) - S_curr / (2^m);
     theory_upper_bound(i) = S_curr * (K - 1) / L;
 
-    % --- A. Single Fixed Message Simulation ---
-    % Construct one fixed non-matching message
+    % --- Single Fixed Message Generation ---
     weights_sym = 2.^((r-1):-1:0);
     target_symbols = zeros(1, K, 'uint32');
     for k = 1:K
@@ -90,44 +85,38 @@ for i = 1:length(n_list_sim)
         fixed_symbols = uint32(randi([0, field_size - 1], 1, K));
     end
 
+    % Run simulation for this single fixed message
     stat_single = run_monte_carlo_fixed_msg_vec(fixed_symbols, valid_symbols_uint32, r, K, L, func_type, params, num_trials_pos);
-    single_fixed_fp_exact(i) = stat_single.fp_prob_exact;
-    single_fixed_fp_mc(i)    = stat_single.fp_prob_mc;
+    fixed_fp_exact(i) = stat_single.fp_prob_exact;
+    fixed_fp_mc(i)    = stat_single.fp_prob_mc;
+    fixed_R_vals(i)   = stat_single.R;
 
-    fprintf('Single Fixed Message: R=%d/%d -> Exact FP = %.6f, MC Position FP = %.6f\n', ...
+    fprintf('Single Fixed Message: R = %d / %d -> Exact FP (R/L) = %.6f, MC Position FP = %.6f\n', ...
         stat_single.R, L, stat_single.fp_prob_exact, stat_single.fp_prob_mc);
-
-    % --- B. Multi-Fixed Message Ensemble Evaluation ---
-    stat_multi = run_monte_carlo_multi_fixed_msg_vec(valid_symbols_uint32, r, K, L, func_type, params, num_fixed_msgs, num_trials_pos);
-    multi_fixed_fp_mean(i) = stat_multi.fp_prob_mean;
-    multi_fixed_fp_max(i)  = stat_multi.fp_prob_max;
-    multi_fixed_fp_min(i)  = stat_multi.fp_prob_min;
-
-    fprintf('Multi-Fixed Messages (%d msgs): Mean FP = %.6f, Max FP = %.6f, Min FP = %.6f\n', ...
-        num_fixed_msgs, stat_multi.fp_prob_mean, stat_multi.fp_prob_max, stat_multi.fp_prob_min);
-    fprintf('Expected FP: %.6f | Upper Bound S(K-1)/L: %.6f\n', expected_FP_rates(i), theory_upper_bound(i));
+    fprintf('Theoretical Expected FP: %.6f | Upper Bound S(K-1)/L: %.6f\n', ...
+        expected_FP_rates(i), theory_upper_bound(i));
 
     % Save per-n result
     res_n = struct('n', n, 'r', r, 'L', L, 'K', K, 'm', m, ...
-                   'stat_single', stat_single, 'stat_multi', stat_multi, ...
-                   'expected_FP', expected_FP_rates(i), 'upper_bound', theory_upper_bound(i));
+                   'fixed_symbols', fixed_symbols, ...
+                   'stat_single', stat_single, ...
+                   'expected_FP', expected_FP_rates(i), ...
+                   'upper_bound', theory_upper_bound(i));
     save(fullfile(results_dir, sprintf('fixed_msg_result_n_%d.mat', n)), '-struct', 'res_n');
 end
 
 % --- Save Summary ---
 save(fullfile(results_dir, 'summary_fixed_msg_all_n.mat'), ...
      'n_list_sim', 'sim_r_vals', 'sim_K_vals', 'sim_L_vals', ...
-     'single_fixed_fp_exact', 'single_fixed_fp_mc', ...
-     'multi_fixed_fp_mean', 'multi_fixed_fp_max', 'multi_fixed_fp_min', ...
+     'fixed_fp_exact', 'fixed_fp_mc', 'fixed_R_vals', ...
      'expected_FP_rates', 'theory_upper_bound');
 
 % --- 3. Plotting ---
-figure('Name', 'Fixed Message FP Simulation', 'Color', 'w', 'Position', [100, 100, 850, 600]);
+figure('Name', 'Single Fixed Message FP Simulation', 'Color', 'w', 'Position', [100, 100, 850, 600]);
 
-semilogy(n_list_sim, single_fixed_fp_exact, 'bo-', 'LineWidth', 2, 'MarkerSize', 8, 'DisplayName', 'Single Fixed Msg (Exact R/L)');
+semilogy(n_list_sim, fixed_fp_exact, 'bo-', 'LineWidth', 2, 'MarkerSize', 8, 'DisplayName', 'Single Fixed Msg (Exact R/L)');
 hold on;
-semilogy(n_list_sim, multi_fixed_fp_mean, 'gs--', 'LineWidth', 2, 'MarkerSize', 8, 'DisplayName', sprintf('Mean over %d Fixed Msgs', num_fixed_msgs));
-semilogy(n_list_sim, multi_fixed_fp_max, 'm^:', 'LineWidth', 2, 'MarkerSize', 8, 'DisplayName', sprintf('Max over %d Fixed Msgs', num_fixed_msgs));
+semilogy(n_list_sim, fixed_fp_mc, 'rx--', 'LineWidth', 1.5, 'MarkerSize', 8, 'DisplayName', 'Single Fixed Msg (Position MC)');
 semilogy(n_list_sim, theory_upper_bound, 'r--', 'LineWidth', 2, 'DisplayName', 'Upper Bound: S(K-1)/L');
 semilogy(n_list_sim, expected_FP_rates, 'k-.', 'LineWidth', 2, 'DisplayName', 'Theoretical Expected FP');
 
@@ -135,11 +124,11 @@ set(gca, 'YScale', 'log');
 grid on; grid minor;
 xlabel('n = log_2(L) + r', 'FontSize', 12, 'FontWeight', 'bold');
 ylabel('False Positive Probability (Log Scale)', 'FontSize', 12, 'FontWeight', 'bold');
-title(sprintf('Fixed Message Error Rates vs. n (E2=%.2f, %s)', E2, func_type), 'FontSize', 14);
+title(sprintf('Single Fixed Message Error Rates vs. n (E2=%.2f, %s)', E2, func_type), 'FontSize', 14);
 legend('Location', 'southwest', 'FontSize', 11);
 xlim([floor(n_list_sim(1)), ceil(n_list_sim(end))]);
 
-fig_filename = fullfile(results_dir, sprintf('Fixed_Msg_Error_Rates_%s_E2_%.2f.png', func_type, E2));
+fig_filename = fullfile(results_dir, sprintf('Single_Fixed_Msg_Error_Rates_%s_E2_%.2f.png', func_type, E2));
 saveas(gcf, fig_filename);
 fprintf('\n=== Simulation Complete ===\nPlot saved to %s\n', fig_filename);
 toc
