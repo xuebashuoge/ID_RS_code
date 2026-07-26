@@ -20,11 +20,21 @@ end
 
 % --- 1. Simulation Parameters ---
 E2 = 0.1;             % Code parameter
-n_list_sim = 4:2:20;  % List of n values
+n_list_sim = 44:2:50;  % List of n values
 num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 
-func_type = 'id';
+% 'id (Constant weight S=1)' 
+% 'exact-threshold (sum == beta)'         
+% 'at-most-threshold (sum <= beta)'       
+% 'bit-query (bit t == 1)'              
+% 'and-subset (bits in S_k == 1)'    
+% 'rank (int(b) <= rank)'      
+
+func_type = 'exact-threshold';  % Choose the boolean function type
 params.beta = 2;
+params.t = 3;                         % Fallback for 'bit-query'
+params.S_k = [1, 2];                  % Fallback for 'and-subset'
+params.rank = 20;                   % Fallback for 'rank'
 
 % --- Setup Output Directory ---
 results_dir = fullfile('results_temp', sprintf('fixed_msg_%s_E2_%.2f', func_type, E2));
