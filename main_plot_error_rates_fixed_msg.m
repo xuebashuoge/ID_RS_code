@@ -20,7 +20,7 @@ end
 
 % --- 1. Simulation Parameters ---
 E2 = 0.1;             % Code parameter
-n_list_sim = 44:2:50;  % List of n values
+n_list_sim = 24:2:44;  % List of n values
 num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 
 % 'id (Constant weight S=1)' 
