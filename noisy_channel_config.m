@@ -12,7 +12,7 @@ function cfg = noisy_channel_config(profile)
     cfg.seed = 1729;
 
     cfg.bfc.E2 = 0.1;
-    cfg.bfc.func_type = 'exact-threshold';
+    cfg.bfc.func_type = 'id';
     cfg.bfc.params = struct('beta', 2, 't', 3, 'S_k', [1 2], 'rank', 20);
     cfg.bfc.rs_length_mode = 'distinct-nonzero';
 
@@ -56,7 +56,7 @@ function cfg = noisy_channel_config(profile)
             cfg.memory.frames_per_batch = 4;
 
         case 'server_full'
-            cfg.n_list = 44:2:50;
+            cfg.n_list = 4:2:24;
             cfg.ebno_db = 0:1:10;
             cfg.mc.min_frames = 100;
             cfg.mc.target_ldpc_frame_errors = 200;
@@ -67,7 +67,7 @@ function cfg = noisy_channel_config(profile)
             error('Unknown noisy-channel profile "%s".', cfg.profile);
     end
 
-    cfg.paths.results_dir = fullfile('results', 'noisy_channel', cfg.profile);
+    cfg.paths.results_dir = fullfile('results', 'noisy_channel', cfg.profile, cfg.bfc.func_type, sprintf('E2_%.2f', cfg.bfc.E2));
     cfg.paths.bank_dir = fullfile(cfg.paths.results_dir, 'source_banks');
     cfg.paths.point_dir = fullfile(cfg.paths.results_dir, 'points');
 end
