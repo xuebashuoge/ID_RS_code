@@ -67,6 +67,7 @@ for i = 1:length(n_list_sim)
     K = K_calculator(n, E2, params, func_type);
     sim_K_vals(i) = K;
     m = r * K;
+    % param.rank = floor(m / 2);  % Update rank parameter based on m
 
     fprintf('\nSimulating n = %d bits (r = %d, L = %d, K = %d, m = %d)...\n', n, r, L, K, m);
 
