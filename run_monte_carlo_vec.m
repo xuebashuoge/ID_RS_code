@@ -13,14 +13,8 @@ function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, pa
 
     prim_poly = get_primpoly(r);
 
-    % 1. Pre-compute evaluation points alpha_powers(l) = alpha^l for l = 1..L
-    alpha = uint32(2);
-    alpha_powers = zeros(1, L, 'uint32');
-    curr = uint32(1);
-    for l = 1:L
-        curr = gf_mul_vec(curr, alpha, r, prim_poly);
-        alpha_powers(l) = curr;
-    end
+    % 1. Pre-compute L distinct extended-RS evaluation points
+    eval_points = rs_evaluation_points(r, L, prim_poly);
 
     % 2. Convert target to symbol format once if func_type is 'id'
     if strcmpi(func_type, 'id')
@@ -64,7 +58,7 @@ function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, pa
 
         % Choose uniform indices U from {1...L} for each trial in the batch
         U = randi([1, L], curr_batch_size, 1);
-        x_val = alpha_powers(U)'; % [curr_batch_size x 1] evaluation points
+        x_val = eval_points(U)'; % [curr_batch_size x 1] evaluation points
 
         % Compute received symbol Y_i in GF(2^r) using Horner's method
         received_symbols_x = symbols(:, K);
@@ -75,7 +69,7 @@ function stat = run_monte_carlo_vec(valid_symbols_uint32, r, K, L, func_type, pa
         % Group sampled channel positions to evaluate valid symbols ONCE per unique position
         [u_unique, ~, u_map] = unique(U);
         num_u = length(u_unique);
-        x_u_pts = alpha_powers(u_unique); % [1 x num_u] evaluation points
+        x_u_pts = eval_points(u_unique); % [1 x num_u] evaluation points
 
         % Compute valid codeword symbols for the unique evaluation points: [S x num_u]
         C_valid_u = repmat(valid_symbols_uint32(:, K), 1, num_u);
