@@ -20,7 +20,7 @@ end
 
 % --- 1. Simulation Parameters ---
 E2 = 0.1;             % Code parameter
-n_list_sim = 24:2:44;  % List of n values
+n_list_sim = 10:2:30;  % List of n values
 num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 
 % 'id (Constant weight S=1)' 
@@ -30,11 +30,11 @@ num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 % 'and-subset (bits in S_k == 1)'    
 % 'rank (int(b) <= rank)'      
 
-func_type = 'exact-threshold';  % Choose the boolean function type
+func_type = 'rank';  % Choose the boolean function type
 params.beta = 2;
 params.t = 3;                         % Fallback for 'bit-query'
 params.S_k = [1, 2];                  % Fallback for 'and-subset'
-params.rank = 20;                   % Fallback for 'rank'
+params.rank = 1000;                   % Fallback for 'rank'
 
 % --- Setup Output Directory ---
 results_dir = fullfile('results_temp', sprintf('fixed_msg_%s_E2_%.2f', func_type, E2));
@@ -67,6 +67,7 @@ for i = 1:length(n_list_sim)
     K = K_calculator(n, E2, params, func_type);
     sim_K_vals(i) = K;
     m = r * K;
+    % param.rank = floor(m / 2);  % Update rank parameter based on m
 
     fprintf('\nSimulating n = %d bits (r = %d, L = %d, K = %d, m = %d)...\n', n, r, L, K, m);
 
