@@ -20,7 +20,7 @@ end
 
 % --- 1. Simulation Parameters ---
 E2 = 0.1;             % Code parameter
-n_list_sim = 24:2:44;  % List of n values
+n_list_sim = 4:2:20;  % List of n values
 num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 
 % 'id (Constant weight S=1)' 
@@ -30,7 +30,7 @@ num_trials_pos = 1e6; % Position Monte Carlo trials for the fixed message
 % 'and-subset (bits in S_k == 1)'    
 % 'rank (int(b) <= rank)'      
 
-func_type = 'exact-threshold';  % Choose the boolean function type
+func_type = 'id';  % Choose the boolean function type
 params.beta = 2;
 params.t = 3;                         % Fallback for 'bit-query'
 params.S_k = [1, 2];                  % Fallback for 'and-subset'

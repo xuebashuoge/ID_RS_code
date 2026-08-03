@@ -15,7 +15,8 @@ function stat = run_monte_carlo_fixed_msg_vec(fixed_symbols, valid_symbols_uint3
     %   stat - struct with fields:
     %          fp_prob_exact: Exact FP probability R/L computed deterministically over all L positions
     %          fp_prob_mc: Empirical FP probability from Monte Carlo position sampling
-    %          R: Exact number of positions resulting in false positive (0 <= R <= K-1)
+    %          R: Exact number of positions resulting in false positive (0 <= R <= L).
+    %             For one distinct competing codeword, R <= K-1.
     %          L: Total evaluation positions L = 2^r
 
     S = size(valid_symbols_uint32, 1);
@@ -26,25 +27,19 @@ function stat = run_monte_carlo_fixed_msg_vec(fixed_symbols, valid_symbols_uint3
 
     prim_poly = get_primpoly(r);
 
-    % 1. Pre-compute evaluation points alpha_powers(l) = alpha^l for l = 1..L
-    alpha = uint32(2);
-    alpha_powers = zeros(1, L, 'uint32');
-    curr = uint32(1);
-    for l = 1:L
-        curr = gf_mul_vec(curr, alpha, r, prim_poly);
-        alpha_powers(l) = curr;
-    end
+    % 1. Pre-compute L distinct extended-RS evaluation points
+    eval_points = rs_evaluation_points(r, L, prim_poly);
 
-    % 2. Compute transmitted symbol Y_fixed(l) = C_{W_fixed}(alpha^l) for ALL L positions in vector form
+    % 2. Compute the transmitted symbol at all L evaluation points
     y_fixed_all = repmat(fixed_symbols(K), 1, L);
     for k = (K-1):-1:1
-        y_fixed_all = bitxor(gf_mul_vec(y_fixed_all, alpha_powers, r, prim_poly), fixed_symbols(k));
+        y_fixed_all = bitxor(gf_mul_vec(y_fixed_all, eval_points, r, prim_poly), fixed_symbols(k));
     end
 
     % 3. Compute valid codeword symbols for all L positions: [S x L] uint32
     C_valid_all = repmat(valid_symbols_uint32(:, K), 1, L);
     for k = (K-1):-1:1
-        C_valid_all = bitxor(gf_mul_vec(C_valid_all, alpha_powers, r, prim_poly), valid_symbols_uint32(:, k));
+        C_valid_all = bitxor(gf_mul_vec(C_valid_all, eval_points, r, prim_poly), valid_symbols_uint32(:, k));
     end
 
     % 4. Deterministically evaluate FP status for each of the L positions
