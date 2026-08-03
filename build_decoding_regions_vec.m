@@ -122,13 +122,7 @@ function [S, D_ratio, valid_symbols_uint32] = build_decoding_regions_vec(r, K, L
         D_ratio(:) = 1 / field_size;
     else
         prim_poly = get_primpoly(r);
-        alpha = uint32(2);
-        alpha_powers = zeros(1, L, 'uint32');
-        curr = uint32(1);
-        for l = 1:L
-            curr = gf_mul_vec(curr, alpha, r, prim_poly);
-            alpha_powers(l) = curr;
-        end
+        eval_points = rs_evaluation_points(r, L, prim_poly);
 
         chunk_size = 2000;
         for c_start = 1:chunk_size:L
@@ -136,21 +130,10 @@ function [S, D_ratio, valid_symbols_uint32] = build_decoding_regions_vec(r, K, L
             cols = c_start:c_end;
             num_cols = length(cols);
 
-            X_chunk = zeros(K, num_cols, 'uint32');
-            X_chunk(1, :) = uint32(1);
-            if K > 1
-                p_val = alpha_powers(cols);
-                X_chunk(2, :) = p_val;
-                for k = 3:K
-                    p_val = gf_mul_vec(p_val, alpha_powers(cols), r, prim_poly);
-                    X_chunk(k, :) = p_val;
-                end
-            end
-
-            c_chunk = zeros(S, num_cols, 'uint32');
-            for k = 1:K
-                term = gf_mul_vec(valid_symbols_uint32(:, k), X_chunk(k, :), r, prim_poly);
-                c_chunk = bitxor(c_chunk, term);
+            x_chunk_pts = eval_points(cols); % [1 x num_cols] evaluation points for this chunk
+            c_chunk = repmat(valid_symbols_uint32(:, K), 1, num_cols);
+            for k = (K-1):-1:1
+                c_chunk = bitxor(gf_mul_vec(c_chunk, x_chunk_pts, r, prim_poly), valid_symbols_uint32(:, k));
             end
 
             for idx = 1:num_cols
