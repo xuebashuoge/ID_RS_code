@@ -13,7 +13,7 @@
 
 #SBATCH --cpus-per-task=16
 #SBATCH --time=12:00:00
-#SBATCH --mem=256G
+#SBATCH --mem=1024G
 
 module load MATLAB/2024b_Update_3
 
