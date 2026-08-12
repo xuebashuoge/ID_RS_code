@@ -27,7 +27,7 @@ function configs = noisy_channel_tradeoff_configs( ...
 
     base_cfg = noisy_channel_config(profile);
     base_cfg.bfc.func_type = char(func_type);
-    base_cfg.n_list = [4 6 8];
+    base_cfg.n_list = [4 8 16 32];
     base_cfg.channel_types = {'awgn'};
 
     switch sweep_type
