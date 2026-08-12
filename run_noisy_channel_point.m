@@ -68,7 +68,8 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
             u_sent, c_sent, d.r, d.ldpc_K, d.tuples_per_frame);
 
         encoded_bits = ldpcEncode(info_bits, encoder_cfg);
-        coded_llr = transmit_bpsk_llr(encoded_bits, channel_type, ebno_db, d.effective_rate);
+        coded_llr = transmit_bpsk_llr( ...
+            encoded_bits, channel_type, ebno_db, d.ldpc_payload_rate);
         [decoded_info, iterations, final_checks] = ldpcDecode( ...
             coded_llr, decoder_cfg, cfg.ldpc.max_iterations, ...
             'OutputFormat', 'info', 'DecisionType', 'hard', ...
@@ -136,7 +137,8 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     result.complete = true;
     result.config = cfg;
     result.scenario = struct('n', d.n, 'channel', lower(channel_type), ...
-        'ebno_db', ebno_db, 'seed', scenario_seed);
+        'ebno_db', ebno_db, 'E2', cfg.bfc.E2, ...
+        'ldpc_rate', cfg.ldpc.rate, 'seed', scenario_seed);
     result.derived = d;
     result.bank_metadata = bank.metadata;
     result.frames = frames_done;

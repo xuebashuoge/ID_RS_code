@@ -32,7 +32,8 @@ bits = rand(25, r*K) > 0.5;
 symbols = bits_to_symbols_uint32(bits, r);
 full_codeword = rs_encode_polynomial_vec(bits, r, K, L);
 u = uint32(randi(L, size(bits, 1), 1));
-x = gf_pow_vec(uint32(2), u, r, get_primpoly(r));
+evaluation_points = rs_evaluation_points(r, L, get_primpoly(r));
+x = evaluation_points(double(u));
 sampled = evaluate_rs_positions_vec(symbols, x, r, get_primpoly(r));
 linear_index = sub2ind(size(full_codeword), (1:size(bits,1))', double(u));
 assert(isequal(sampled, full_codeword(linear_index)));
@@ -63,6 +64,36 @@ decoded_invalid = decode_bfc_tuples_vec(uint32(16), uint32(0), ...
     valid_symbols, 4, 2, 15, struct('region_working_mb', 16));
 assert(~decoded_invalid);
 fprintf('PASS: tuple framing and invalid-index handling\n');
+
+%% Rate bookkeeping and controlled sweep configurations
+[ldpc_N, ldpc_K, canonical_rate] = dvbs2_ldpc_dimensions(3/5);
+assert(ldpc_N == 64800 && ldpc_K == 38880 && canonical_rate == 3/5);
+
+base_cfg = noisy_channel_config('local_smoke');
+base_cfg.bfc.func_type = 'id';
+d4 = derive_bfc_parameters(base_cfg, 4);
+assert(d4.tuples_per_frame == 8100);
+assert(d4.channel_uses_per_bfc_decision == 8);
+assert(abs(d4.ldpc_payload_rate - 1/2) < 1e-12);
+assert(abs(d4.noiseless_bfc_rate - log2(6)/4) < 1e-12);
+assert(abs(d4.parallel_bfc_rate - log2(6)/8) < 1e-12);
+rates = noisy_channel_rate_metadata(d4, 'id');
+assert(abs(rates.parallel_bfc_rate-d4.parallel_bfc_rate) < 1e-12);
+
+e2_configs = noisy_channel_tradeoff_configs( ...
+    'e2', 'local_smoke', 'id', [0.05 0.10]);
+assert(numel(e2_configs) == 2);
+assert(e2_configs{1}.ldpc.rate == 1/2);
+assert(e2_configs{1}.bfc.E2 ~= e2_configs{2}.bfc.E2);
+
+rate_configs = noisy_channel_tradeoff_configs( ...
+    'ldpc_rate', 'local_smoke', 'id', [1/3 1/2 2/3]);
+rate_derived = cellfun(@(x) derive_bfc_parameters(x, 4), ...
+    rate_configs, 'UniformOutput', false);
+assert(all(cellfun(@(x) x.K, rate_derived) == rate_derived{1}.K));
+assert(issorted(cellfun( ...
+    @(x) x.channel_uses_per_bfc_decision, rate_derived), 'descend'));
+fprintf('PASS: rate bookkeeping and tradeoff configurations\n');
 
 %% Uncoded channel checks against analytical BPSK BER
 num_bits = 2e5;

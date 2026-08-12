@@ -83,6 +83,7 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
     bank.metadata.complete = true;
     bank.metadata.profile = cfg.profile;
     bank.metadata.seed = cfg.seed;
+    bank.metadata.E2 = cfg.bfc.E2;
     bank.metadata.n = d.n;
     bank.metadata.r = d.r;
     bank.metadata.L = d.L;
@@ -148,6 +149,10 @@ function validate_bank(bank, cfg, n)
         error('Source bank metadata does not match the requested configuration.');
     end
     expected = derive_bfc_parameters(cfg, n);
+    if bank.metadata.r ~= expected.r || bank.metadata.L ~= expected.L || ...
+            bank.metadata.K ~= expected.K || bank.metadata.m ~= expected.m
+        error('Source bank BFC parameters do not match the requested configuration.');
+    end
     if bank.metadata.total_tuples < cfg.mc.max_frames * expected.tuples_per_frame
         error('Source bank does not contain enough tuples for this profile.');
     end

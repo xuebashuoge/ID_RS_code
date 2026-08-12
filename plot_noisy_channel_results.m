@@ -30,21 +30,35 @@ function summary = plot_noisy_channel_results(cfg)
             coded = arrayfun(@(x) x.result.metrics.coded.weighted_error, points);
             uncoded = arrayfun(@(x) x.result.metrics.uncoded.weighted_error, points);
             noiseless = arrayfun(@(x) x.result.metrics.noiseless.weighted_error, points);
+            coded_empirical = arrayfun( ...
+                @(x) x.result.metrics.coded.balanced_error, points);
+            uncoded_empirical = arrayfun( ...
+                @(x) x.result.metrics.uncoded.balanced_error, points);
+            noiseless_empirical = arrayfun( ...
+                @(x) x.result.metrics.noiseless.balanced_error, points);
             ldpc_fer = arrayfun(@(x) x.result.metrics.ldpc_fer, points);
             ldpc_ber = arrayfun(@(x) x.result.metrics.ldpc_payload_ber, points);
             coded_tuple = arrayfun(@(x) x.result.metrics.coded_tuple_error_rate, points);
             tuples = arrayfun(@(x) x.result.tuples, points);
             frames = arrayfun(@(x) x.result.frames, points);
+            payload_bit_trials = arrayfun( ...
+                @(x) x.result.channel_counts.ldpc_payload_bits, points);
+            rates = noisy_channel_rate_metadata(points(1).result);
 
             coded_plot = zero_safe(coded, tuples);
             uncoded_plot = zero_safe(uncoded, tuples);
             noiseless_plot = zero_safe(noiseless, tuples);
+            coded_empirical_plot = zero_safe(coded_empirical, tuples);
+            uncoded_empirical_plot = zero_safe(uncoded_empirical, tuples);
+            noiseless_empirical_plot = zero_safe(noiseless_empirical, tuples);
             fer_plot = zero_safe(ldpc_fer, frames);
-            ber_plot = zero_safe(ldpc_ber, tuples*n);
+            ber_plot = zero_safe(ldpc_ber, payload_bit_trials);
             tuple_plot = zero_safe(coded_tuple, tuples);
 
-            fig = figure('Visible', 'off', 'Color', 'w', 'Position', [100 100 1050 440]);
-            layout = tiledlayout(fig, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
+            fig = figure('Visible', 'off', 'Color', 'w', ...
+                'Position', [100 100 1550 440]);
+            layout = tiledlayout(fig, 1, 3, ...
+                'TileSpacing', 'compact', 'Padding', 'compact');
 
             nexttile(layout);
             semilogy(ebno, coded_plot, 'bo-', 'LineWidth', 1.8, 'DisplayName', 'LDPC + BFC');
@@ -58,6 +72,20 @@ function summary = plot_noisy_channel_results(cfg)
             legend('Location', 'best');
 
             nexttile(layout);
+            semilogy(ebno, coded_empirical_plot, 'bo-', ...
+                'LineWidth', 1.8, 'DisplayName', 'LDPC + BFC');
+            hold on;
+            semilogy(ebno, uncoded_empirical_plot, 'rx-', ...
+                'LineWidth', 1.6, 'DisplayName', 'Uncoded BPSK + BFC');
+            semilogy(ebno, noiseless_empirical_plot, 'k--', ...
+                'LineWidth', 1.5, 'DisplayName', 'Noiseless BFC');
+            grid on;
+            xlabel('E_b/N_0 (dB)');
+            ylabel('(FP + FN) / number of trials');
+            title('Balanced-sample decision error');
+            legend('Location', 'best');
+
+            nexttile(layout);
             semilogy(ebno, fer_plot, 'ms-', 'LineWidth', 1.8, 'DisplayName', 'LDPC FER');
             hold on;
             semilogy(ebno, ber_plot, 'gd-', 'LineWidth', 1.6, 'DisplayName', 'LDPC payload BER');
@@ -65,7 +93,10 @@ function summary = plot_noisy_channel_results(cfg)
             grid on;
             xlabel('E_b/N_0 (dB)');
             ylabel('Error rate');
-            title(sprintf('R_{eff}=%.5f', points(1).result.derived.effective_rate));
+            title(sprintf(['R_{payload}=%.4f, \\nu=%.3g, ' ...
+                'R_{\\Sigma}=%.4f'], rates.ldpc_payload_rate, ...
+                rates.channel_uses_per_bfc_decision, ...
+                rates.parallel_bfc_rate));
             legend('Location', 'best');
 
             output_png = fullfile(cfg.paths.results_dir, ...
@@ -80,9 +111,20 @@ function summary = plot_noisy_channel_results(cfg)
                 'coded_error', coded, ...
                 'uncoded_error', uncoded, ...
                 'noiseless_error', noiseless, ...
+                'coded_empirical_decision_error', coded_empirical, ...
+                'uncoded_empirical_decision_error', uncoded_empirical, ...
+                'noiseless_empirical_decision_error', noiseless_empirical, ...
                 'ldpc_fer', ldpc_fer, ...
                 'ldpc_payload_ber', ldpc_ber, ...
-                'coded_tuple_error', coded_tuple);
+                'coded_tuple_error', coded_tuple, ...
+                'tuples', tuples, ...
+                'frames', frames, ...
+                'ldpc_code_rate', rates.ldpc_code_rate, ...
+                'ldpc_payload_rate', rates.ldpc_payload_rate, ...
+                'noiseless_bfc_rate', rates.noiseless_bfc_rate, ...
+                'parallel_bfc_rate', rates.parallel_bfc_rate, ...
+                'channel_uses_per_bfc_decision', ...
+                    rates.channel_uses_per_bfc_decision);
             if isempty(summary)
                 summary = entry;
             else
@@ -92,6 +134,8 @@ function summary = plot_noisy_channel_results(cfg)
     end
 
     save(fullfile(cfg.paths.results_dir, 'summary_noisy_channel.mat'), 'summary', 'cfg');
+    plot_noisy_channel_n_comparison( ...
+        summary, cfg, '', 'rule_of_three', 160);
 end
 
 function values = zero_safe(values, trials)

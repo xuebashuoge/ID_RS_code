@@ -24,9 +24,10 @@ repository root:
 bash submit_noisy_channel_sweep.sh
 ```
 
-The full profile uses `n=44:2:50`, AWGN and symbol-wise flat Rayleigh
-fading, and `Eb/N0=0:1:10` dB. Eight concurrent jobs request eight CPUs
-and 32 GB each. Completed point files are detected and reused.
+The full profile uses the `n_list` in `noisy_channel_config.m`, AWGN and
+symbol-wise flat Rayleigh fading, and `Eb/N0=0:1:10` dB. Eight concurrent
+jobs request eight CPUs and 32 GB each. Completed point files are detected
+and reused.
 
 For a smaller server validation, run the `server_pilot` profile serially
 or adapt the array entry point:
@@ -66,3 +67,62 @@ The source distribution is balanced between Boolean outputs zero and one
 so false-positive and false-negative rates are both measurable. The
 reported end-to-end error is reweighted to the uniform-message prior using
 `S/2^m`.
+
+## Rate and channel-use conventions
+
+The simulation saves four distinct quantities; they should not be called by
+the same generic "effective rate" name:
+
+- `ldpc_code_rate = K_LDPC/N_LDPC` is the nominal channel-code rate.
+- `ldpc_payload_rate = G*n/N_LDPC` also accounts for tuple padding. It is
+  the rate used for payload-referenced `Eb/N0` noise scaling.
+- `channel_uses_per_bfc_decision = N_LDPC/G` is the average number of BPSK
+  channel uses assigned to one independently decoded BFC tuple.
+- `parallel_bfc_rate = G*(n*R_BFC)/N_LDPC` is the sum of the BFC rate
+  numerators per physical channel use. For the identification function,
+  this is `G*log2(m)/N_LDPC`, approximately `R_c*log2(m)/n` when there is
+  no padding.
+
+Here `G=floor(K_LDPC/n)`. A 64,800-bit rate-1/2 LDPC frame therefore packs
+`32400/n` tuples and consumes 64,800 BPSK channel uses. The packed tuples
+are independent BFC decisions; the frame is not treated as one
+identification message with message space `N^G`.
+
+`plot_noisy_channel_results` retains the detailed per-`n` figures and also
+creates `noisy_channel_compare_n_<channel>.png`, which compares all saved
+values of `n` on common `Eb/N0` axes. `replot_noisy_channel_drop_zeros`
+creates the same recommended comparison while omitting zero-observation
+points rather than adding a display floor.
+
+## Controlled tradeoff sweeps
+
+Two experiment families keep the interpretation of the x-axis controlled:
+
+```matlab
+% Safe two-frame local checks; defaults to the identification function.
+main_noisy_channel_e2_sweep
+main_noisy_channel_ldpc_rate_sweep
+
+% Full AWGN sweeps for n=[4 6 8].
+main_noisy_channel_e2_sweep('server_full', 'id')
+main_noisy_channel_ldpc_rate_sweep('server_full', 'id')
+```
+
+The default E2 sweep uses `E2=[0.05 0.10 0.15 0.20]` and keeps the LDPC
+rate at 1/2. `K` is recalculated from the maximum-rate rule for every
+`(E2,n)` point. The default channel-code sweep uses DVB-S2 rates
+`[1/3 2/5 1/2 3/5 2/3]`, fixes `E2=0.10`, and therefore keeps the BFC
+parameters fixed for each `n`.
+
+Each aggregate image has one tile for each `n`. It includes error versus
+`Eb/N0`, error versus parallel BFC rate with SNR as the line parameter, and
+for the channel-code-rate sweep, error versus physical channel uses per BFC
+decision with SNR as the line parameter. Outputs are below
+`results/noisy_channel_tradeoffs`.
+
+The corresponding server submissions are:
+
+```bash
+bash submit_noisy_channel_tradeoff_sweep.sh e2 id
+bash submit_noisy_channel_tradeoff_sweep.sh ldpc_rate id
+```

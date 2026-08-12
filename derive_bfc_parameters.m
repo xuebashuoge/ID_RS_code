@@ -29,11 +29,28 @@ function d = derive_bfc_parameters(cfg, n)
 
     d.ldpc_N = cfg.ldpc.block_length;
     d.ldpc_K = cfg.ldpc.information_length;
+    [expected_N, expected_K, expected_rate] = ...
+        dvbs2_ldpc_dimensions(cfg.ldpc.rate);
+    if d.ldpc_N ~= expected_N || d.ldpc_K ~= expected_K
+        error(['Configured LDPC dimensions (%d,%d) do not match the ' ...
+            'DVB-S2 rate %.6g dimensions (%d,%d).'], ...
+            d.ldpc_N, d.ldpc_K, expected_rate, expected_N, expected_K);
+    end
     d.tuples_per_frame = floor(d.ldpc_K / d.n);
     if d.tuples_per_frame < 1
         error('The BFC tuple is longer than the LDPC information block.');
     end
     d.payload_bits_per_frame = d.tuples_per_frame * d.n;
     d.padding_bits = d.ldpc_K - d.payload_bits_per_frame;
-    d.effective_rate = d.payload_bits_per_frame / d.ldpc_N;
+    d.ldpc_code_rate = d.ldpc_K / d.ldpc_N;
+    d.ldpc_payload_rate = d.payload_bits_per_frame / d.ldpc_N;
+    d.padding_efficiency = d.payload_bits_per_frame / d.ldpc_K;
+    d.channel_uses_per_bfc_decision = d.ldpc_N / d.tuples_per_frame;
+    d.noiseless_bfc_rate = rate_calculation(d.n, d.m, cfg.bfc.func_type);
+    rate_numerator = d.n * d.noiseless_bfc_rate;
+    d.parallel_bfc_rate = ...
+        d.tuples_per_frame * rate_numerator / d.ldpc_N;
+
+    % Backward-compatible alias used by older result and channel code.
+    d.effective_rate = d.ldpc_payload_rate;
 end

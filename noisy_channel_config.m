@@ -16,9 +16,8 @@ function cfg = noisy_channel_config(profile)
     cfg.bfc.params = struct('beta', 2, 't', 3, 'S_k', [1 2], 'rank', 20);
     cfg.bfc.rs_length_mode = 'distinct-nonzero';
 
-    cfg.ldpc.rate = 1/2;
-    cfg.ldpc.block_length = 64800;
-    cfg.ldpc.information_length = 32400;
+    [cfg.ldpc.block_length, cfg.ldpc.information_length, ...
+        cfg.ldpc.rate] = dvbs2_ldpc_dimensions(1/2);
     cfg.ldpc.algorithm = 'norm-min-sum';
     cfg.ldpc.max_iterations = 50;
     cfg.ldpc.min_sum_scaling = 0.75;
