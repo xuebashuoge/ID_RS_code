@@ -4,8 +4,9 @@ function configs = noisy_channel_tradeoff_configs( ...
 %
 %   CONFIGS = NOISY_CHANNEL_TRADEOFF_CONFIGS(TYPE, PROFILE, FUNC_TYPE)
 %   returns a cell array of complete noisy-channel configurations. TYPE is
-%   "e2" or "ldpc_rate". The default experiment uses n=[4 6 8], AWGN,
-%   and the identification function.
+%   "e2" or "ldpc_rate". The default experiment uses n=[4 8 16 32], AWGN,
+%   and the identification function. Set BFC_N_LIST to a colon-separated
+%   list to override the default n=[4 8 16 32] for a submitted job.
 %
 %   E2 sweep defaults:        [0.05 0.10 0.15 0.20], R_c=1/2
 %   LDPC-rate sweep defaults: [1/3 2/5 1/2 3/5 2/3], E2=0.10
@@ -27,7 +28,7 @@ function configs = noisy_channel_tradeoff_configs( ...
 
     base_cfg = noisy_channel_config(profile);
     base_cfg.bfc.func_type = char(func_type);
-    base_cfg.n_list = [4 8 16 32];
+    base_cfg.n_list = getenv_n_list('BFC_N_LIST', [4 8 16 32]);
     base_cfg.channel_types = {'awgn'};
 
     switch sweep_type
@@ -91,6 +92,21 @@ function configs = noisy_channel_tradeoff_configs( ...
         cfg.paths.bank_dir = fullfile(cfg.paths.results_dir, 'source_banks');
         cfg.paths.point_dir = fullfile(cfg.paths.results_dir, 'points');
         configs{value_index} = cfg;
+    end
+end
+
+function values = getenv_n_list(name, default_values)
+    text = getenv(name);
+    if isempty(text)
+        values = default_values;
+        return;
+    end
+
+    tokens = strsplit(text, ':');
+    values = str2double(tokens);
+    if isempty(values) || any(~isfinite(values)) || ...
+            any(values < 2) || any(mod(values, 2) ~= 0)
+        error('%s must be a colon-separated list of positive even integers.', name);
     end
 end
 

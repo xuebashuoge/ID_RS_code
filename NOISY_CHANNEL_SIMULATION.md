@@ -126,3 +126,18 @@ The corresponding server submissions are:
 bash submit_noisy_channel_tradeoff_sweep.sh e2 id
 bash submit_noisy_channel_tradeoff_sweep.sh ldpc_rate id
 ```
+
+Pass more than one function type to submit independent job chains without
+editing `noisy_channel_config.m`. Add `=n1,n2,...` to give each function its
+own `n` list. For example:
+
+```bash
+bash submit_noisy_channel_tradeoff_sweep.sh e2 \
+    id=4,8,16,32 exact-threshold=12,16,20 rank=8,12,16
+```
+
+Each function type and `n` list are captured in the submitted jobs through
+`BFC_FUNC_TYPE` and `BFC_N_LIST`. Results are written under separate
+function-type directories. A function without `=...` uses `[4 8 16 32]`;
+omitting all function types remains backward compatible and uses `id` with
+that same list.
