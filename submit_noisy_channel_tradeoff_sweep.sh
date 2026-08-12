@@ -29,9 +29,9 @@ exports="ALL,BFC_SWEEP_TYPE=${sweep_type},BFC_SWEEP_PROFILE=${profile},BFC_FUNC_
 
 mkdir -p logs
 prepare_job=$(sbatch --parsable --export="${exports}" \
-    --array="0-${prepare_last}%8" noisy_channel_tradeoff_prepare.slurm)
+    --array="0-${prepare_last}%16" noisy_channel_tradeoff_prepare.slurm)
 simulation_job=$(sbatch --parsable --export="${exports}" \
-    --array="0-${simulation_last}%8" \
+    --array="0-${simulation_last}%16" \
     --dependency="afterok:${prepare_job}" noisy_channel_tradeoff_sweep.slurm)
 plot_job=$(sbatch --parsable --export="${exports}" \
     --dependency="afterok:${simulation_job}" noisy_channel_tradeoff_plot.slurm)
