@@ -8,3 +8,7 @@
 
 module load MATLAB/2024b_Update_3
 matlab -batch "run_plot_noisy_channel_tradeoff_task"
+
+if command -v my-job-stats >/dev/null 2>&1; then
+    my-job-stats -a -n -s
+fi
