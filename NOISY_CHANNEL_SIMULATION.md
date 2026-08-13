@@ -141,3 +141,27 @@ Each function type and `n` list are captured in the submitted jobs through
 function-type directories. A function without `=...` uses `[4 8 16 32]`;
 omitting all function types remains backward compatible and uses `id` with
 that same list.
+
+### Traditional error-versus-SNR replot
+
+After a sweep has produced point files, generate one conventional
+error-versus-`Eb/N0` image for every E2 or LDPC-rate setting. Curves within
+an image compare the simulated values of `n` and show physical channel uses
+per BFC decision in the legend:
+
+```matlab
+replot_noisy_channel_tradeoff_by_setting('e2', 'server_full', 'id')
+replot_noisy_channel_tradeoff_by_setting( ...
+    'ldpc_rate', 'server_full', 'id')
+```
+
+The default y-axis is the balanced end-to-end BFC decision error
+`(FP+FN)/trials`. Optional metrics are `weighted`, `tuple`, `ber`, and `fer`.
+Observed zero-error points are omitted by default because they cannot be
+drawn on a logarithmic axis. To show the rule-of-three upper-bound display
+value instead, use:
+
+```matlab
+replot_noisy_channel_tradeoff_by_setting( ...
+    'e2', 'server_full', 'id', 'balanced', 'rule_of_three')
+```
