@@ -165,3 +165,19 @@ value instead, use:
 replot_noisy_channel_tradeoff_by_setting( ...
     'e2', 'server_full', 'id', 'balanced', 'rule_of_three')
 ```
+
+Submit the same replot as a standalone SLURM job with environment variables:
+
+```bash
+# E2 sweep, default balanced BFC decision error, zero points omitted
+sbatch --export=ALL,BFC_SWEEP_TYPE=e2,BFC_SWEEP_PROFILE=server_full,\
+BFC_FUNC_TYPE=id noisy_channel_tradeoff_replot.slurm
+
+# LDPC-rate sweep, displaying zero observations at the rule-of-three bound
+sbatch --export=ALL,BFC_SWEEP_TYPE=ldpc_rate,BFC_SWEEP_PROFILE=server_full,\
+BFC_FUNC_TYPE=id,BFC_ERROR_METRIC=balanced,BFC_ZERO_MODE=rule_of_three \
+noisy_channel_tradeoff_replot.slurm
+```
+
+The accepted values of `BFC_ERROR_METRIC` are `balanced`, `weighted`,
+`tuple`, `ber`, and `fer`. `BFC_ZERO_MODE` is `omit` or `rule_of_three`.
