@@ -8,8 +8,12 @@ for config_index = 1:numel(configs)
     plot_noisy_channel_results(configs{config_index});
 end
 plot_noisy_channel_tradeoff_results(configs, 'omit');
-replot_noisy_channel_tradeoff_by_setting( ...
-    sweep_type, profile, func_type, 'balanced', 'omit');
+decision_metrics = {'balanced', 'fpr', 'fnr', 'max'};
+for metric_index = 1:numel(decision_metrics)
+    replot_noisy_channel_tradeoff_by_setting( ...
+        sweep_type, profile, func_type, ...
+        decision_metrics{metric_index}, 'omit');
+end
 
 function value = getenv_default(name, default_value)
     value = getenv(name);

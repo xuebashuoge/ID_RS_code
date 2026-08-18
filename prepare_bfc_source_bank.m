@@ -11,6 +11,8 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
         loaded = load(bank_file, 'bank');
         bank = loaded.bank;
         validate_bank(bank, cfg, n);
+        fprintf('Reusing compatible source bank %s (%d tuples)\n', ...
+            bank_file, bank.metadata.total_tuples);
         return;
     end
 

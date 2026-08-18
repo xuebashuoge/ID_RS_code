@@ -34,32 +34,48 @@ function cfg = noisy_channel_config(profile)
     cfg.memory.max_valid_messages = 5e6;
 
     cfg.mc.min_frames = 10;
-    cfg.mc.target_ldpc_frame_errors = 20;
+    cfg.mc.target_false_positives = 20;
+    cfg.mc.target_false_negatives = 20;
+    cfg.mc.max_trials_per_class = 1e5;
     cfg.mc.max_frames = 20;
+    cfg.mc.max_runtime_seconds = 30*60;
+    cfg.mc.progress_interval_seconds = 15*60;
 
     switch lower(cfg.profile)
         case 'local_smoke'
             cfg.n_list = 8;
             cfg.ebno_db = [0 6];
             cfg.mc.min_frames = 1;
-            cfg.mc.target_ldpc_frame_errors = 1;
+            cfg.mc.target_false_positives = 1;
+            cfg.mc.target_false_negatives = 1;
+            cfg.mc.max_trials_per_class = 1e4;
             cfg.mc.max_frames = 2;
+            cfg.mc.max_runtime_seconds = 5*60;
             cfg.memory.frames_per_batch = 1;
 
         case 'server_pilot'
             cfg.n_list = [44 50];
             cfg.ebno_db = 0:2:10;
             cfg.mc.min_frames = 25;
-            cfg.mc.target_ldpc_frame_errors = 50;
+            cfg.mc.target_false_positives = 50;
+            cfg.mc.target_false_negatives = 50;
+            cfg.mc.max_trials_per_class = 2e5;
             cfg.mc.max_frames = 500;
+            cfg.mc.max_runtime_seconds = 6*60*60;
             cfg.memory.frames_per_batch = 4;
 
         case 'server_full'
             cfg.n_list = 4:2:24;
             cfg.ebno_db = 0:1:10;
             cfg.mc.min_frames = 100;
-            cfg.mc.target_ldpc_frame_errors = 200;
+            cfg.mc.target_false_positives = 200;
+            cfg.mc.target_false_negatives = 200;
+            % With zero observed errors this gives the rule-of-three
+            % one-sided 95% upper bound 3e-6 for each conditional rate.
+            cfg.mc.max_trials_per_class = 1e6;
             cfg.mc.max_frames = 5000;
+            % Leave a full day of scheduler margin on the 72-hour job.
+            cfg.mc.max_runtime_seconds = 48*60*60;
             cfg.memory.frames_per_batch = 4;
 
         otherwise

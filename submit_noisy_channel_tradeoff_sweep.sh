@@ -15,10 +15,12 @@ fi
 case "${sweep_type}" in
     e2)
         config_count=4
+        snr_count=13
         ;;
     ldpc_rate|rate)
         sweep_type="ldpc_rate"
         config_count=5
+        snr_count=21
         ;;
     *)
         echo "Usage: $0 {e2|ldpc_rate} [func_type[=n1,n2,...] ...]" >&2
@@ -26,10 +28,7 @@ case "${sweep_type}" in
         ;;
 esac
 
-# Default tradeoff config: n=[4 8 16 32], AWGN, Eb/N0=0:1:10.
-default_n_list="4:8:16:32"
 channel_count=1
-snr_count=11
 
 func_types=()
 n_lists=()
@@ -41,7 +40,20 @@ for job_spec in "${job_specs[@]}"; do
         n_list="${n_list//,/:}"
     else
         func_type="${job_spec}"
-        n_list="${default_n_list}"
+        case "${func_type}" in
+            id)
+                n_list="4:16"
+                ;;
+            exact-threshold)
+                n_list="36:42"
+                ;;
+            rank)
+                n_list="24:32:40"
+                ;;
+            *)
+                n_list="4:8:16:32"
+                ;;
+        esac
     fi
 
     if [[ -z "${func_type}" || ! "${n_list}" =~ ^[0-9]+(:[0-9]+)*$ ]]; then

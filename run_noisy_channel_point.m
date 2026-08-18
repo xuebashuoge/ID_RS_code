@@ -1,16 +1,25 @@
 function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, result_file)
 %RUN_NOISY_CHANNEL_POINT Simulate one (n, channel, Eb/N0) scenario.
 
+    result_version = 2;
+
     if nargin < 5
         result_file = '';
     end
     if ~isempty(result_file) && isfile(result_file)
         loaded = load(result_file, 'result');
-        if isfield(loaded, 'result') && isfield(loaded.result, 'complete') && loaded.result.complete
+        saved_version = 0;
+        if isfield(loaded, 'result') && isfield(loaded.result, 'version')
+            saved_version = double(loaded.result.version);
+        end
+        if isfield(loaded, 'result') && isfield(loaded.result, 'complete') && ...
+                loaded.result.complete && saved_version >= result_version
             result = loaded.result;
             fprintf('Using completed result %s\n', result_file);
             return;
         end
+        fprintf(['Existing point %s predates transition decomposition; ' ...
+            'rerunning it with the saved source bank.\n'], result_file);
     end
 
     require_communications_toolbox();
@@ -20,7 +29,7 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
 
     channel_index = find(strcmpi(channel_type, cfg.channel_types), 1);
     scenario_seed = mod(cfg.seed + 1009*d.n + 100003*channel_index + ...
-        1009*round(10*(ebno_db+100)), 2^31-1);
+        1009*round(1000*(ebno_db+100)), 2^31-1);
     rng(scenario_seed, 'twister');
 
     H = dvbs2ldpc(cfg.ldpc.rate);
@@ -34,6 +43,7 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     counts.uncoded = empty_decision_counts();
     counts.noiseless = empty_decision_counts();
     counts.erasure = empty_decision_counts();
+    transition_counts = empty_transition_counts();
     channel_counts = struct( ...
         'ldpc_payload_bit_errors', 0, 'ldpc_payload_bits', 0, ...
         'ldpc_frame_errors', 0, 'ldpc_frames', 0, ...
@@ -51,6 +61,7 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
 
     frames_done = 0;
     start_time = tic;
+    next_progress_seconds = cfg.mc.progress_interval_seconds;
     fprintf('Simulating n=%d, %s, Eb/N0=%g dB, G=%d tuples/frame\n', ...
         d.n, channel_type, ebno_db, d.tuples_per_frame);
 
@@ -96,6 +107,8 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         counts.uncoded = add_decisions(counts.uncoded, actual_f, uncoded_f);
         counts.noiseless = add_decisions(counts.noiseless, actual_f, noiseless_f);
         counts.erasure = add_decisions(counts.erasure, actual_f, erasure_f);
+        transition_counts = add_transitions(transition_counts, ...
+            actual_f, noiseless_f, coded_f);
 
         payload_error_matrix = decoded_payload ~= payload_bits;
         frame_error = any(payload_error_matrix, 1);
@@ -126,15 +139,35 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
             actual_f, noiseless_f, d.tuples_per_frame, p1);
 
         frames_done = frames_done + frame_count;
-        if frames_done >= cfg.mc.min_frames && ...
-                channel_counts.ldpc_frame_errors >= cfg.mc.target_ldpc_frame_errors
-            stopping_reason = 'target_ldpc_frame_errors';
+        elapsed_seconds = toc(start_time);
+        if elapsed_seconds >= next_progress_seconds
+            fprintf(['  progress: %d frames, FP=%d/%d negatives, ' ...
+                'FN=%d/%d positives, %.1f hours\n'], ...
+                frames_done, counts.coded.false_positive, ...
+                counts.coded.actual_zero, counts.coded.false_negative, ...
+                counts.coded.actual_one, elapsed_seconds/3600);
+            next_progress_seconds = next_progress_seconds + ...
+                cfg.mc.progress_interval_seconds;
+        end
+        [classes_resolved, all_targets_reached] = ...
+            class_stopping_status(counts.coded, cfg.mc);
+        if frames_done >= cfg.mc.min_frames && classes_resolved
+            if all_targets_reached
+                stopping_reason = 'target_fp_fn_counts';
+            else
+                stopping_reason = 'class_trial_cap';
+            end
+            break;
+        end
+        if elapsed_seconds >= cfg.mc.max_runtime_seconds
+            stopping_reason = 'max_runtime_seconds';
             break;
         end
         stopping_reason = 'max_frames';
     end
 
     result.complete = true;
+    result.version = result_version;
     result.config = cfg;
     result.scenario = struct('n', d.n, 'channel', lower(channel_type), ...
         'ebno_db', ebno_db, 'E2', cfg.bfc.E2, ...
@@ -147,6 +180,7 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     result.runtime_seconds = toc(start_time);
     result.counts = counts;
     result.channel_counts = channel_counts;
+    result.transition_counts = transition_counts;
     result.metrics.coded = finalize_decisions(counts.coded, p1);
     result.metrics.uncoded = finalize_decisions(counts.uncoded, p1);
     result.metrics.noiseless = finalize_decisions(counts.noiseless, p1);
@@ -171,6 +205,20 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         channel_counts.uncoded_tuple_errors, result.tuples);
     result.metrics.uncoded_ber = safe_ratio( ...
         channel_counts.uncoded_bit_errors, channel_counts.uncoded_bits);
+    result.metrics.decomposition = finalize_transitions(transition_counts);
+    reconstructed_error = result.metrics.decomposition.intrinsic_error + ...
+        result.metrics.decomposition.channel_created_error - ...
+        result.metrics.decomposition.channel_corrected_intrinsic_error;
+    if abs(reconstructed_error-result.metrics.coded.balanced_error) > 1e-12
+        error('The BFC error decomposition identity failed.');
+    end
+    [classes_resolved, all_targets_reached, stopping_status] = ...
+        class_stopping_status(counts.coded, cfg.mc);
+    result.stopping = stopping_status;
+    result.stopping.classes_resolved = classes_resolved;
+    result.stopping.all_targets_reached = all_targets_reached;
+    result.stopping.frames = frames_done;
+    result.stopping.runtime_seconds = result.runtime_seconds;
     result.per_frame.ldpc_error = per_frame.ldpc_error(1:frames_done);
     result.per_frame.parity_failure = per_frame.parity_failure(1:frames_done);
     result.per_frame.coded_bfc_errors = per_frame.coded_bfc_errors(1:frames_done);
@@ -179,9 +227,11 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     result.per_frame.uncoded_weighted_error = per_frame.uncoded_weighted_error(1:frames_done);
     result.per_frame.noiseless_weighted_error = per_frame.noiseless_weighted_error(1:frames_done);
 
-    fprintf('  coded BFC error %.4g, uncoded %.4g, LDPC FER %.4g (%d frames, %.1fs)\n', ...
-        result.metrics.coded.weighted_error, result.metrics.uncoded.weighted_error, ...
-        result.metrics.ldpc_fer, frames_done, result.runtime_seconds);
+    fprintf(['  coded BFC error %.4g, FPR %.4g, FNR %.4g, ' ...
+        'LDPC FER %.4g (%d frames, %.1fs, %s)\n'], ...
+        result.metrics.coded.balanced_error, result.metrics.coded.fpr, ...
+        result.metrics.coded.fnr, result.metrics.ldpc_fer, frames_done, ...
+        result.runtime_seconds, stopping_reason);
 
     if ~isempty(result_file)
         parent_dir = fileparts(result_file);
@@ -219,11 +269,37 @@ function validate_point_inputs(cfg, bank, d, channel_type)
     if strcmpi(channel_type, 'rayleigh') && ~strcmpi(cfg.rayleigh.csi, 'perfect')
         error('The initial Rayleigh implementation supports perfect CSI only.');
     end
+    required_mc_fields = {'min_frames', 'max_frames', ...
+        'target_false_positives', 'target_false_negatives', ...
+        'max_trials_per_class', 'max_runtime_seconds', ...
+        'progress_interval_seconds'};
+    missing_mc_fields = required_mc_fields(~isfield(cfg.mc, required_mc_fields));
+    if ~isempty(missing_mc_fields)
+        error('Missing Monte Carlo configuration fields: %s.', ...
+            strjoin(missing_mc_fields, ', '));
+    end
+    validateattributes(cfg.mc.target_false_positives, {'numeric'}, ...
+        {'scalar', 'integer', 'nonnegative'});
+    validateattributes(cfg.mc.target_false_negatives, {'numeric'}, ...
+        {'scalar', 'integer', 'nonnegative'});
+    validateattributes(cfg.mc.max_trials_per_class, {'numeric'}, ...
+        {'scalar', 'integer', 'positive'});
+    validateattributes(cfg.mc.max_runtime_seconds, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'});
+    validateattributes(cfg.mc.progress_interval_seconds, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'});
 end
 
 function counts = empty_decision_counts()
     counts = struct('actual_zero', 0, 'actual_one', 0, ...
         'false_positive', 0, 'false_negative', 0, 'total', 0);
+end
+
+function counts = empty_transition_counts()
+    counts = struct('total', 0, 'intrinsic_error', 0, ...
+        'channel_created_error', 0, ...
+        'channel_corrected_intrinsic_error', 0, ...
+        'channel_decision_changes', 0);
 end
 
 function counts = add_decisions(counts, actual, decoded)
@@ -236,6 +312,23 @@ function counts = add_decisions(counts, actual, decoded)
     counts.total = counts.total + numel(actual);
 end
 
+function counts = add_transitions(counts, actual, noiseless, coded)
+    actual = logical(actual(:));
+    noiseless = logical(noiseless(:));
+    coded = logical(coded(:));
+    intrinsic = noiseless ~= actual;
+    coded_error = coded ~= actual;
+    counts.total = counts.total + numel(actual);
+    counts.intrinsic_error = counts.intrinsic_error + sum(intrinsic);
+    counts.channel_created_error = counts.channel_created_error + ...
+        sum(~intrinsic & coded_error);
+    counts.channel_corrected_intrinsic_error = ...
+        counts.channel_corrected_intrinsic_error + ...
+        sum(intrinsic & ~coded_error);
+    counts.channel_decision_changes = counts.channel_decision_changes + ...
+        sum(coded ~= noiseless);
+end
+
 function metrics = finalize_decisions(counts, p1)
     metrics.fpr = safe_ratio(counts.false_positive, counts.actual_zero);
     metrics.fnr = safe_ratio(counts.false_negative, counts.actual_one);
@@ -246,6 +339,34 @@ function metrics = finalize_decisions(counts, p1)
     metrics.false_negative_contribution = p1*metrics.fnr;
     metrics.weighted_error = metrics.false_positive_contribution + ...
         metrics.false_negative_contribution;
+end
+
+function metrics = finalize_transitions(counts)
+    metrics.intrinsic_error = safe_ratio( ...
+        counts.intrinsic_error, counts.total);
+    metrics.channel_created_error = safe_ratio( ...
+        counts.channel_created_error, counts.total);
+    metrics.channel_corrected_intrinsic_error = safe_ratio( ...
+        counts.channel_corrected_intrinsic_error, counts.total);
+    metrics.channel_decision_change_rate = safe_ratio( ...
+        counts.channel_decision_changes, counts.total);
+end
+
+function [resolved, all_targets, status] = class_stopping_status(counts, mc)
+    fp_target = counts.false_positive >= mc.target_false_positives;
+    fn_target = counts.false_negative >= mc.target_false_negatives;
+    fp_capped = counts.actual_zero >= mc.max_trials_per_class;
+    fn_capped = counts.actual_one >= mc.max_trials_per_class;
+    resolved = (fp_target || fp_capped) && (fn_target || fn_capped);
+    all_targets = fp_target && fn_target;
+    status = struct( ...
+        'target_false_positives', mc.target_false_positives, ...
+        'target_false_negatives', mc.target_false_negatives, ...
+        'max_trials_per_class', mc.max_trials_per_class, ...
+        'false_positive_target_reached', fp_target, ...
+        'false_negative_target_reached', fn_target, ...
+        'false_positive_trial_cap_reached', fp_capped, ...
+        'false_negative_trial_cap_reached', fn_capped);
 end
 
 function value = safe_ratio(numerator, denominator)

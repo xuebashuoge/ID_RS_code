@@ -13,8 +13,9 @@ function manifest = replot_noisy_channel_tradeoff_by_setting( ...
 %
 %   No simulation is run and no point file is modified. The default error
 %   metric is "balanced", i.e. (FP+FN)/number of balanced Monte Carlo
-%   trials. ERROR_METRIC can also be "weighted", "tuple", "ber", or
-%   "fer". ZERO_MODE is "omit" (default) or "rule_of_three".
+%   trials. ERROR_METRIC can also be "fpr", "fnr", "max", "weighted",
+%   "tuple", "ber", or "fer". ZERO_MODE is "omit" (default) or
+%   "rule_of_three".
 %
 %   Examples:
 %     replot_noisy_channel_tradeoff_by_setting('e2','server_full','id')
@@ -168,6 +169,7 @@ function [output_file, n_values] = plot_one_setting( ...
 
     grid(ax, 'on');
     box(ax, 'on');
+    set(ax, 'YScale', 'log');
     xlabel(ax, 'E_b/N_0 (dB)');
     ylabel(ax, metric_label(error_metric));
     title(ax, sprintf('%s, %s, %s', upper(channel_type), ...
@@ -191,6 +193,18 @@ function [errors, trials] = extract_error(points, error_metric)
         case 'weighted'
             errors = cellfun(@(x) x.metrics.coded.weighted_error, results);
             trials = cellfun(@(x) x.counts.coded.total, results);
+        case 'fpr'
+            errors = cellfun(@(x) x.metrics.coded.fpr, results);
+            trials = cellfun(@(x) x.counts.coded.actual_zero, results);
+        case 'fnr'
+            errors = cellfun(@(x) x.metrics.coded.fnr, results);
+            trials = cellfun(@(x) x.counts.coded.actual_one, results);
+        case 'max'
+            errors = cellfun(@(x) max( ...
+                x.metrics.coded.fpr, x.metrics.coded.fnr), results);
+            trials = cellfun(@(x) min( ...
+                x.counts.coded.actual_zero, ...
+                x.counts.coded.actual_one), results);
         case 'tuple'
             errors = cellfun(@(x) x.metrics.coded_tuple_error_rate, results);
             trials = cellfun(@(x) x.tuples, results);
@@ -210,7 +224,8 @@ function values = prepare_zero_values(values, trials, zero_mode)
     if strcmp(zero_mode, 'omit')
         values(zero_mask) = NaN;
     else
-        values(zero_mask) = 3 ./ max(1, double(trials(zero_mask)));
+        values(zero_mask) = min( ...
+            1, 3 ./ max(1, double(trials(zero_mask))));
     end
 end
 
@@ -220,6 +235,12 @@ function label = metric_label(error_metric)
             label = 'BFC decision error, (FP + FN) / trials';
         case 'weighted'
             label = 'Prior-weighted BFC decision error probability';
+        case 'fpr'
+            label = 'BFC false-positive rate';
+        case 'fnr'
+            label = 'BFC false-negative rate';
+        case 'max'
+            label = 'BFC max(FPR,FNR)';
         case 'tuple'
             label = 'Coded BFC tuple error rate';
         case 'ber'
@@ -266,7 +287,8 @@ function sweep_type = normalize_sweep_type(sweep_type)
 end
 
 function validate_metric(error_metric)
-    valid_metrics = {'balanced', 'weighted', 'tuple', 'ber', 'fer'};
+    valid_metrics = {'balanced', 'fpr', 'fnr', 'max', ...
+        'weighted', 'tuple', 'ber', 'fer'};
     if ~any(strcmp(error_metric, valid_metrics))
         error('ERROR_METRIC must be one of: %s.', ...
             strjoin(valid_metrics, ', '));

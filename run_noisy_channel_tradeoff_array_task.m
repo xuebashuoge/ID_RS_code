@@ -31,8 +31,9 @@ cfg = configs{config_index};
 n = cfg.n_list(n_index);
 channel_type = cfg.channel_types{channel_index};
 ebno_db = cfg.ebno_db(snr_index);
-loaded = load(noisy_channel_bank_file(cfg, n), 'bank');
-run_noisy_channel_point(cfg, loaded.bank, channel_type, ebno_db, ...
+bank = prepare_bfc_source_bank( ...
+    cfg, n, noisy_channel_bank_file(cfg, n));
+run_noisy_channel_point(cfg, bank, channel_type, ebno_db, ...
     noisy_channel_result_file(cfg, n, channel_type, ebno_db));
 
 function value = getenv_default(name, default_value)

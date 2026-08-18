@@ -4,9 +4,9 @@ function configs = noisy_channel_tradeoff_configs( ...
 %
 %   CONFIGS = NOISY_CHANNEL_TRADEOFF_CONFIGS(TYPE, PROFILE, FUNC_TYPE)
 %   returns a cell array of complete noisy-channel configurations. TYPE is
-%   "e2" or "ldpc_rate". The default experiment uses n=[4 8 16 32], AWGN,
-%   and the identification function. Set BFC_N_LIST to a colon-separated
-%   list to override the default n=[4 8 16 32] for a submitted job.
+%   "e2" or "ldpc_rate". Function-specific default n grids contain only
+%   nontrivial K>1 points and reuse the original server banks. Set
+%   BFC_N_LIST to a colon-separated list to override the default.
 %
 %   E2 sweep defaults:        [0.05 0.10 0.15 0.20], R_c=1/2
 %   LDPC-rate sweep defaults: [1/3 2/5 1/2 3/5 2/3], E2=0.10
@@ -28,7 +28,8 @@ function configs = noisy_channel_tradeoff_configs( ...
 
     base_cfg = noisy_channel_config(profile);
     base_cfg.bfc.func_type = char(func_type);
-    base_cfg.n_list = getenv_n_list('BFC_N_LIST', [4 8 16 32]);
+    base_cfg.n_list = getenv_n_list( ...
+        'BFC_N_LIST', default_n_list_for_function(func_type));
     base_cfg.channel_types = {'awgn'};
 
     switch sweep_type
@@ -39,6 +40,9 @@ function configs = noisy_channel_tradeoff_configs( ...
             validateattributes(sweep_values, {'numeric'}, ...
                 {'vector', 'real', 'finite', 'positive', '<', 0.5});
             fixed_value = 1/2;
+            % Resolve the rate-1/2 waterfall without spending jobs on the
+            % already-flat 4--10 dB region.
+            base_cfg.ebno_db = 0:0.25:3;
 
         case 'ldpc_rate'
             if nargin < 4 || isempty(sweep_values)
@@ -50,6 +54,8 @@ function configs = noisy_channel_tradeoff_configs( ...
                 dvbs2_ldpc_dimensions(rate);
             end
             fixed_value = 0.10;
+            % The lowest DVB-S2 rates have a later FER waterfall.
+            base_cfg.ebno_db = 0:0.25:5;
 
         otherwise
             error('Sweep type must be "e2" or "ldpc_rate".');
@@ -92,6 +98,47 @@ function configs = noisy_channel_tradeoff_configs( ...
         cfg.paths.bank_dir = fullfile(cfg.paths.results_dir, 'source_banks');
         cfg.paths.point_dir = fullfile(cfg.paths.results_dir, 'points');
         configs{value_index} = cfg;
+    end
+
+    validate_common_nontrivial_n(configs);
+end
+
+function values = default_n_list_for_function(func_type)
+    switch lower(char(func_type))
+        case 'id'
+            % Common to the already-generated E2 and LDPC-rate banks.
+            values = [4 16];
+        case 'exact-threshold'
+            % At beta=2 these remain nontrivial for every default E2.
+            values = [36 42];
+        case 'rank'
+            % n=16 gives K=1 at E2=0.2 for the default rank=20.
+            values = [24 32 40];
+        otherwise
+            values = [4 8 16 32];
+    end
+end
+
+function validate_common_nontrivial_n(configs)
+    reference_n = double(configs{1}.n_list(:).');
+    invalid = strings(0, 1);
+    for config_index = 1:numel(configs)
+        cfg = configs{config_index};
+        if ~isequal(double(cfg.n_list(:).'), reference_n)
+            error('Every sweep setting must use the same n grid.');
+        end
+        for n = reference_n
+            K = K_calculator(n, cfg.bfc.E2, ...
+                cfg.bfc.params, cfg.bfc.func_type);
+            if K <= 1
+                invalid(end+1) = sprintf('n=%d at %s gives K=%d', ...
+                    n, cfg.experiment.display_label, K); %#ok<AGROW>
+            end
+        end
+    end
+    if ~isempty(invalid)
+        error(['All sweep points must have nontrivial K>1. Revise ' ...
+            'BFC_N_LIST. Invalid points: %s'], strjoin(invalid, '; '));
     end
 end
 

@@ -34,12 +34,17 @@ function aggregate = plot_noisy_channel_tradeoff_results(configs, zero_mode)
     for channel_index = 1:numel(channels)
         channel_type = channels{channel_index};
         channel_points = aggregate(strcmpi({aggregate.channel}, channel_type));
-        plot_ebno_view(channel_points, cfg, aggregate_dir, zero_mode);
-        plot_resource_view(channel_points, cfg, aggregate_dir, ...
-            'parallel_bfc_rate', zero_mode);
-        if strcmp(cfg.experiment.type, 'ldpc_rate')
+        decision_metrics = {'balanced', 'fpr', 'fnr', 'max'};
+        for metric_index = 1:numel(decision_metrics)
+            metric_name = decision_metrics{metric_index};
+            plot_ebno_view(channel_points, cfg, aggregate_dir, ...
+                zero_mode, metric_name);
             plot_resource_view(channel_points, cfg, aggregate_dir, ...
-                'channel_uses_per_bfc_decision', zero_mode);
+                'parallel_bfc_rate', zero_mode, metric_name);
+            if strcmp(cfg.experiment.type, 'ldpc_rate')
+                plot_resource_view(channel_points, cfg, aggregate_dir, ...
+                    'channel_uses_per_bfc_decision', zero_mode, metric_name);
+            end
         end
     end
 end
@@ -66,6 +71,8 @@ function aggregate = collect_points(configs)
 
                     result = loaded.result;
                     rates = noisy_channel_rate_metadata(result);
+                    coded_fpr = result.metrics.coded.fpr;
+                    coded_fnr = result.metrics.coded.fnr;
                     entry = struct( ...
                         'sweep_type', cfg.experiment.type, ...
                         'sweep_value', cfg.experiment.value, ...
@@ -86,6 +93,17 @@ function aggregate = collect_points(configs)
                             result.metrics.coded.weighted_error, ...
                         'coded_empirical_decision_error', ...
                             result.metrics.coded.balanced_error, ...
+                        'coded_fpr', coded_fpr, ...
+                        'coded_fnr', coded_fnr, ...
+                        'coded_max_conditional_error', ...
+                            max(coded_fpr, coded_fnr), ...
+                        'intrinsic_error', decomposition_value( ...
+                            result, 'intrinsic_error'), ...
+                        'channel_created_error', decomposition_value( ...
+                            result, 'channel_created_error'), ...
+                        'channel_corrected_intrinsic_error', ...
+                            decomposition_value(result, ...
+                            'channel_corrected_intrinsic_error'), ...
                         'noiseless_weighted_error', ...
                             result.metrics.noiseless.weighted_error, ...
                         'noiseless_empirical_decision_error', ...
@@ -95,7 +113,11 @@ function aggregate = collect_points(configs)
                         'ldpc_ber', result.metrics.ldpc_payload_ber, ...
                         'ldpc_fer', result.metrics.ldpc_fer, ...
                         'tuples', double(result.tuples), ...
-                        'frames', double(result.frames));
+                        'frames', double(result.frames), ...
+                        'actual_zero_trials', ...
+                            double(result.counts.coded.actual_zero), ...
+                        'actual_one_trials', ...
+                            double(result.counts.coded.actual_one));
                     if isempty(aggregate)
                         aggregate = entry;
                     else
@@ -107,7 +129,7 @@ function aggregate = collect_points(configs)
     end
 end
 
-function plot_ebno_view(points, cfg, output_dir, zero_mode)
+function plot_ebno_view(points, cfg, output_dir, zero_mode, metric_name)
     n_values = unique([points.n]);
     sweep_values = unique([points.sweep_value], 'stable');
     colors = lines(numel(sweep_values));
@@ -129,30 +151,36 @@ function plot_ebno_view(points, cfg, output_dir, zero_mode)
             end
             [~, order] = sort([selected.ebno_db]);
             selected = selected(order);
-            y = prepare_zeros( ...
-                [selected.coded_empirical_decision_error], ...
-                [selected.tuples], zero_mode);
+            [y, trials] = decision_metric_values(selected, metric_name);
+            y = prepare_zeros(y, trials, zero_mode);
             label = sweep_legend(selected(1));
             semilogy(ax, [selected.ebno_db], y, 'o-', ...
                 'Color', colors(value_index, :), 'LineWidth', 1.8, ...
                 'DisplayName', label);
         end
         style_axis(ax, 'E_b/N_0 (dB)');
+        set(ax, 'YScale', 'log');
         title(ax, sprintf('n=%d', n));
         legend(ax, 'Location', 'best');
     end
 
-    sgtitle(layout, sprintf('%s: BFC decision error across %s', ...
-        upper(points(1).channel), sweep_title(cfg.experiment.type)));
-    output_file = fullfile(output_dir, sprintf( ...
-        '%s_%s_error_vs_ebno.png', cfg.experiment.type, ...
-        lower(points(1).channel)));
+    sgtitle(layout, sprintf('%s: BFC %s across %s', ...
+        upper(points(1).channel), metric_title(metric_name), ...
+        sweep_title(cfg.experiment.type)));
+    if strcmp(metric_name, 'balanced')
+        filename = sprintf('%s_%s_error_vs_ebno.png', ...
+            cfg.experiment.type, lower(points(1).channel));
+    else
+        filename = sprintf('%s_%s_%s_error_vs_ebno.png', ...
+            cfg.experiment.type, lower(points(1).channel), metric_name);
+    end
+    output_file = fullfile(output_dir, filename);
     exportgraphics(fig, output_file, 'Resolution', 300);
     close(fig);
     fprintf('Saved %s\n', output_file);
 end
 
-function plot_resource_view(points, cfg, output_dir, resource_name, zero_mode)
+function plot_resource_view(points, cfg, output_dir, resource_name, zero_mode, metric_name)
     n_values = unique([points.n]);
     snr_values = select_snr_curves(unique([points.ebno_db]));
     colors = turbo(numel(snr_values));
@@ -175,22 +203,30 @@ function plot_resource_view(points, cfg, output_dir, resource_name, zero_mode)
             x = [selected.(resource_name)];
             [x, order] = sort(x);
             selected = selected(order);
-            y = prepare_zeros( ...
-                [selected.coded_empirical_decision_error], ...
-                [selected.tuples], zero_mode);
+            [y, trials] = decision_metric_values(selected, metric_name);
+            y = prepare_zeros(y, trials, zero_mode);
             semilogy(ax, x, y, 'o-', ...
                 'Color', colors(snr_index, :), 'LineWidth', 1.8, ...
                 'DisplayName', sprintf('E_b/N_0=%g dB', ebno_db));
         end
         style_axis(ax, resource_label(resource_name));
+        set(ax, 'YScale', 'log');
         title(ax, sprintf('n=%d', n));
         legend(ax, 'Location', 'best');
     end
 
-    sgtitle(layout, sprintf('%s: error-resource tradeoff (%s sweep)', ...
-        upper(points(1).channel), sweep_title(cfg.experiment.type)));
-    output_file = fullfile(output_dir, sprintf('%s_%s_error_vs_%s.png', ...
-        cfg.experiment.type, lower(points(1).channel), resource_name));
+    sgtitle(layout, sprintf('%s: %s-resource tradeoff (%s sweep)', ...
+        upper(points(1).channel), metric_title(metric_name), ...
+        sweep_title(cfg.experiment.type)));
+    if strcmp(metric_name, 'balanced')
+        filename = sprintf('%s_%s_error_vs_%s.png', ...
+            cfg.experiment.type, lower(points(1).channel), resource_name);
+    else
+        filename = sprintf('%s_%s_%s_error_vs_%s.png', ...
+            cfg.experiment.type, lower(points(1).channel), ...
+            metric_name, resource_name);
+    end
+    output_file = fullfile(output_dir, filename);
     exportgraphics(fig, output_file, 'Resolution', 300);
     close(fig);
     fprintf('Saved %s\n', output_file);
@@ -247,7 +283,50 @@ end
 function style_axis(ax, x_label)
     grid(ax, 'on');
     xlabel(ax, x_label);
-    ylabel(ax, '(FP + FN) / number of trials');
+    ylabel(ax, 'Conditional/average error probability');
+end
+
+function [values, trials] = decision_metric_values(points, metric_name)
+    switch metric_name
+        case 'balanced'
+            values = [points.coded_empirical_decision_error];
+            trials = [points.tuples];
+        case 'fpr'
+            values = [points.coded_fpr];
+            trials = [points.actual_zero_trials];
+        case 'fnr'
+            values = [points.coded_fnr];
+            trials = [points.actual_one_trials];
+        case 'max'
+            values = [points.coded_max_conditional_error];
+            trials = min([points.actual_zero_trials], ...
+                [points.actual_one_trials]);
+        otherwise
+            error('Unknown BFC decision metric "%s".', metric_name);
+    end
+end
+
+function value = metric_title(metric_name)
+    switch metric_name
+        case 'balanced'
+            value = 'balanced average error';
+        case 'fpr'
+            value = 'false-positive rate';
+        case 'fnr'
+            value = 'false-negative rate';
+        case 'max'
+            value = 'max(FPR,FNR)';
+    end
+end
+
+function value = decomposition_value(result, field_name)
+    if isfield(result, 'metrics') && ...
+            isfield(result.metrics, 'decomposition') && ...
+            isfield(result.metrics.decomposition, field_name)
+        value = result.metrics.decomposition.(field_name);
+    else
+        value = NaN;
+    end
 end
 
 function values = prepare_zeros(values, trials, zero_mode)
@@ -258,7 +337,8 @@ function values = prepare_zeros(values, trials, zero_mode)
             values(zero_mask) = NaN;
         case 'rule_of_three'
             trials = double(trials);
-            values(zero_mask) = 3 ./ max(1, trials(zero_mask));
+            values(zero_mask) = min( ...
+                1, 3 ./ max(1, trials(zero_mask)));
         otherwise
             error('Unknown zero plotting mode "%s".', zero_mode);
     end

@@ -85,6 +85,10 @@ e2_configs = noisy_channel_tradeoff_configs( ...
 assert(numel(e2_configs) == 2);
 assert(e2_configs{1}.ldpc.rate == 1/2);
 assert(e2_configs{1}.bfc.E2 ~= e2_configs{2}.bfc.E2);
+assert(isequal(e2_configs{1}.n_list, e2_configs{2}.n_list));
+assert(isequal(e2_configs{1}.ebno_db, 0:0.25:3));
+assert(all(arrayfun(@(n) K_calculator(n, 0.10, ...
+    e2_configs{1}.bfc.params, 'id') > 1, e2_configs{1}.n_list)));
 
 rate_configs = noisy_channel_tradeoff_configs( ...
     'ldpc_rate', 'local_smoke', 'id', [1/3 1/2 2/3]);
@@ -93,6 +97,12 @@ rate_derived = cellfun(@(x) derive_bfc_parameters(x, 4), ...
 assert(all(cellfun(@(x) x.K, rate_derived) == rate_derived{1}.K));
 assert(issorted(cellfun( ...
     @(x) x.channel_uses_per_bfc_decision, rate_derived), 'descend'));
+assert(isequal(rate_configs{1}.ebno_db, 0:0.25:5));
+
+dense_file_a = noisy_channel_result_file(e2_configs{1}, 4, 'awgn', 1.25);
+dense_file_b = noisy_channel_result_file(e2_configs{1}, 4, 'awgn', 1.5);
+assert(~strcmp(dense_file_a, dense_file_b));
+assert(contains(dense_file_a, 'ebno_p1p25.mat'));
 fprintf('PASS: rate bookkeeping and tradeoff configurations\n');
 
 %% Uncoded channel checks against analytical BPSK BER
@@ -117,7 +127,8 @@ cfg.channel_types = {'awgn'};
 cfg.ebno_db = 20;
 cfg.mc.min_frames = 1;
 cfg.mc.max_frames = 1;
-cfg.mc.target_ldpc_frame_errors = 1;
+cfg.mc.target_false_positives = 1;
+cfg.mc.target_false_negatives = 1;
 bank = prepare_bfc_source_bank(cfg, cfg.n_list(1));
 assert(all(bank.noiseless_f(bank.actual_f)));
 result = run_noisy_channel_point(cfg, bank, 'awgn', 20);
@@ -125,6 +136,13 @@ assert(result.complete);
 assert(result.frames == 1);
 assert(result.metrics.ldpc_payload_ber == 0);
 assert(result.metrics.coded_tuple_error_rate == 0);
+assert(result.version >= 2);
+decomp = result.metrics.decomposition;
+reconstructed = decomp.intrinsic_error + ...
+    decomp.channel_created_error - ...
+    decomp.channel_corrected_intrinsic_error;
+assert(abs(reconstructed-result.metrics.coded.balanced_error) < 1e-12);
+assert(isfield(result, 'stopping'));
 fprintf('PASS: one-frame LDPC/BFC end-to-end simulation\n');
 
 fprintf('=== ALL NOISY-CHANNEL TESTS PASSED ===\n');
