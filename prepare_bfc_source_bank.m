@@ -41,7 +41,6 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
     noiseless_f = false(total_tuples, 1);
 
     prim_poly = get_primpoly(d.r);
-    alpha = uint32(2);
     batch_size = cfg.memory.sample_message_batch;
     fprintf('Preparing source bank: n=%d, K=%d, m=%d, S=%g, tuples=%d\n', ...
         d.n, d.K, d.m, S, total_tuples);
@@ -65,7 +64,8 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
         end
 
         u(rows) = uint32(randi(d.L, count, 1));
-        x = gf_pow_vec(alpha, u(rows), d.r, prim_poly);
+        x = rs_evaluation_points_at( ...
+            d.r, u(rows), prim_poly, d.rs_length_mode);
         c(rows) = evaluate_rs_positions_vec(message_symbols, x, d.r, prim_poly);
 
         noiseless_f(rows(labels)) = true;
@@ -73,7 +73,7 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
             local_negative = find(~labels);
             decoded_negative = decode_bfc_tuples_vec( ...
                 u(rows(local_negative)), c(rows(local_negative)), valid_symbols, ...
-                d.r, d.K, d.L, cfg.memory);
+                d.r, d.K, d.L, cfg.memory, d.rs_length_mode);
             noiseless_f(rows(local_negative)) = decoded_negative;
         end
 
@@ -95,7 +95,8 @@ function bank = prepare_bfc_source_bank(cfg, n, bank_file)
     bank.metadata.log2_p1 = log2_p1;
     bank.metadata.func_type = cfg.bfc.func_type;
     bank.metadata.params = params;
-    bank.metadata.rs_length_mode = cfg.bfc.rs_length_mode;
+    bank.metadata.rs_length_mode = d.rs_length_mode;
+    bank.metadata.rs_evaluation_order = d.rs_evaluation_order;
     bank.metadata.tuples_per_frame = d.tuples_per_frame;
     bank.metadata.padding_bits = d.padding_bits;
     bank.metadata.total_tuples = total_tuples;
@@ -146,11 +147,17 @@ function validate_bank(bank, cfg, n)
     if ~isfield(bank, 'metadata') || ~bank.metadata.complete
         error('Source bank is incomplete.');
     end
+    expected = derive_bfc_parameters(cfg, n);
     if bank.metadata.n ~= n || ~strcmp(bank.metadata.func_type, cfg.bfc.func_type) || ...
-            ~strcmp(bank.metadata.rs_length_mode, cfg.bfc.rs_length_mode)
+            ~isfield(bank.metadata, 'rs_length_mode') || ...
+            ~strcmp(bank.metadata.rs_length_mode, expected.rs_length_mode)
         error('Source bank metadata does not match the requested configuration.');
     end
-    expected = derive_bfc_parameters(cfg, n);
+    if ~isfield(bank.metadata, 'rs_evaluation_order') || ...
+            ~strcmp(bank.metadata.rs_evaluation_order, expected.rs_evaluation_order)
+        error(['Source bank uses an incompatible RS evaluation-point mapping; ' ...
+               'regenerate the source bank.']);
+    end
     if bank.metadata.r ~= expected.r || bank.metadata.L ~= expected.L || ...
             bank.metadata.K ~= expected.K || bank.metadata.m ~= expected.m
         error('Source bank BFC parameters do not match the requested configuration.');

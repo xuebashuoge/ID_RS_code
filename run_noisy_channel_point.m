@@ -1,7 +1,7 @@
 function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, result_file)
 %RUN_NOISY_CHANNEL_POINT Simulate one (n, channel, Eb/N0) scenario.
 
-    result_version = 2;
+    result_version = 3;
 
     if nargin < 5
         result_file = '';
@@ -259,6 +259,10 @@ end
 function validate_point_inputs(cfg, bank, d, channel_type)
     if ~bank.metadata.complete || bank.metadata.n ~= d.n
         error('Source bank is incomplete or belongs to another n.');
+    end
+    if ~isfield(bank.metadata, 'rs_evaluation_order') || ...
+            ~strcmp(bank.metadata.rs_evaluation_order, d.rs_evaluation_order)
+        error('Source bank uses an incompatible RS evaluation-point mapping.');
     end
     if numel(bank.u) < cfg.mc.max_frames*d.tuples_per_frame
         error('Source bank is too short for the requested maximum frame count.');

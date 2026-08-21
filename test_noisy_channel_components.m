@@ -27,16 +27,21 @@ fprintf('PASS: GF exponentiation\n');
 %% Sampled RS evaluation equals the full encoder
 r = 4;
 K = 2;
-L = 2^r - 1;
+L = 2^r;
 bits = rand(25, r*K) > 0.5;
 symbols = bits_to_symbols_uint32(bits, r);
 full_codeword = rs_encode_polynomial_vec(bits, r, K, L);
 u = uint32(randi(L, size(bits, 1), 1));
-evaluation_points = rs_evaluation_points(r, L, get_primpoly(r));
-x = evaluation_points(double(u));
+prim_poly = get_primpoly(r);
+evaluation_points = rs_evaluation_points(r, L, prim_poly);
+x = rs_evaluation_points_at(r, u, prim_poly, 'extended');
 sampled = evaluate_rs_positions_vec(symbols, x, r, get_primpoly(r));
 linear_index = sub2ind(size(full_codeword), (1:size(bits,1))', double(u));
 assert(isequal(sampled, full_codeword(linear_index)));
+assert(numel(unique(evaluation_points)) == L);
+all_indices = uint32((1:L)');
+assert(isequal(rs_evaluation_points_at( ...
+    r, all_indices, prim_poly, 'extended'), evaluation_points.'));
 fprintf('PASS: sampled RS evaluation\n');
 
 %% Direct valid-set builder agrees with the original small implementation
@@ -45,7 +50,7 @@ limits.max_valid_messages = 1e5;
 limits.max_valid_set_mb = 64;
 [S_new, valid_symbols, log2_p1] = build_valid_symbols_vec(4, 2, ...
     'exact-threshold', params, limits);
-[S_old, ~, valid_symbols_old] = build_decoding_regions_vec(4, 2, 15, ...
+[S_old, ~, valid_symbols_old] = build_decoding_regions_vec(4, 2, 16, ...
     'exact-threshold', params);
 assert(S_new == S_old);
 assert(isequal(sortrows(valid_symbols), sortrows(valid_symbols_old)));
@@ -53,15 +58,15 @@ assert(abs(log2_p1 - (log2(S_new)-8)) < 1e-12);
 fprintf('PASS: valid-set construction\n');
 
 %% Tuple packing, padding, and invalid-index erasure
-u = uint32([1; 15; 3; 8]);
+u = uint32([1; 16; 3; 8]);
 c = uint32([0; 15; 6; 9]);
 [info_bits, payload_bits] = pack_bfc_tuples(u, c, 4, 21, 2);
 assert(isequal(size(info_bits), [21 2]));
 assert(all(info_bits(17:end, :) == 0, 'all'));
 [u_roundtrip, c_roundtrip] = unpack_bfc_tuples(payload_bits, 4);
 assert(isequal(u, u_roundtrip) && isequal(c, c_roundtrip));
-decoded_invalid = decode_bfc_tuples_vec(uint32(16), uint32(0), ...
-    valid_symbols, 4, 2, 15, struct('region_working_mb', 16));
+decoded_invalid = decode_bfc_tuples_vec(uint32(17), uint32(0), ...
+    valid_symbols, 4, 2, 16, struct('region_working_mb', 16));
 assert(~decoded_invalid);
 fprintf('PASS: tuple framing and invalid-index handling\n');
 
@@ -72,6 +77,9 @@ assert(ldpc_N == 64800 && ldpc_K == 38880 && canonical_rate == 3/5);
 base_cfg = noisy_channel_config('local_smoke');
 base_cfg.bfc.func_type = 'id';
 d4 = derive_bfc_parameters(base_cfg, 4);
+assert(d4.L == 2^d4.r);
+assert(strcmp(d4.rs_length_mode, 'extended'));
+assert(strcmp(d4.rs_evaluation_order, 'extended-zero-first-v1'));
 assert(d4.tuples_per_frame == 8100);
 assert(d4.channel_uses_per_bfc_decision == 8);
 assert(abs(d4.ldpc_payload_rate - 1/2) < 1e-12);

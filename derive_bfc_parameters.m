@@ -12,11 +12,16 @@ function d = derive_bfc_parameters(cfg, n)
         error('The custom GF implementation supports r <= 32.');
     end
 
-    switch lower(cfg.bfc.rs_length_mode)
+    d.rs_length_mode = lower(char(cfg.bfc.rs_length_mode));
+    switch d.rs_length_mode
         case 'distinct-nonzero'
             d.L = 2^d.r - 1;
-        case 'legacy'
+            d.rs_evaluation_order = 'nonzero-power-v1';
+        case {'extended', 'legacy'}
+            % The legacy name is retained as a configuration alias, but it
+            % now uses the corrected extended-RS point ordering.
             d.L = 2^d.r;
+            d.rs_evaluation_order = 'extended-zero-first-v1';
         otherwise
             error('Unknown RS length mode "%s".', cfg.bfc.rs_length_mode);
     end

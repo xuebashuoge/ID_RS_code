@@ -38,8 +38,10 @@ main_noisy_channel_sim('server_pilot')
 
 ## Receiver and energy conventions
 
-- The RS evaluation length is `L=2^r-1`; the unused all-one index pattern
-  is treated as an erasure.
+- The RS evaluation length is `L=2^r`. The one-based index mapping is the
+  extended-RS ordering `1 -> 0`, `2 -> 1`, ..., `L -> alpha^(L-2)`, so every
+  `r`-bit index pattern is valid. The source-bank and decoder paths evaluate
+  only the requested point indices and do not materialize the complete table.
 - DVB-S2 rate-1/2 LDPC uses a 32,400-bit information block and a
   64,800-bit codeword.
 - BPSK maps zero to `+1` and one to `-1`.

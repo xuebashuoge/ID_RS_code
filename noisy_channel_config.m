@@ -14,7 +14,7 @@ function cfg = noisy_channel_config(profile)
     cfg.bfc.E2 = 0.1;
     cfg.bfc.func_type = 'exact-threshold';
     cfg.bfc.params = struct('beta', 2, 't', 3, 'S_k', [1 2], 'rank', 20);
-    cfg.bfc.rs_length_mode = 'distinct-nonzero';
+    cfg.bfc.rs_length_mode = 'extended';
 
     [cfg.ldpc.block_length, cfg.ldpc.information_length, ...
         cfg.ldpc.rate] = dvbs2_ldpc_dimensions(1/2);
