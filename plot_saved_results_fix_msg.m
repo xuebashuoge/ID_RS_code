@@ -8,11 +8,25 @@
 % Otherwise, it reconstructs the plotted vectors from the individual
 % fixed_msg_result_n_*.mat files.
 % =========================================================================
-clear; close all;
+% Preserve optional caller overrides, e.g.:
+%   func_type = 'rank'; run('plot_saved_results_fix_msg.m')
+clearvars -except func_type E2;
+close all;
 
 % --- 1. Saved Result Parameters ---
-func_type = 'exact-threshold';
-E2 = 0.10;
+if ~exist('func_type', 'var')
+    func_type = 'exact-threshold';
+end
+if ~exist('E2', 'var')
+    E2 = 0.10;
+end
+
+% These parameters must match the run that produced the saved results. They
+% are only used to reconstruct rates for older files that did not save them.
+params.beta = 2;
+params.t = 3;
+params.S_k = [1, 2];
+params.rank = 20;
 
 results_dir = fullfile('results_temp', ...
     sprintf('fixed_msg_%s_E2_%.2f', func_type, E2));
@@ -44,6 +58,12 @@ if exist(summary_file, 'file')
     fixed_fp_mc = saved.fixed_fp_mc(:).';
     expected_FP_rates = saved.expected_FP_rates(:).';
     theory_upper_bound = saved.theory_upper_bound(:).';
+
+    if isfield(saved, 'sim_rates')
+        sim_rates = saved.sim_rates(:).';
+    else
+        sim_rates = reconstruct_rates(n_list_sim, E2, params, func_type, saved);
+    end
 else
     fprintf(['Summary file not found. Reconstructing results from ', ...
         'fixed_msg_result_n_*.mat files...\n']);
@@ -59,6 +79,7 @@ else
     fixed_fp_mc = zeros(1, num_files);
     expected_FP_rates = zeros(1, num_files);
     theory_upper_bound = zeros(1, num_files);
+    sim_rates = zeros(1, num_files);
 
     for i = 1:num_files
         result_file = fullfile(results_dir, mat_files(i).name);
@@ -84,6 +105,20 @@ else
         fixed_fp_mc(i) = saved.stat_single.fp_prob_mc;
         expected_FP_rates(i) = saved.expected_FP;
         theory_upper_bound(i) = saved.upper_bound;
+
+        if isfield(saved, 'rate')
+            sim_rates(i) = saved.rate;
+        else
+            K_computed = K_calculator(saved.n, E2, params, func_type);
+            if isfield(saved, 'K') && saved.K ~= K_computed
+                warning(['Computed K=%d differs from saved K=%d for n=%d. ', ...
+                    'Using the saved K to reproduce the original run.'], ...
+                    K_computed, saved.K, saved.n);
+                K_computed = saved.K;
+            end
+            sim_rates(i) = rate_calculation(saved.n, ...
+                (saved.n / 2) * K_computed, func_type);
+        end
     end
 
     [n_list_sim, sort_idx] = sort(n_list_sim);
@@ -91,11 +126,13 @@ else
     fixed_fp_mc = fixed_fp_mc(sort_idx);
     expected_FP_rates = expected_FP_rates(sort_idx);
     theory_upper_bound = theory_upper_bound(sort_idx);
+    sim_rates = sim_rates(sort_idx);
 end
 
 num_points = numel(n_list_sim);
 if any([numel(fixed_fp_exact), numel(fixed_fp_mc), ...
-        numel(expected_FP_rates), numel(theory_upper_bound)] ~= num_points)
+        numel(expected_FP_rates), numel(theory_upper_bound), ...
+        numel(sim_rates)] ~= num_points)
     error('Saved result vectors do not all have the same length.');
 end
 
@@ -104,33 +141,99 @@ fprintf('Loaded %d data points for n = %s\n', ...
 
 % --- 3. Recreate the Plot from main_plot_error_rates_fixed_msg.m ---
 figure('Name', 'Single Fixed Message FP Simulation', 'Color', 'w', ...
-    'Position', [100, 100, 850, 600]);
+    'Position', [100, 100, 800, 600]);
 
-semilogy(n_list_sim, fixed_fp_exact, 'bo-', 'LineWidth', 2, ...
-    'MarkerSize', 8, 'DisplayName', 'Single Fixed Msg (Exact R/L)');
+theory_exact_color = [0.4940, 0.1840, 0.5560];
+semilogy(n_list_sim, fixed_fp_exact, 's--', ...
+    'Color', theory_exact_color, 'LineWidth', 1.8, ...
+    'MarkerSize', 7, 'DisplayName', 'Theoretical Exact FP (R/L)');
 hold on;
-semilogy(n_list_sim, fixed_fp_mc, 'rx--', 'LineWidth', 1.5, ...
+semilogy(n_list_sim, fixed_fp_mc, 'bo-', 'LineWidth', 2, ...
     'MarkerSize', 8, 'DisplayName', ...
     'Single Fixed Msg (Position MC)');
 semilogy(n_list_sim, theory_upper_bound, 'r--', 'LineWidth', 2, ...
     'DisplayName', 'Upper Bound: S(K-1)/L');
-semilogy(n_list_sim, expected_FP_rates, 'k-.', 'LineWidth', 2, ...
-    'DisplayName', 'Theoretical Expected FP');
+semilogy(n_list_sim, expected_FP_rates, 'g-.', 'LineWidth', 2, ...
+    'DisplayName', 'Expected FP');
 
 set(gca, 'YScale', 'log');
+
+% Put adjacent rate labels on opposite sides of the primary Monte Carlo
+% curve. This remains readable for the densely sampled id and rank runs.
+for i = 1:num_points
+    if fixed_fp_mc(i) > 0
+        x_text = n_list_sim(i);
+        if i == 1
+            horizontal_alignment = 'left';
+        elseif i == num_points
+            horizontal_alignment = 'right';
+        else
+            horizontal_alignment = 'center';
+        end
+
+        place_below = mod(i, 2) == 0 || fixed_fp_mc(i) * 1.8 > 0.75;
+        if place_below
+            y_text = fixed_fp_mc(i) * 0.55;
+            vertical_alignment = 'top';
+        else
+            y_text = fixed_fp_mc(i) * 1.8;
+            vertical_alignment = 'bottom';
+        end
+        text(x_text, y_text, ...
+            sprintf('R=%.3f', sim_rates(i)), 'Color', 'b', ...
+            'FontSize', 10, 'FontWeight', 'bold', ...
+            'BackgroundColor', 'w', 'Margin', 1, ...
+            'VerticalAlignment', vertical_alignment, ...
+            'HorizontalAlignment', horizontal_alignment);
+    end
+end
+
 grid on; grid minor;
 xlabel('n = log_2(L) + r', 'FontSize', 12, 'FontWeight', 'bold');
-ylabel('False Positive Probability (Log Scale)', ...
+ylabel('Error Probability (Log Scale)', ...
     'FontSize', 12, 'FontWeight', 'bold');
-title(sprintf('Single Fixed Message Error Rates vs. n (E2=%.2f, %s)', ...
+title(sprintf('Single Fixed Message BFC Error Rate vs. n (E2=%.2f, %s)', ...
     E2, func_type), 'FontSize', 14);
 legend('Location', 'southwest', 'FontSize', 11);
 xlim([floor(n_list_sim(1)), ceil(n_list_sim(end))]);
 
-% Use the same output filename as the main simulation script.
+% Match the dynamic Y-axis convention in plot_saved_results.m.
+valid_errs = fixed_fp_mc(fixed_fp_mc > 0);
+if ~isempty(valid_errs)
+    ylim([max(1e-6, min(valid_errs) * 0.1), 1]);
+else
+    ylim([1e-6, 1]);
+end
+
+% Keep the original simulation figure and write the revised plot separately.
 fig_filename = fullfile(results_dir, sprintf( ...
-    'Single_Fixed_Msg_Error_Rates_%s_E2_%.2f.png', func_type, E2));
+    'Single_Fixed_Msg_Error_Rates_%s_E2_%.2f_replot.png', func_type, E2));
 saveas(gcf, fig_filename);
 
 fprintf('\n=== Plotting Complete ===\n');
 fprintf('Plot saved to %s\n', fig_filename);
+
+function sim_rates = reconstruct_rates(n_list_sim, E2, params, func_type, saved)
+%RECONSTRUCT_RATES Recreate rates for summaries written by older runs.
+    sim_rates = zeros(size(n_list_sim));
+    has_saved_K = isfield(saved, 'sim_K_vals') && ...
+        numel(saved.sim_K_vals) == numel(n_list_sim);
+
+    for i = 1:numel(n_list_sim)
+        n = n_list_sim(i);
+        K = K_calculator(n, E2, params, func_type);
+
+        if has_saved_K
+            saved_K = saved.sim_K_vals(i);
+            if saved_K ~= K
+                warning(['Computed K=%d differs from saved K=%d for n=%d. ', ...
+                    'Using the saved K to reproduce the original run.'], ...
+                    K, saved_K, n);
+                K = saved_K;
+            end
+        end
+
+        r = n / 2;
+        sim_rates(i) = rate_calculation(n, r * K, func_type);
+    end
+end
