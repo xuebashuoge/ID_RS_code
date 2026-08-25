@@ -1,3 +1,4 @@
 logs
 .vscode
 results/noisy_channel*
+tmp
