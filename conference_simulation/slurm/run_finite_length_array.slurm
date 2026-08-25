@@ -2,10 +2,10 @@
 #SBATCH --job-name=bfc_finite
 #SBATCH --output=logs/bfc_finite_%A_%a.out
 #SBATCH --error=logs/bfc_finite_%A_%a.err
-#SBATCH --array=0-26%3
+#SBATCH --array=0-26%1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=1024G
-#SBATCH --time=7-00:00:00
+#SBATCH --time=1-00:00:00
 
 set -euo pipefail
 

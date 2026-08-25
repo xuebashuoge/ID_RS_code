@@ -26,18 +26,32 @@ From the repository root:
 bash conference_simulation/slurm/submit_conference_pipeline.sh
 ```
 
-The finite-length and adversarial jobs request 64 CPUs and 1024 GB. Array
-concurrency is capped at three and two jobs, respectively; lower those `%`
-limits if the partition has only one suitable node.
+The finite-length and adversarial jobs request 64 CPUs and 1024 GB. They use
+`%1` concurrency and dependencies so only one whole-node simulation job is
+eligible to run at a time.
+
+The submission helper divides the finite-length grid into workload classes:
+
+| Class | Array cells | Wall-time ceiling |
+|---|---|---:|
+| Fast | ID `n=24:28`, rank `n=24:32`, all exact threshold | 24 hours |
+| Medium | ID `n=30:34`, rank `n=34:36` | 48 hours |
+| Slow | ID `n=36:40`, rank `n=38:40` | 72 hours |
+
+The medium array depends on the fast array, the slow array depends on the
+medium array, and adversarial validation starts only after the slow array.
+Rate/exponent generation is independent and requests only 30 minutes.
 
 The exact calculation is compute-heavy for large `K`, especially ID at
-`n=40`. Every finite-length job writes a resumable checkpoint. Resubmitting the
-same array index resumes it; a completed `.mat` file is left unchanged.
+`n=40`. Every finite-length job writes a resumable checkpoint. If a slow cell
+reaches its 72-hour limit, resubmitting that array index resumes from its last
+checkpoint; a completed `.mat` file is left unchanged.
 
 Useful submission overrides include:
 
 ```bash
-sbatch --export=ALL,BFC_NUM_MESSAGES=200,BFC_CHUNK_SIZE=256 \
+sbatch --time=12:00:00 \
+  --export=ALL,BFC_NUM_MESSAGES=200,BFC_CHUNK_SIZE=256 \
   conference_simulation/slurm/run_finite_length_array.slurm
 ```
 
@@ -55,7 +69,8 @@ the pilot timings.
 Before the full submission, run one small array cell:
 
 ```bash
-sbatch --array=18 --export=ALL,BFC_NUM_MESSAGES=20,BFC_CHUNK_SIZE=128 \
+sbatch --array=18 --time=02:00:00 \
+  --export=ALL,BFC_NUM_MESSAGES=20,BFC_CHUNK_SIZE=128 \
   conference_simulation/slurm/run_finite_length_array.slurm
 ```
 
