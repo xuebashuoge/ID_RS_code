@@ -1,3 +1,5 @@
 logs
 .vscode
 conference_draft
+results/noisy_channel*
+tmp
