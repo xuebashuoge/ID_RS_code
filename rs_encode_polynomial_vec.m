@@ -23,18 +23,13 @@ function c = rs_encode_polynomial_vec(b, r, K, L)
         symbols(:, k) = uint32(sum(b(:, idx) .* weights, 2));
     end
     
-    % 2. Compute evaluation points alpha_powers(l) = alpha^l in GF(2^r) for l = 1..L
-    alpha = uint32(2);
-    alpha_powers = zeros(1, L, 'uint32');
-    curr = uint32(1);
-    for l = 1:L
-        curr = gf_mul_vec(curr, alpha, r, prim_poly);
-        alpha_powers(l) = curr;
-    end
+    % 2. Compute L distinct extended-RS evaluation points:
+    %    0, 1, alpha, ..., alpha^(L-2)
+    eval_points = rs_evaluation_points(r, L, prim_poly);
     
     % 3. Evaluate polynomial using Horner's method: c = ( ... (s_K * x + s_{K-1}) * x ... + s_1)
     c = repmat(symbols(:, K), 1, L);
     for k = (K-1):-1:1
-        c = bitxor(gf_mul_vec(c, alpha_powers, r, prim_poly), symbols(:, k));
+        c = bitxor(gf_mul_vec(c, eval_points, r, prim_poly), symbols(:, k));
     end
 end

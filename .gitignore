@@ -1,3 +1,5 @@
 logs
 .vscode
 results/noisy_channel*
+conference_draft
+.DS_Store
