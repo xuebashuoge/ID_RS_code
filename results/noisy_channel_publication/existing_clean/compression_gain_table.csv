@@ -1,0 +1,4 @@
+function_type,function_label,n_tag,K,m,ldpc_code_rate,ideal_tagging_channel_uses,actual_tagging_channel_uses,transmit_then_compute_channel_uses,ideal_compression_gain,actual_compression_gain
+id,Identification,40,65536,1310720,0.5,80,80,2621440,32768,32768
+exact-threshold,Exact threshold,42,8,168,0.5,84,84.0466926070039,336,4,3.99777777777778
+rank,Rank,40,3120,62400,0.5,80,80,124800,1560,1560

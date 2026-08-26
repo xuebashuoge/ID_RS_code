@@ -1,7 +1,7 @@
 function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, result_file)
 %RUN_NOISY_CHANNEL_POINT Simulate one (n, channel, Eb/N0) scenario.
 
-    result_version = 3;
+    result_version = 4;
 
     if nargin < 5
         result_file = '';
@@ -18,13 +18,15 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
             fprintf('Using completed result %s\n', result_file);
             return;
         end
-        fprintf(['Existing point %s predates transition decomposition; ' ...
+        fprintf(['Existing point %s predates the fixed-sample/count schema; ' ...
             'rerunning it with the saved source bank.\n'], result_file);
     end
 
     require_communications_toolbox();
     d = derive_bfc_parameters(cfg, bank.metadata.n);
     validate_point_inputs(cfg, bank, d, channel_type);
+    point_max_frames = point_frame_limit(cfg, ebno_db);
+    stopping_mode = point_stopping_mode(cfg);
     p1 = min(1, 2^bank.metadata.log2_p1);
 
     channel_index = find(strcmpi(channel_type, cfg.channel_types), 1);
@@ -51,13 +53,21 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         'coded_tuple_errors', 0, 'uncoded_tuple_errors', 0, ...
         'uncoded_bit_errors', 0, 'uncoded_bits', 0);
 
-    per_frame.ldpc_error = false(cfg.mc.max_frames, 1);
-    per_frame.parity_failure = false(cfg.mc.max_frames, 1);
-    per_frame.coded_bfc_errors = zeros(cfg.mc.max_frames, 1, 'uint32');
-    per_frame.uncoded_bfc_errors = zeros(cfg.mc.max_frames, 1, 'uint32');
-    per_frame.coded_weighted_error = zeros(cfg.mc.max_frames, 1);
-    per_frame.uncoded_weighted_error = zeros(cfg.mc.max_frames, 1);
-    per_frame.noiseless_weighted_error = zeros(cfg.mc.max_frames, 1);
+    per_frame.ldpc_error = false(point_max_frames, 1);
+    per_frame.parity_failure = false(point_max_frames, 1);
+    per_frame.actual_zero = zeros(point_max_frames, 1, 'uint32');
+    per_frame.actual_one = zeros(point_max_frames, 1, 'uint32');
+    per_frame.coded_false_positive = zeros(point_max_frames, 1, 'uint32');
+    per_frame.coded_false_negative = zeros(point_max_frames, 1, 'uint32');
+    per_frame.uncoded_false_positive = zeros(point_max_frames, 1, 'uint32');
+    per_frame.uncoded_false_negative = zeros(point_max_frames, 1, 'uint32');
+    per_frame.noiseless_false_positive = zeros(point_max_frames, 1, 'uint32');
+    per_frame.noiseless_false_negative = zeros(point_max_frames, 1, 'uint32');
+    per_frame.coded_bfc_errors = zeros(point_max_frames, 1, 'uint32');
+    per_frame.uncoded_bfc_errors = zeros(point_max_frames, 1, 'uint32');
+    per_frame.coded_weighted_error = zeros(point_max_frames, 1);
+    per_frame.uncoded_weighted_error = zeros(point_max_frames, 1);
+    per_frame.noiseless_weighted_error = zeros(point_max_frames, 1);
 
     frames_done = 0;
     start_time = tic;
@@ -65,8 +75,8 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     fprintf('Simulating n=%d, %s, Eb/N0=%g dB, G=%d tuples/frame\n', ...
         d.n, channel_type, ebno_db, d.tuples_per_frame);
 
-    while frames_done < cfg.mc.max_frames
-        frame_count = min(cfg.memory.frames_per_batch, cfg.mc.max_frames-frames_done);
+    while frames_done < point_max_frames
+        frame_count = min(cfg.memory.frames_per_batch, point_max_frames-frames_done);
         tuple_first = frames_done*d.tuples_per_frame + 1;
         tuple_last = (frames_done+frame_count)*d.tuples_per_frame;
         rows = tuple_first:tuple_last;
@@ -129,6 +139,26 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         frame_rows = frames_done + (1:frame_count);
         per_frame.ldpc_error(frame_rows) = frame_error(:);
         per_frame.parity_failure(frame_rows) = parity_failed(:);
+        coded_frame_counts = frame_class_counts( ...
+            actual_f, coded_f, d.tuples_per_frame);
+        uncoded_frame_counts = frame_class_counts( ...
+            actual_f, uncoded_f, d.tuples_per_frame);
+        noiseless_frame_counts = frame_class_counts( ...
+            actual_f, noiseless_f, d.tuples_per_frame);
+        per_frame.actual_zero(frame_rows) = coded_frame_counts.actual_zero;
+        per_frame.actual_one(frame_rows) = coded_frame_counts.actual_one;
+        per_frame.coded_false_positive(frame_rows) = ...
+            coded_frame_counts.false_positive;
+        per_frame.coded_false_negative(frame_rows) = ...
+            coded_frame_counts.false_negative;
+        per_frame.uncoded_false_positive(frame_rows) = ...
+            uncoded_frame_counts.false_positive;
+        per_frame.uncoded_false_negative(frame_rows) = ...
+            uncoded_frame_counts.false_negative;
+        per_frame.noiseless_false_positive(frame_rows) = ...
+            noiseless_frame_counts.false_positive;
+        per_frame.noiseless_false_negative(frame_rows) = ...
+            noiseless_frame_counts.false_negative;
         per_frame.coded_bfc_errors(frame_rows) = uint32(sum(reshape(actual_f ~= coded_f, d.tuples_per_frame, []), 1));
         per_frame.uncoded_bfc_errors(frame_rows) = uint32(sum(reshape(actual_f ~= uncoded_f, d.tuples_per_frame, []), 1));
         per_frame.coded_weighted_error(frame_rows) = frame_weighted_errors( ...
@@ -149,15 +179,22 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
             next_progress_seconds = next_progress_seconds + ...
                 cfg.mc.progress_interval_seconds;
         end
-        [classes_resolved, all_targets_reached] = ...
-            class_stopping_status(counts.coded, cfg.mc);
-        if frames_done >= cfg.mc.min_frames && classes_resolved
-            if all_targets_reached
-                stopping_reason = 'target_fp_fn_counts';
-            else
-                stopping_reason = 'class_trial_cap';
+        if strcmp(stopping_mode, 'fixed_frames')
+            if frames_done >= point_max_frames
+                stopping_reason = 'fixed_frames';
+                break;
             end
-            break;
+        else
+            [classes_resolved, all_targets_reached] = ...
+                class_stopping_status(counts.coded, cfg.mc);
+            if frames_done >= cfg.mc.min_frames && classes_resolved
+                if all_targets_reached
+                    stopping_reason = 'target_fp_fn_counts';
+                else
+                    stopping_reason = 'class_trial_cap';
+                end
+                break;
+            end
         end
         if elapsed_seconds >= cfg.mc.max_runtime_seconds
             stopping_reason = 'max_runtime_seconds';
@@ -166,7 +203,8 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         stopping_reason = 'max_frames';
     end
 
-    result.complete = true;
+    result.complete = ~strcmp(stopping_mode, 'fixed_frames') || ...
+        frames_done >= point_max_frames;
     result.version = result_version;
     result.config = cfg;
     result.scenario = struct('n', d.n, 'channel', lower(channel_type), ...
@@ -191,6 +229,12 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         per_frame.uncoded_weighted_error(1:frames_done));
     result.metrics.noiseless.cluster_ci95 = cluster_mean_ci( ...
         per_frame.noiseless_weighted_error(1:frames_done));
+    result.metrics.coded.cluster_conditional_ci95 = ...
+        conditional_cluster_intervals(per_frame, 'coded', frames_done);
+    result.metrics.uncoded.cluster_conditional_ci95 = ...
+        conditional_cluster_intervals(per_frame, 'uncoded', frames_done);
+    result.metrics.noiseless.cluster_conditional_ci95 = ...
+        conditional_cluster_intervals(per_frame, 'noiseless', frames_done);
     result.metrics.ldpc_payload_ber = safe_ratio( ...
         channel_counts.ldpc_payload_bit_errors, channel_counts.ldpc_payload_bits);
     result.metrics.ldpc_fer = safe_ratio( ...
@@ -218,9 +262,28 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
     result.stopping.classes_resolved = classes_resolved;
     result.stopping.all_targets_reached = all_targets_reached;
     result.stopping.frames = frames_done;
+    result.stopping.mode = stopping_mode;
+    result.stopping.planned_frames = point_max_frames;
+    result.stopping.fixed_sample_complete = ...
+        strcmp(stopping_mode, 'fixed_frames') && frames_done >= point_max_frames;
+    result.stopping.ordinary_ci_valid = strcmp(stopping_mode, 'fixed_frames');
     result.stopping.runtime_seconds = result.runtime_seconds;
     result.per_frame.ldpc_error = per_frame.ldpc_error(1:frames_done);
     result.per_frame.parity_failure = per_frame.parity_failure(1:frames_done);
+    result.per_frame.actual_zero = per_frame.actual_zero(1:frames_done);
+    result.per_frame.actual_one = per_frame.actual_one(1:frames_done);
+    result.per_frame.coded_false_positive = ...
+        per_frame.coded_false_positive(1:frames_done);
+    result.per_frame.coded_false_negative = ...
+        per_frame.coded_false_negative(1:frames_done);
+    result.per_frame.uncoded_false_positive = ...
+        per_frame.uncoded_false_positive(1:frames_done);
+    result.per_frame.uncoded_false_negative = ...
+        per_frame.uncoded_false_negative(1:frames_done);
+    result.per_frame.noiseless_false_positive = ...
+        per_frame.noiseless_false_positive(1:frames_done);
+    result.per_frame.noiseless_false_negative = ...
+        per_frame.noiseless_false_negative(1:frames_done);
     result.per_frame.coded_bfc_errors = per_frame.coded_bfc_errors(1:frames_done);
     result.per_frame.uncoded_bfc_errors = per_frame.uncoded_bfc_errors(1:frames_done);
     result.per_frame.coded_weighted_error = per_frame.coded_weighted_error(1:frames_done);
@@ -292,6 +355,11 @@ function validate_point_inputs(cfg, bank, d, channel_type)
         {'scalar', 'real', 'finite', 'positive'});
     validateattributes(cfg.mc.progress_interval_seconds, {'numeric'}, ...
         {'scalar', 'real', 'finite', 'positive'});
+    stopping_mode = point_stopping_mode(cfg);
+    if ~any(strcmp(stopping_mode, {'event_target', 'fixed_frames'}))
+        error('cfg.mc.stopping_mode must be "event_target" or "fixed_frames".');
+    end
+    point_frame_limit(cfg, cfg.ebno_db(1));
 end
 
 function counts = empty_decision_counts()
@@ -343,6 +411,11 @@ function metrics = finalize_decisions(counts, p1)
     metrics.false_negative_contribution = p1*metrics.fnr;
     metrics.weighted_error = metrics.false_positive_contribution + ...
         metrics.false_negative_contribution;
+    metrics.max_conditional_error = max(metrics.fpr, metrics.fnr);
+    metrics.false_positive_count = counts.false_positive;
+    metrics.false_negative_count = counts.false_negative;
+    metrics.error_count = counts.false_positive + counts.false_negative;
+    metrics.trial_count = counts.total;
 end
 
 function metrics = finalize_transitions(counts)
@@ -389,6 +462,97 @@ function values = frame_weighted_errors(actual, decoded, tuples_per_frame, p1)
     fpr = sum(~actual & decoded, 1) ./ zero_count;
     fnr = sum(actual & ~decoded, 1) ./ one_count;
     values = ((1-p1).*fpr + p1.*fnr).';
+end
+
+function counts = frame_class_counts(actual, decoded, tuples_per_frame)
+    actual = reshape(logical(actual), tuples_per_frame, []);
+    decoded = reshape(logical(decoded), tuples_per_frame, []);
+    counts.actual_zero = uint32(sum(~actual, 1).');
+    counts.actual_one = uint32(sum(actual, 1).');
+    counts.false_positive = uint32(sum(~actual & decoded, 1).');
+    counts.false_negative = uint32(sum(actual & ~decoded, 1).');
+end
+
+function intervals = conditional_cluster_intervals(per_frame, prefix, frames_done)
+    zero_trials = per_frame.actual_zero(1:frames_done);
+    one_trials = per_frame.actual_one(1:frames_done);
+    false_positive = per_frame.([prefix '_false_positive']);
+    false_negative = per_frame.([prefix '_false_negative']);
+    false_positive = false_positive(1:frames_done);
+    false_negative = false_negative(1:frames_done);
+    intervals.fpr = cluster_ratio_ci(false_positive, zero_trials, 0.05);
+    intervals.fnr = cluster_ratio_ci(false_negative, one_trials, 0.05);
+    simultaneous_fpr = cluster_ratio_ci(false_positive, zero_trials, 0.025);
+    simultaneous_fnr = cluster_ratio_ci(false_negative, one_trials, 0.025);
+    intervals.max_simultaneous = [ ...
+        max(simultaneous_fpr(1), simultaneous_fnr(1)), ...
+        max(simultaneous_fpr(2), simultaneous_fnr(2))];
+    intervals.method = ['frame-cluster sandwich; zero-event classes use ' ...
+        'a conservative any-error-per-frame upper bound'];
+end
+
+function ci = cluster_ratio_ci(numerators, denominators, alpha)
+    numerators = double(numerators(:));
+    denominators = double(denominators(:));
+    valid = denominators > 0;
+    numerators = numerators(valid);
+    denominators = denominators(valid);
+    if isempty(denominators)
+        ci = [NaN NaN];
+        return;
+    end
+    estimate = sum(numerators) / sum(denominators);
+    cluster_count = numel(denominators);
+    if all(numerators == 0)
+        % If no cluster contains an error, bound the probability of an
+        % error-containing frame. This also upper-bounds the mean within-
+        % frame error fraction and remains nonzero for zero observations.
+        ci = [0, 1-alpha^(1/cluster_count)];
+        return;
+    end
+    if cluster_count < 2
+        ci = [NaN NaN];
+        return;
+    end
+    residual = numerators - estimate .* denominators;
+    standard_error = sqrt(cluster_count/(cluster_count-1) * ...
+        sum(residual.^2)) / sum(denominators);
+    z_value = sqrt(2) * erfcinv(alpha);
+    ci = [max(0, estimate-z_value*standard_error), ...
+        min(1, estimate+z_value*standard_error)];
+end
+
+function mode = point_stopping_mode(cfg)
+    mode = 'event_target';
+    if isfield(cfg.mc, 'stopping_mode') && ~isempty(cfg.mc.stopping_mode)
+        mode = lower(char(cfg.mc.stopping_mode));
+    end
+end
+
+function frame_limit = point_frame_limit(cfg, ebno_db)
+    frame_limit = double(cfg.mc.max_frames);
+    if isfield(cfg.mc, 'fixed_frame_ebno_db') || ...
+            isfield(cfg.mc, 'fixed_frame_counts')
+        if ~isfield(cfg.mc, 'fixed_frame_ebno_db') || ...
+                ~isfield(cfg.mc, 'fixed_frame_counts')
+            error(['cfg.mc.fixed_frame_ebno_db and fixed_frame_counts ' ...
+                'must be provided together.']);
+        end
+        snr_values = double(cfg.mc.fixed_frame_ebno_db(:));
+        frame_values = double(cfg.mc.fixed_frame_counts(:));
+        if numel(snr_values) ~= numel(frame_values) || isempty(snr_values) || ...
+                any(frame_values < 1) || any(mod(frame_values, 1) ~= 0)
+            error('Fixed-frame SNR and frame-count vectors are incompatible.');
+        end
+        match = find(abs(snr_values-double(ebno_db)) <= ...
+            1e-10*max(1, abs(double(ebno_db))), 1);
+        if isempty(match)
+            error('No fixed frame count is configured for Eb/N0=%g dB.', ebno_db);
+        end
+        frame_limit = frame_values(match);
+    end
+    validateattributes(frame_limit, {'numeric'}, ...
+        {'scalar', 'integer', 'positive', '<=', cfg.mc.max_frames});
 end
 
 function ci = cluster_mean_ci(values)

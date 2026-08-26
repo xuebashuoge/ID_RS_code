@@ -211,3 +211,48 @@ noisy_channel_tradeoff_replot.slurm
 The accepted values of `BFC_ERROR_METRIC` are `balanced`, `fpr`, `fnr`,
 `max`, `weighted`, `tuple`, `ber`, and `fer`. `BFC_ZERO_MODE` is `omit`
 or `rule_of_three`.
+
+## Publication cleanup and fixed-sample confirmation
+
+Build a non-destructive, configuration-locked publication package from the
+committed pilot results with:
+
+```matlab
+cleanup_noisy_channel_publication_results
+```
+
+The package is written below
+`results/noisy_channel_publication/existing_clean`. It contains a source-file
+manifest with separate FP and FN counts, a compression-gain CSV, a MAT summary,
+and 300-dpi PNG plus vector PDF versions of every figure. Historical point
+directories are not changed or deleted.
+
+The confirmatory simulations use predeclared frame counts rather than stopping
+at an FP/FN event target. Every result records per-frame negative/positive
+trials and separate FP/FN counts for coded, uncoded, and noiseless decisions.
+It also reports FPR, FNR, `max(FPR,FNR)`, `(FP+FN)/trials`, and frame-cluster
+confidence intervals. Submit the two targeted experiments separately:
+
+```bash
+bash submit_noisy_channel_confirmatory.sh waterfall
+bash submit_noisy_channel_confirmatory.sh rate_pareto
+```
+
+The waterfall uses representative configurations `id/n=40`,
+`exact-threshold/n=42`, and `rank/n=40`. The rate-Pareto experiment uses the
+same representatives at DVB-S2 rates `[1/3 2/5 1/2 3/5 2/3]` and selected SNR
+operating points. Both use AWGN, BPSK, `E2=0.10`, and fixed per-SNR frame
+schedules declared by `noisy_channel_confirmatory_configs`.
+
+Before interpreting the non-monotone LDPC-rate tradeoff, submit the independent
+fixed-frame LDPC calibration:
+
+```bash
+bash submit_ldpc_awgn_calibration.sh
+```
+
+It compares normalized min-sum and belief-propagation decoding for all five
+rates. Array concurrency is sized to use at most 64 requested CPUs on the
+64-CPU/1024-GB server. Point wall times are 6 hours for LDPC-only calibration
+and 12 hours for BFC confirmation; no full simulation is intended for a local
+machine.

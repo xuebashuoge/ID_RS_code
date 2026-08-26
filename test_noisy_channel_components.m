@@ -111,6 +111,21 @@ dense_file_a = noisy_channel_result_file(e2_configs{1}, 4, 'awgn', 1.25);
 dense_file_b = noisy_channel_result_file(e2_configs{1}, 4, 'awgn', 1.5);
 assert(~strcmp(dense_file_a, dense_file_b));
 assert(contains(dense_file_a, 'ebno_p1p25.mat'));
+
+[confirmatory_waterfall, confirmatory_banks] = ...
+    noisy_channel_confirmatory_configs('waterfall');
+assert(numel(confirmatory_waterfall) == 3);
+assert(numel(confirmatory_banks) == 3);
+assert(numel(confirmatory_waterfall{1}.ebno_db) == 22);
+assert(strcmp(confirmatory_waterfall{1}.mc.stopping_mode, 'fixed_frames'));
+assert(confirmatory_waterfall{1}.mc.max_frames == ...
+    max(confirmatory_waterfall{1}.mc.fixed_frame_counts));
+confirmatory_pareto = noisy_channel_confirmatory_configs('rate_pareto');
+assert(numel(confirmatory_pareto) == 15);
+assert(numel(confirmatory_pareto{1}.ebno_db) == 4);
+calibration_cfg = ldpc_awgn_calibration_config();
+assert(numel(calibration_cfg.rates) == 5);
+assert(numel(calibration_cfg.algorithms) == 2);
 fprintf('PASS: rate bookkeeping and tradeoff configurations\n');
 
 %% Uncoded channel checks against analytical BPSK BER
@@ -137,6 +152,9 @@ cfg.mc.min_frames = 1;
 cfg.mc.max_frames = 1;
 cfg.mc.target_false_positives = 1;
 cfg.mc.target_false_negatives = 1;
+cfg.mc.stopping_mode = 'fixed_frames';
+cfg.mc.fixed_frame_ebno_db = 20;
+cfg.mc.fixed_frame_counts = 1;
 bank = prepare_bfc_source_bank(cfg, cfg.n_list(1));
 assert(all(bank.noiseless_f(bank.actual_f)));
 result = run_noisy_channel_point(cfg, bank, 'awgn', 20);
@@ -144,7 +162,20 @@ assert(result.complete);
 assert(result.frames == 1);
 assert(result.metrics.ldpc_payload_ber == 0);
 assert(result.metrics.coded_tuple_error_rate == 0);
-assert(result.version >= 2);
+assert(result.version >= 4);
+assert(strcmp(result.stopping.mode, 'fixed_frames'));
+assert(result.stopping.fixed_sample_complete);
+assert(result.stopping.ordinary_ci_valid);
+assert(sum(result.per_frame.actual_zero) == ...
+    result.counts.coded.actual_zero);
+assert(sum(result.per_frame.actual_one) == ...
+    result.counts.coded.actual_one);
+assert(sum(result.per_frame.coded_false_positive) == ...
+    result.counts.coded.false_positive);
+assert(sum(result.per_frame.coded_false_negative) == ...
+    result.counts.coded.false_negative);
+assert(result.metrics.coded.max_conditional_error == ...
+    max(result.metrics.coded.fpr, result.metrics.coded.fnr));
 decomp = result.metrics.decomposition;
 reconstructed = decomp.intrinsic_error + ...
     decomp.channel_created_error - ...
