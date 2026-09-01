@@ -3,3 +3,5 @@ logs
 results/**/source_banks/
 conference_draft
 .DS_Store
+tmp
+output
