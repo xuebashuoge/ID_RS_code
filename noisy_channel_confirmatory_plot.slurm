@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=BFC_conf_plot
-#SBATCH --output=logs/conf_plot_%j.out
-#SBATCH --error=logs/conf_plot_%j.err
+#SBATCH --job-name=BFC_BP_plot
+#SBATCH --output=logs/bp_plot_%j.out
+#SBATCH --error=logs/bp_plot_%j.err
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
 #SBATCH --time=01:00:00

@@ -3,8 +3,9 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
 %
 %   EXPERIMENT is "waterfall" or "rate_pareto". The committed adaptive
 %   sweeps are treated as pilot data; these configurations predeclare the
-%   frame count at every SNR and therefore support ordinary frame-cluster
-%   confidence intervals.
+%   frame count at every SNR and therefore support frame-cluster bootstrap
+%   confidence intervals. BP results are isolated from the normalized-
+%   min-sum pilot results under a new results root.
 
     if nargin < 1 || isempty(experiment)
         experiment = 'waterfall';
@@ -26,7 +27,7 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
             error('Experiment must be "waterfall" or "rate_pareto".');
     end
 
-    root_dir = fullfile('results', 'noisy_channel_confirmatory', experiment);
+    root_dir = fullfile('results', 'noisy_channel_confirmatory_bp', experiment);
     configs = cell(0, 1);
     for rep_index = 1:numel(representatives)
         rep = representatives(rep_index);
@@ -39,19 +40,22 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
             cfg.ebno_db = ebno_db;
             [cfg.ldpc.block_length, cfg.ldpc.information_length, ...
                 cfg.ldpc.rate] = dvbs2_ldpc_dimensions(rate);
+            cfg.ldpc.algorithm = 'bp';
             cfg.mc.stopping_mode = 'fixed_frames';
             cfg.mc.fixed_frame_ebno_db = ebno_db;
             cfg.mc.fixed_frame_counts = fixed_frame_schedule( ...
                 experiment, rep.func_type, ebno_db);
             cfg.mc.max_frames = max(cfg.mc.fixed_frame_counts);
             cfg.mc.min_frames = cfg.mc.max_frames;
-            cfg.mc.max_runtime_seconds = 10*60*60;
+            cfg.mc.max_runtime_seconds = 16*60*60;
             cfg.mc.progress_interval_seconds = 30*60;
+            cfg.mc.cluster_bootstrap_replicates = 2000;
             cfg.memory.frames_per_batch = 4;
             rate_tag = value_tag(rate);
             cfg.experiment = struct( ...
                 'type', experiment, ...
                 'function_label', rep.label, ...
+                'decoder', 'belief propagation', ...
                 'display_label', sprintf('%s, n=%d, R_c=%.4g', ...
                     rep.label, rep.n, rate), ...
                 'root_dir', root_dir);
@@ -67,18 +71,9 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
 end
 
 function frames = fixed_frame_schedule(experiment, func_type, ebno_db)
-    if strcmp(experiment, 'waterfall')
-        frames = 100 * ones(size(ebno_db));
-        frames(ebno_db >= 1.0) = 500;
-        if any(strcmp(func_type, {'id', 'rank'}))
-            frames(ebno_db >= 1.6) = 2500;
-        end
-    else
-        frames = 500 * ones(size(ebno_db));
-        if any(strcmp(func_type, {'id', 'rank'}))
-            frames(ebno_db >= 2.0) = 1500;
-        end
-    end
+    %#ok<INUSD> Uniform sampling makes every operating point directly
+    % comparable and avoids changes in interval width at schedule boundaries.
+    frames = 2500 * ones(size(ebno_db));
 end
 
 function bank_configs = select_bank_configs(configs)

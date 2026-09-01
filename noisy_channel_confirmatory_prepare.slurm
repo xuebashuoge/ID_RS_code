@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=BFC_conf_bank
-#SBATCH --output=logs/conf_bank_%A_%a.out
-#SBATCH --error=logs/conf_bank_%A_%a.err
+#SBATCH --job-name=BFC_BP_bank
+#SBATCH --output=logs/bp_bank_%A_%a.out
+#SBATCH --error=logs/bp_bank_%A_%a.err
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
-#SBATCH --time=12:00:00
+#SBATCH --time=18:00:00
 
 set -euo pipefail
 mkdir -p logs

@@ -118,11 +118,17 @@ assert(numel(confirmatory_waterfall) == 3);
 assert(numel(confirmatory_banks) == 3);
 assert(numel(confirmatory_waterfall{1}.ebno_db) == 22);
 assert(strcmp(confirmatory_waterfall{1}.mc.stopping_mode, 'fixed_frames'));
-assert(confirmatory_waterfall{1}.mc.max_frames == ...
-    max(confirmatory_waterfall{1}.mc.fixed_frame_counts));
+assert(strcmp(confirmatory_waterfall{1}.ldpc.algorithm, 'bp'));
+assert(all(confirmatory_waterfall{1}.mc.fixed_frame_counts == 2500));
+assert(confirmatory_waterfall{1}.mc.max_frames == 2500);
+assert(confirmatory_waterfall{1}.mc.max_runtime_seconds == 16*60*60);
+assert(confirmatory_waterfall{1}.mc.cluster_bootstrap_replicates == 2000);
+assert(contains(confirmatory_waterfall{1}.paths.results_dir, ...
+    'noisy_channel_confirmatory_bp'));
 confirmatory_pareto = noisy_channel_confirmatory_configs('rate_pareto');
 assert(numel(confirmatory_pareto) == 15);
 assert(numel(confirmatory_pareto{1}.ebno_db) == 4);
+assert(all(confirmatory_pareto{1}.mc.fixed_frame_counts == 2500));
 calibration_cfg = ldpc_awgn_calibration_config();
 assert(numel(calibration_cfg.rates) == 5);
 assert(numel(calibration_cfg.algorithms) == 2);
@@ -152,9 +158,11 @@ cfg.mc.min_frames = 1;
 cfg.mc.max_frames = 1;
 cfg.mc.target_false_positives = 1;
 cfg.mc.target_false_negatives = 1;
+cfg.ldpc.algorithm = 'bp';
 cfg.mc.stopping_mode = 'fixed_frames';
 cfg.mc.fixed_frame_ebno_db = 20;
 cfg.mc.fixed_frame_counts = 1;
+cfg.mc.cluster_bootstrap_replicates = 10;
 bank = prepare_bfc_source_bank(cfg, cfg.n_list(1));
 assert(all(bank.noiseless_f(bank.actual_f)));
 result = run_noisy_channel_point(cfg, bank, 'awgn', 20);
@@ -162,7 +170,7 @@ assert(result.complete);
 assert(result.frames == 1);
 assert(result.metrics.ldpc_payload_ber == 0);
 assert(result.metrics.coded_tuple_error_rate == 0);
-assert(result.version >= 4);
+assert(result.version >= 5);
 assert(strcmp(result.stopping.mode, 'fixed_frames'));
 assert(result.stopping.fixed_sample_complete);
 assert(result.stopping.ordinary_ci_valid);
@@ -176,6 +184,9 @@ assert(sum(result.per_frame.coded_false_negative) == ...
     result.counts.coded.false_negative);
 assert(result.metrics.coded.max_conditional_error == ...
     max(result.metrics.coded.fpr, result.metrics.coded.fnr));
+assert(strcmp(result.metrics.coded.cluster_conditional_ci95.method, ...
+    'fixed-sample frame-cluster percentile bootstrap'));
+assert(isfield(result.metrics.coded.cluster_conditional_ci95, 'max'));
 decomp = result.metrics.decomposition;
 reconstructed = decomp.intrinsic_error + ...
     decomp.channel_created_error - ...

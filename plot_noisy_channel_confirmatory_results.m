@@ -42,7 +42,6 @@ function rows = collect_rows(configs)
             end
             result = saved.result;
             rates = noisy_channel_rate_metadata(result);
-            ci = result.metrics.coded.cluster_conditional_ci95;
             row = struct( ...
                 'source_file', string(filename), ...
                 'function_type', string(cfg.bfc.func_type), ...
@@ -50,24 +49,14 @@ function rows = collect_rows(configs)
                 'n', cfg.n_list, 'E2', cfg.bfc.E2, ...
                 'ldpc_code_rate', cfg.ldpc.rate, ...
                 'ebno_db', ebno_db, ...
-                'false_positive_count', ...
-                    result.counts.coded.false_positive, ...
-                'negative_trials', result.counts.coded.actual_zero, ...
-                'false_negative_count', ...
-                    result.counts.coded.false_negative, ...
-                'positive_trials', result.counts.coded.actual_one, ...
-                'fpr', result.metrics.coded.fpr, ...
-                'fnr', result.metrics.coded.fnr, ...
-                'max_fpr_fnr', result.metrics.coded.max_conditional_error, ...
-                'fp_plus_fn_over_trials', ...
-                    result.metrics.coded.balanced_error, ...
-                'max_ci95_lower', ci.max_simultaneous(1), ...
-                'max_ci95_upper', ci.max_simultaneous(2), ...
                 'channel_uses_per_bfc_decision', ...
                     rates.channel_uses_per_bfc_decision, ...
                 'parallel_bfc_rate', rates.parallel_bfc_rate, ...
                 'frames', result.frames, ...
                 'stopping_mode', string(result.stopping.mode));
+            row = append_decision_fields(row, result, 'coded');
+            row = append_decision_fields(row, result, 'uncoded');
+            row = append_decision_fields(row, result, 'noiseless');
             if isempty(rows)
                 rows = row;
             else
@@ -75,6 +64,24 @@ function rows = collect_rows(configs)
             end
         end
     end
+end
+
+function row = append_decision_fields(row, result, prefix)
+    counts = result.counts.(prefix);
+    metrics = result.metrics.(prefix);
+    ci = metrics.cluster_conditional_ci95;
+    row.([prefix '_false_positive_count']) = counts.false_positive;
+    row.([prefix '_negative_trials']) = counts.actual_zero;
+    row.([prefix '_false_negative_count']) = counts.false_negative;
+    row.([prefix '_positive_trials']) = counts.actual_one;
+    row.([prefix '_fpr']) = metrics.fpr;
+    row.([prefix '_fnr']) = metrics.fnr;
+    row.([prefix '_max_fpr_fnr']) = metrics.max_conditional_error;
+    row.([prefix '_fp_plus_fn_over_trials']) = metrics.balanced_error;
+    row.([prefix '_max_ci95_lower']) = ci.max(1);
+    row.([prefix '_max_ci95_upper']) = ci.max(2);
+    row.([prefix '_max_zero_event_upper95']) = ...
+        ci.zero_event_tuple_upper95.max;
 end
 
 function files = plot_waterfall(rows, output_dir)
@@ -89,12 +96,14 @@ function files = plot_waterfall(rows, output_dir)
         [~, order] = sort([selected.ebno_db]);
         selected = selected(order);
         x = [selected.ebno_db];
-        y = [selected.max_fpr_fnr];
-        low = [selected.max_ci95_lower];
-        high = [selected.max_ci95_upper];
         ax = nexttile(layout);
-        errorbar(ax, x, y, y-low, high-y, 'o-', ...
-            'LineWidth', 1.6, 'CapSize', 4);
+        hold(ax, 'on');
+        plot_decision_curve(ax, x, selected, 'coded', ...
+            [0 0.35 0.75], 'o', '-', 'BP-LDPC + BFC');
+        plot_decision_curve(ax, x, selected, 'uncoded', ...
+            [0.85 0.2 0.15], 'x', '-', 'Uncoded BPSK + BFC');
+        plot_decision_curve(ax, x, selected, 'noiseless', ...
+            [0.1 0.1 0.1], 'none', '--', 'Noiseless BFC');
         set(ax, 'YScale', 'log');
         grid(ax, 'on');
         box(ax, 'on');
@@ -102,11 +111,34 @@ function files = plot_waterfall(rows, output_dir)
         ylabel(ax, 'max(FPR, FNR)');
         title(ax, sprintf('%s, n=%d', ...
             selected(1).function_label, selected(1).n));
+        legend(ax, 'Location', 'best');
     end
-    title(layout, 'Fixed-sample coded BFC waterfall with frame-cluster 95% CIs');
+    title(layout, ['BP-LDPC/BFC waterfall with fixed-sample ' ...
+        'frame-cluster bootstrap 95% CIs']);
     files = export_figure_pair(fig, fullfile(output_dir, ...
         'confirmatory_waterfall_max_fpr_fnr'));
     close(fig);
+end
+
+function plot_decision_curve( ...
+        ax, x, selected, prefix, color, marker, line_style, display_name)
+    y = [selected.([prefix '_max_fpr_fnr'])];
+    low = [selected.([prefix '_max_ci95_lower'])];
+    high = [selected.([prefix '_max_ci95_upper'])];
+    positive = y > 0;
+    errorbar(ax, x(positive), y(positive), ...
+        max(0, y(positive)-low(positive)), ...
+        max(0, high(positive)-y(positive)), ...
+        'Color', color, 'Marker', marker, 'LineStyle', line_style, ...
+        'LineWidth', 1.5, 'CapSize', 3, 'DisplayName', display_name);
+    zero = ~positive;
+    if any(zero)
+        upper = [selected.([prefix '_max_zero_event_upper95'])];
+        valid_upper = zero & isfinite(upper) & upper > 0;
+        semilogy(ax, x(valid_upper), upper(valid_upper), 'v', ...
+            'LineStyle', 'none', 'Color', color, ...
+            'HandleVisibility', 'off');
+    end
 end
 
 function files = plot_pareto(rows, output_dir, resource_name)
@@ -127,10 +159,24 @@ function files = plot_pareto(rows, output_dir, resource_name)
                 snr_values(snr_index)) < 1e-12);
             [x, order] = sort([selected.(resource_name)]);
             selected = selected(order);
-            y = [selected.max_fpr_fnr];
-            semilogy(ax, x, y, 'o-', 'LineWidth', 1.5, ...
+            y = [selected.coded_max_fpr_fnr];
+            low = [selected.coded_max_ci95_lower];
+            high = [selected.coded_max_ci95_upper];
+            positive = y > 0;
+            errorbar(ax, x(positive), y(positive), ...
+                max(0, y(positive)-low(positive)), ...
+                max(0, high(positive)-y(positive)), ...
+                'o-', 'LineWidth', 1.5, 'CapSize', 3, ...
                 'Color', colors(snr_index, :), 'DisplayName', sprintf( ...
                 'E_b/N_0=%.1f dB', snr_values(snr_index)));
+            zero = ~positive;
+            if any(zero)
+                upper = [selected.coded_max_zero_event_upper95];
+                valid_upper = zero & isfinite(upper) & upper > 0;
+                semilogy(ax, x(valid_upper), upper(valid_upper), 'v', ...
+                    'LineStyle', 'none', 'Color', colors(snr_index, :), ...
+                    'HandleVisibility', 'off');
+            end
             if snr_index == 1
             for index = 1:numel(selected)
                 horizontal_alignment = 'left';
@@ -152,14 +198,26 @@ function files = plot_pareto(rows, output_dir, resource_name)
         set(ax, 'YScale', 'log');
         grid(ax, 'on');
         box(ax, 'on');
-        xlabel(ax, strrep(resource_name, '_', ' '));
+        xlabel(ax, resource_label(resource_name));
         ylabel(ax, 'max(FPR, FNR)');
         title(ax, sprintf('%s, n=%d', ...
             function_rows(1).function_label, function_rows(1).n));
         legend(ax, 'Location', 'best');
     end
-    title(layout, 'Fixed-sample LDPC-rate resource-reliability tradeoff');
+    title(layout, ['BP-LDPC fixed-sample resource-reliability tradeoff ' ...
+        'with frame-cluster bootstrap 95% CIs']);
     files = export_figure_pair(fig, fullfile(output_dir, ...
         ['confirmatory_pareto_' resource_name]));
     close(fig);
+end
+
+function label = resource_label(resource_name)
+    switch resource_name
+        case 'channel_uses_per_bfc_decision'
+            label = 'Physical channel uses per BFC decision, \nu';
+        case 'parallel_bfc_rate'
+            label = 'Parallel BFC rate, R_{\Sigma} per channel use';
+        otherwise
+            label = strrep(resource_name, '_', ' ');
+    end
 end

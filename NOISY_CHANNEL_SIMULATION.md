@@ -227,11 +227,14 @@ manifest with separate FP and FN counts, a compression-gain CSV, a MAT summary,
 and 300-dpi PNG plus vector PDF versions of every figure. Historical point
 directories are not changed or deleted.
 
-The confirmatory simulations use predeclared frame counts rather than stopping
-at an FP/FN event target. Every result records per-frame negative/positive
+The BP confirmatory simulations use 2,500 predeclared frames at every point
+rather than stopping at an FP/FN event target. New outputs are isolated below
+`results/noisy_channel_confirmatory_bp`; the normalized-min-sum pilot results
+below `results/noisy_channel_confirmatory` remain unchanged. Every result
+records per-frame negative/positive
 trials and separate FP/FN counts for coded, uncoded, and noiseless decisions.
 It also reports FPR, FNR, `max(FPR,FNR)`, `(FP+FN)/trials`, and frame-cluster
-confidence intervals. Submit the two targeted experiments separately:
+bootstrap confidence intervals. Submit the two targeted experiments separately:
 
 ```bash
 bash submit_noisy_channel_confirmatory.sh waterfall
@@ -241,8 +244,17 @@ bash submit_noisy_channel_confirmatory.sh rate_pareto
 The waterfall uses representative configurations `id/n=40`,
 `exact-threshold/n=42`, and `rank/n=40`. The rate-Pareto experiment uses the
 same representatives at DVB-S2 rates `[1/3 2/5 1/2 3/5 2/3]` and selected SNR
-operating points. Both use AWGN, BPSK, `E2=0.10`, and fixed per-SNR frame
-schedules declared by `noisy_channel_confirmatory_configs`.
+operating points. Both use belief-propagation decoding, AWGN, BPSK, `E2=0.10`,
+and 2,500 fixed frames per point as declared by
+`noisy_channel_confirmatory_configs`.
+
+The previously generated LDPC calibration remains reusable because it already
+contains both BP and normalized-min-sum results. The deterministic compression
+table also remains reusable. Normalized-min-sum BFC point results are retained
+only as pilot/decoder-ablation evidence and are never mixed into the BP
+confirmatory aggregates. New source banks are generated under the BP results
+root because the uniform 2,500-frame Pareto sweep requires longer banks than
+several pilot configurations.
 
 Before interpreting the non-monotone LDPC-rate tradeoff, submit the independent
 fixed-frame LDPC calibration:
@@ -254,5 +266,6 @@ bash submit_ldpc_awgn_calibration.sh
 It compares normalized min-sum and belief-propagation decoding for all five
 rates. Array concurrency is sized to use at most 64 requested CPUs on the
 64-CPU/1024-GB server. Point wall times are 6 hours for LDPC-only calibration
-and 12 hours for BFC confirmation; no full simulation is intended for a local
-machine.
+and 18 hours for BP-BFC confirmation. The BFC runner uses a 16-hour internal
+limit, leaving two hours for orderly save/exit before the scheduler limit. No
+full simulation is intended for a local machine.

@@ -32,6 +32,8 @@ plot_job=$(sbatch --parsable --export="${exports}" \
     noisy_channel_confirmatory_plot.slurm)
 
 echo "Confirmatory experiment: ${experiment}"
+echo "Decoder: belief propagation; fixed frames per point: 2500"
+echo "Output root: results/noisy_channel_confirmatory_bp/${experiment}"
 echo "Source-bank job: ${prepare_job}"
 echo "Fixed-sample sweep job: ${simulation_job}"
 echo "Plot job: ${plot_job}"

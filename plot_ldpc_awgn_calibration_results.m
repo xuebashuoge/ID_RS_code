@@ -49,9 +49,13 @@ function outputs = plot_ldpc_awgn_calibration_results()
         'TileSpacing', 'compact', 'Padding', 'compact');
     metrics = {'ber', 'fer'};
     titles = {'Information-bit BER', 'Frame error rate'};
+    colors = lines(numel(cfg.rates));
+    line_styles = {'-', '--'};
+    markers = {'o', 's'};
     for metric_index = 1:2
         ax = nexttile(layout);
         hold(ax, 'on');
+        set(ax, 'YScale', 'log');
         for algorithm_index = 1:numel(cfg.algorithms)
             algorithm = cfg.algorithms{algorithm_index};
             for rate_index = 1:numel(cfg.rates)
@@ -64,10 +68,24 @@ function outputs = plot_ldpc_awgn_calibration_results()
                 if metric_index == 1
                     trials = [selected.bit_trials];
                 end
-                values(values == 0) = 3 ./ trials(values == 0);
-                semilogy(ax, [selected.ebno_db], values, 'o-', ...
+                ebno = [selected.ebno_db];
+                positive = values > 0;
+                line_values = values;
+                line_values(~positive) = NaN;
+                semilogy(ax, ebno, line_values, ...
+                    'Color', colors(rate_index, :), ...
+                    'LineStyle', line_styles{algorithm_index}, ...
+                    'Marker', markers{algorithm_index}, ...
                     'LineWidth', 1.3, 'DisplayName', sprintf( ...
                     '%s, R_c=%.3g', algorithm, cfg.rates(rate_index)));
+                zero = ~positive;
+                if any(zero)
+                    upper = 3 ./ trials(zero);
+                    semilogy(ax, ebno(zero), upper, 'v', ...
+                        'LineStyle', 'none', ...
+                        'Color', colors(rate_index, :), ...
+                        'HandleVisibility', 'off');
+                end
             end
         end
         grid(ax, 'on');
@@ -77,7 +95,8 @@ function outputs = plot_ldpc_awgn_calibration_results()
         title(ax, titles{metric_index});
         legend(ax, 'Location', 'best', 'FontSize', 7);
     end
-    title(layout, 'DVB-S2 LDPC AWGN calibration (zero observations use 3/N)');
+    title(layout, ['DVB-S2 LDPC AWGN calibration; downward triangles ' ...
+        'are zero-observation upper bounds']);
     outputs.figure = export_figure_pair(fig, fullfile(cfg.results_dir, ...
         'ldpc_awgn_calibration'));
     close(fig);

@@ -1,7 +1,7 @@
 function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, result_file)
 %RUN_NOISY_CHANNEL_POINT Simulate one (n, channel, Eb/N0) scenario.
 
-    result_version = 4;
+    result_version = 5;
 
     if nargin < 5
         result_file = '';
@@ -91,12 +91,17 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         encoded_bits = ldpcEncode(info_bits, encoder_cfg);
         coded_llr = transmit_bpsk_llr( ...
             encoded_bits, channel_type, ebno_db, d.ldpc_payload_rate);
-        [decoded_info, iterations, final_checks] = ldpcDecode( ...
-            coded_llr, decoder_cfg, cfg.ldpc.max_iterations, ...
+        decoder_arguments = { ...
             'OutputFormat', 'info', 'DecisionType', 'hard', ...
             'Termination', 'early', ...
-            'MinSumScalingFactor', cfg.ldpc.min_sum_scaling, ...
-            'Multithreaded', cfg.ldpc.multithreaded);
+            'Multithreaded', cfg.ldpc.multithreaded};
+        if strcmpi(cfg.ldpc.algorithm, 'norm-min-sum')
+            decoder_arguments = [decoder_arguments, ...
+                {'MinSumScalingFactor', cfg.ldpc.min_sum_scaling}]; %#ok<AGROW>
+        end
+        [decoded_info, iterations, final_checks] = ldpcDecode( ...
+            coded_llr, decoder_cfg, cfg.ldpc.max_iterations, ...
+            decoder_arguments{:});
         decoded_payload = logical(decoded_info(1:d.payload_bits_per_frame, :));
         [u_coded, c_coded] = unpack_bfc_tuples(decoded_payload, d.r);
         coded_f = decode_received_bfc( ...
@@ -229,12 +234,16 @@ function result = run_noisy_channel_point(cfg, bank, channel_type, ebno_db, resu
         per_frame.uncoded_weighted_error(1:frames_done));
     result.metrics.noiseless.cluster_ci95 = cluster_mean_ci( ...
         per_frame.noiseless_weighted_error(1:frames_done));
+    bootstrap_replicates = cluster_bootstrap_replicates(cfg);
     result.metrics.coded.cluster_conditional_ci95 = ...
-        conditional_cluster_intervals(per_frame, 'coded', frames_done);
+        conditional_cluster_intervals(per_frame, 'coded', frames_done, ...
+        bootstrap_replicates, scenario_seed+11);
     result.metrics.uncoded.cluster_conditional_ci95 = ...
-        conditional_cluster_intervals(per_frame, 'uncoded', frames_done);
+        conditional_cluster_intervals(per_frame, 'uncoded', frames_done, ...
+        bootstrap_replicates, scenario_seed+23);
     result.metrics.noiseless.cluster_conditional_ci95 = ...
-        conditional_cluster_intervals(per_frame, 'noiseless', frames_done);
+        conditional_cluster_intervals(per_frame, 'noiseless', frames_done, ...
+        bootstrap_replicates, scenario_seed+37);
     result.metrics.ldpc_payload_ber = safe_ratio( ...
         channel_counts.ldpc_payload_bit_errors, channel_counts.ldpc_payload_bits);
     result.metrics.ldpc_fer = safe_ratio( ...
@@ -473,53 +482,85 @@ function counts = frame_class_counts(actual, decoded, tuples_per_frame)
     counts.false_negative = uint32(sum(actual & ~decoded, 1).');
 end
 
-function intervals = conditional_cluster_intervals(per_frame, prefix, frames_done)
+function intervals = conditional_cluster_intervals( ...
+        per_frame, prefix, frames_done, bootstrap_replicates, bootstrap_seed)
     zero_trials = per_frame.actual_zero(1:frames_done);
     one_trials = per_frame.actual_one(1:frames_done);
     false_positive = per_frame.([prefix '_false_positive']);
     false_negative = per_frame.([prefix '_false_negative']);
     false_positive = false_positive(1:frames_done);
     false_negative = false_negative(1:frames_done);
-    intervals.fpr = cluster_ratio_ci(false_positive, zero_trials, 0.05);
-    intervals.fnr = cluster_ratio_ci(false_negative, one_trials, 0.05);
-    simultaneous_fpr = cluster_ratio_ci(false_positive, zero_trials, 0.025);
-    simultaneous_fnr = cluster_ratio_ci(false_negative, one_trials, 0.025);
-    intervals.max_simultaneous = [ ...
-        max(simultaneous_fpr(1), simultaneous_fnr(1)), ...
-        max(simultaneous_fpr(2), simultaneous_fnr(2))];
-    intervals.method = ['frame-cluster sandwich; zero-event classes use ' ...
-        'a conservative any-error-per-frame upper bound'];
+    [intervals.fpr, intervals.fnr, intervals.max] = ...
+        frame_cluster_bootstrap_ci(false_positive, false_negative, ...
+        zero_trials, one_trials, bootstrap_replicates, bootstrap_seed);
+    intervals.zero_event_tuple_upper95 = struct( ...
+        'fpr', zero_event_upper(false_positive, zero_trials), ...
+        'fnr', zero_event_upper(false_negative, one_trials));
+    if all(false_positive == 0) && all(false_negative == 0)
+        intervals.zero_event_tuple_upper95.max = max( ...
+            intervals.zero_event_tuple_upper95.fpr, ...
+            intervals.zero_event_tuple_upper95.fnr);
+    else
+        intervals.zero_event_tuple_upper95.max = NaN;
+    end
+    intervals.bootstrap_replicates = bootstrap_replicates;
+    intervals.bootstrap_seed = bootstrap_seed;
+    intervals.method = 'fixed-sample frame-cluster percentile bootstrap';
 end
 
-function ci = cluster_ratio_ci(numerators, denominators, alpha)
-    numerators = double(numerators(:));
-    denominators = double(denominators(:));
-    valid = denominators > 0;
-    numerators = numerators(valid);
-    denominators = denominators(valid);
-    if isempty(denominators)
-        ci = [NaN NaN];
+function [fpr_ci, fnr_ci, max_ci] = frame_cluster_bootstrap_ci( ...
+        false_positive, false_negative, zero_trials, one_trials, ...
+        bootstrap_replicates, bootstrap_seed)
+    false_positive = double(false_positive(:));
+    false_negative = double(false_negative(:));
+    zero_trials = double(zero_trials(:));
+    one_trials = double(one_trials(:));
+    cluster_count = numel(zero_trials);
+    if cluster_count < 2 || bootstrap_replicates < 1
+        fpr_ci = [NaN NaN];
+        fnr_ci = [NaN NaN];
+        max_ci = [NaN NaN];
         return;
     end
-    estimate = sum(numerators) / sum(denominators);
-    cluster_count = numel(denominators);
-    if all(numerators == 0)
-        % If no cluster contains an error, bound the probability of an
-        % error-containing frame. This also upper-bounds the mean within-
-        % frame error fraction and remains nonzero for zero observations.
-        ci = [0, 1-alpha^(1/cluster_count)];
-        return;
+    stream = RandStream('mt19937ar', 'Seed', ...
+        mod(double(bootstrap_seed), 2^31-1));
+    bootstrap_fpr = zeros(bootstrap_replicates, 1);
+    bootstrap_fnr = zeros(bootstrap_replicates, 1);
+    for replicate = 1:bootstrap_replicates
+        indices = randi(stream, cluster_count, cluster_count, 1);
+        bootstrap_fpr(replicate) = sum(false_positive(indices)) / ...
+            sum(zero_trials(indices));
+        bootstrap_fnr(replicate) = sum(false_negative(indices)) / ...
+            sum(one_trials(indices));
     end
-    if cluster_count < 2
-        ci = [NaN NaN];
-        return;
+    fpr_ci = percentile_interval(bootstrap_fpr);
+    fnr_ci = percentile_interval(bootstrap_fnr);
+    max_ci = percentile_interval(max(bootstrap_fpr, bootstrap_fnr));
+end
+
+function ci = percentile_interval(values)
+    values = sort(double(values(:)));
+    count = numel(values);
+    lower_index = max(1, ceil(0.025*count));
+    upper_index = min(count, ceil(0.975*count));
+    ci = [values(lower_index), values(upper_index)];
+end
+
+function upper = zero_event_upper(numerators, denominators)
+    if sum(numerators) == 0
+        upper = 1 - 0.05^(1/sum(double(denominators)));
+    else
+        upper = NaN;
     end
-    residual = numerators - estimate .* denominators;
-    standard_error = sqrt(cluster_count/(cluster_count-1) * ...
-        sum(residual.^2)) / sum(denominators);
-    z_value = sqrt(2) * erfcinv(alpha);
-    ci = [max(0, estimate-z_value*standard_error), ...
-        min(1, estimate+z_value*standard_error)];
+end
+
+function replicates = cluster_bootstrap_replicates(cfg)
+    replicates = 2000;
+    if isfield(cfg.mc, 'cluster_bootstrap_replicates')
+        replicates = double(cfg.mc.cluster_bootstrap_replicates);
+    end
+    validateattributes(replicates, {'numeric'}, ...
+        {'scalar', 'integer', 'nonnegative'});
 end
 
 function mode = point_stopping_mode(cfg)
