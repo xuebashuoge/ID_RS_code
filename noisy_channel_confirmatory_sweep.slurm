@@ -3,7 +3,7 @@
 #SBATCH --output=logs/bp_conf_%A_%a.out
 #SBATCH --error=logs/bp_conf_%A_%a.err
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=8G
 #SBATCH --time=18:00:00
 
 set -euo pipefail

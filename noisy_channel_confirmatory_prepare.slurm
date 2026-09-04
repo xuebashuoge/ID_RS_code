@@ -3,8 +3,8 @@
 #SBATCH --output=logs/bp_bank_%A_%a.out
 #SBATCH --error=logs/bp_bank_%A_%a.err
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=128G
-#SBATCH --time=18:00:00
+#SBATCH --mem=32G
+#SBATCH --time=10:00:00
 
 set -euo pipefail
 mkdir -p logs

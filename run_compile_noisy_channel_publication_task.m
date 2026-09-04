@@ -1,0 +1,2 @@
+%RUN_COMPILE_NOISY_CHANNEL_PUBLICATION_TASK Slurm publication entry point.
+compile_noisy_channel_publication_results();
