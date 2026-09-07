@@ -1,0 +1,7 @@
+experiment,function_type,point_count,min_frames,max_frames,ldpc_block_length,max_empirical_fpr_union_excess,max_worst_case_fpr_union_excess,max_fnr_fer_excess,all_empirical_fpr_union_checks_pass,all_worst_case_fpr_union_checks_pass,all_fnr_fer_checks_pass,interpretation
+rate_pareto,exact-threshold,20,2500,2500,64800,0,-0.0401288193560451,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER
+rate_pareto,id,20,2500,2500,64800,0,-0.0624946018812391,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER
+rate_pareto,rank,20,2500,2500,64800,0,-0.0624375535564658,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER
+waterfall,exact-threshold,22,2500,2500,64800,0,-0.0401267441290671,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER
+waterfall,id,22,2500,2500,64800,0,-0.0624960833627206,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER
+waterfall,rank,22,2500,2500,64800,0,-0.0624400226922683,0,1,1,1,diagnostic_with_empirical_average_FER_not_a_proof_of_maximal_FER

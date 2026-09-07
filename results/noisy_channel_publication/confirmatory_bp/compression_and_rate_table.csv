@@ -1,0 +1,4 @@
+function_type,tag_length,K,m,S,ldpc_block_length,ldpc_code_rate,ldpc_payload_rate,tuples_per_frame,padding_efficiency,packed_channel_uses_per_decision,transmit_then_compute_channel_uses,compression_gain,finite_parallel_computation_rate,tag_error_exponent,effective_error_exponent,asymptotic_parallel_rate_target,coded_fpr_at_1p5dB,coded_fnr_at_1p5dB,ldpc_fer_at_1p5dB
+exact-threshold,42,8,168,14028,64800,0.5,0.499722222222222,771,0.999444444444444,84.0466926070039,336,3.99777777777778,0.0879548878543584,0.1,0.05,0.0666666666666667,0.00669364461738003,0.000395330739299611,0.0004
+id,40,65536,1310720,1,64800,0.5,0.5,810,1,80,2621440,32768,0.254024101186092,0.1,0.05,0.2,2.96296296296296e-06,0,0
+rank,40,3120,62400,21,64800,0.5,0.5,810,1,80,124800,1560,0.199115730107962,0.1,0.05,0.2,2.46913580246914e-05,0,0
