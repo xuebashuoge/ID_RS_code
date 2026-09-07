@@ -36,16 +36,22 @@ The submission helper divides the finite-length grid into workload classes:
 |---|---|---:|
 | Fast | ID `n=24:28`, rank `n=24:32`, all exact threshold | 24 hours |
 | Medium | ID `n=30:34`, rank `n=34:36` | 48 hours |
-| Slow | ID `n=36:40`, rank `n=38:40` | 72 hours |
+| Slow | ID `n=36`, rank `n=38:40` | 72 hours |
+| Sharded ID | ID `n=38,40`: four 50-message shards per `n` | 48 hours per shard |
 
-The medium array depends on the fast array, the slow array depends on the
-medium array, and adversarial validation starts only after the slow array.
-Rate/exponent generation is independent and requests only 30 minutes.
+The medium array depends on the fast array. The unsharded slow array and all
+eight large-ID shard jobs depend on the medium array. Adversarial validation
+starts only after the slow array and every shard complete. Rate/exponent
+generation is independent and requests only 30 minutes.
 
 The exact calculation is compute-heavy for large `K`, especially ID at
-`n=40`. Every finite-length job writes a resumable checkpoint. If a slow cell
-reaches its 72-hour limit, resubmitting that array index resumes from its last
-checkpoint; a completed `.mat` file is left unchanged.
+`n=40`. Consequently, ID `n=38,40` use 200 sampled messages each by default:
+four shards with 50 independently seeded messages. The processed table records
+the actual `sample_count`. To change this, set `BFC_ID_SHARD_COUNT` and/or
+`BFC_ID_MESSAGES_PER_SHARD` before launching the submission helper. Every
+finite-length job writes a resumable checkpoint; resubmitting an identical
+cell/shard resumes from its last checkpoint, while a completed `.mat` file is
+left unchanged.
 
 Useful submission overrides include:
 
