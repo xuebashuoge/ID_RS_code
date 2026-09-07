@@ -2,10 +2,10 @@
 #SBATCH --job-name=bfc_adversarial
 #SBATCH --output=logs/bfc_adversarial_%A_%a.out
 #SBATCH --error=logs/bfc_adversarial_%A_%a.err
-#SBATCH --array=0-26%1
+#SBATCH --array=0-26%8
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=1024G
-#SBATCH --time=1-00:00:00
+#SBATCH --mem=256G
+#SBATCH --time=2-00:00:00
 
 set -euo pipefail
 
