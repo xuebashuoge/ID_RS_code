@@ -5,5 +5,4 @@ results/noisy_channel*
 tmp
 .DS_Store
 conference_results/raw/
-conference_results/processed/figures/*.png
-conference_results/processed/figures/*.pdf
+
