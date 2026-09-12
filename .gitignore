@@ -6,3 +6,8 @@ tmp
 .DS_Store
 conference_results/raw/
 
+
+# ITW2027: compact, validated evidence is tracked; regenerable banks are not.
+itw2027/results/source/
+itw2027/results/rerun*/
+itw2027/scripts/__pycache__/

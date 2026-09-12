@@ -1,0 +1,10 @@
+{
+  "noiseless_cells": 27,
+  "noiseless_shards": 33,
+  "adversarial_verified": 22,
+  "adversarial_skipped": 5,
+  "noisy_points": 126,
+  "frames_per_point": 2500,
+  "all_paired_error_checks_passed": true,
+  "new_channel_simulation_required_for_selected_figures": false
+}

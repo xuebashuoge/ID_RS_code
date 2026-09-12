@@ -17,6 +17,10 @@ function cfg = conference_config()
     cfg.figure_dpi = 300;
 
     cfg.raw_dir = fullfile('conference_results', 'raw');
+    % ITW2027 isolates reruns from archived evidence and old checkpoints.
+    if ~isempty(getenv('BFC_RESULTS_ROOT'))
+        cfg.raw_dir = getenv('BFC_RESULTS_ROOT');
+    end
     cfg.processed_dir = fullfile('conference_results', 'processed');
     cfg.figure_dir = fullfile(cfg.processed_dir, 'figures');
     cfg.table_dir = fullfile(cfg.processed_dir, 'tables');

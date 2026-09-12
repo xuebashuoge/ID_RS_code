@@ -1,0 +1,88 @@
+% Suggested replacements for the empty numerical subsections in the supplied
+% manuscript. Place at repository root or adjust the itw2027/ relative paths.
+% This is a results fragment, not a full manuscript; review final page count.
+
+\subsection{Numerical Results}
+\label{sec:noiseless_numerical}
+We consider identification ($S=1$), rank with fixed rank $20$ ($S=21$),
+and the exact-threshold function with $\beta=2$
+($S=\binom{m}{2}\sim m^2/2$).
+For even $n_t$, we choose $r=n_t/2$, $T=2^r$, and $m=rK$ using the
+conservative design $KS_{\rm up}(rK)\leq 2^{n_t(1/2-E)}$, where
+$S_{\rm up}(m)=S$ for ID/rank and $S_{\rm up}(m)=m^2/2$ for threshold.
+The finite computation rate is $R_t=\log_2(m)/n_t$.
+
+Fig.~\ref{fig:itw27_noiseless}(a) uses $E=0.1$ and evaluates every RS
+position for each sampled negative message. The sampled probabilities
+satisfy Proposition~\ref{prop:finite_error}; its uniform bound is especially
+conservative for the specified ID and rank functions. Separately, $22$
+completed arbitrary-support tests attain $S(K-1)/T$ exactly, illustrating
+tightness for unrestricted supports of the corresponding sizes.
+Fig.~\ref{fig:itw27_noiseless}(b) distinguishes fixed-$E$ rate sequences
+from $E(n_t)=1/\sqrt{n_t}$, for which the error bound vanishes while the
+rates approach $1/2$ for constant weights and $1/6$ for $\beta=2$.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure1_noiseless.pdf}
+  \caption{Noiseless RS tagging. (a) Exact per-message FP probabilities:
+  solid curves show medians, shaded regions the fifth--95th percentiles,
+  dotted curves the sample maxima, and dashed curves $S(K-1)/T$.
+  There are $2{,}000$ sampled negative messages per setting except ID at
+  $n_t=38,40$, with $200$ each. Zero lower quantiles are clipped to the
+  display floor $2\times10^{-7}$. Sample maxima do not establish maximal
+  error. (b) Deterministic finite-rate calculations with fixed $E=0.1$
+  (solid) and $E(n_t)=1/\sqrt{n_t}$ (dashed); horizontal dotted lines
+  indicate the asymptotic benchmarks. Colors identify the same functions
+  in both panels.}
+  \label{fig:itw27_noiseless}
+\end{figure*}
+
+% Insert in the noisy-channel section, replacing its empty subsection.
+\subsection{Numerical Results}
+\label{sec:noisy_numerical}
+We concatenate the tags with a length-$64{,}800$, rate-$1/2$ DVB-S2 LDPC
+code over BPSK-AWGN, using belief-propagation decoding with at most $50$
+iterations. Each SNR point contains $2{,}500$ frames.
+Table~\ref{tab:itw27_parameters} reports the implemented finite rates,
+using $G=\lfloor N_i/n_t\rfloor$ and
+$R_{\rm eff}=G\log_2(m)/N_b$. The effective uses are $80$, $80$, and
+$84.0467$ for ID, rank, and threshold, respectively; the threshold frame
+has $18$ padding bits. These are amortized resource costs, while decoding
+still uses the full physical frame.
+
+Fig.~\ref{fig:itw27_noisy} separates the channel-induced FN behavior from
+the intrinsic FP floor. Every recorded payload-correct frame reproduces
+the paired noiseless decisions, consistent with the mechanism in
+Proposition~\ref{prop:noisy_finite_error}. The dashed FP curves substitute
+observed payload FER into the additive expression and are empirical
+diagnostics, not estimates of the maximal channel-error guarantee $\xi$.
+The shared source bank explains repeated high-SNR FP floors; the
+class-conditional estimates and frame-cluster intervals do not establish
+maximal error over messages and functions.
+
+\begin{table}[t]
+  \centering
+  \caption{Representative configurations with $N_b=64{,}800$,
+  $N_i=32{,}400$, and inner design $E=0.1$.
+  Rates use exponential message-length scaling.}
+  \label{tab:itw27_parameters}
+  \normalsize
+  \setlength{\tabcolsep}{2pt}
+  \input{itw2027/results/processed/tables/paper_parameters.tex}
+\end{table}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure2_noisy.pdf}
+  \caption{Packed BFC over BPSK-AWGN. The energy normalization is per
+  occupied payload bit. (a) Conditional FN (solid) and observed payload
+  FER (dashed). (b) Conditional FP (solid), paired noiseless FP (dotted),
+  and the diagnostic $\min\{1,S(K-1)/T+\widehat{\mathrm{FER}}\}$ (dashed).
+  Shading denotes $95\%$ frame-cluster bootstrap intervals for nonzero
+  FP/FN observations. A downward triangle marks the first zero-event
+  point for each curve at its conservative one-sided $95\%$ frame-based
+  upper limit, about $1.2\times10^{-3}$; subsequent zero observations
+  remain in the saved tables.}
+  \label{fig:itw27_noisy}
+\end{figure*}

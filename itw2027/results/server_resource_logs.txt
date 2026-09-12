@@ -1,0 +1,1325 @@
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_0.out
+Starting id: n=24, r=12, L=4096, K=776, m=9312, S=1, negative messages=2000, operation proxy=6.360e+09.
+Saved completed result: conference_results/raw/finite_length/id_n024_M002000_seed0020363225_shard000.mat
+Job ID           : 29590767
+Array Job ID     : 29590761_0
+Wall-clock time  : 00:02:20 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7415MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_1.out
+Starting id: n=26, r=13, L=8192, K=1351, m=17563, S=1, negative messages=2000, operation proxy=2.215e+10.
+Saved completed result: conference_results/raw/finite_length/id_n026_M002000_seed0020363425_shard000.mat
+Job ID           : 29590768
+Array Job ID     : 29590761_1
+Wall-clock time  : 00:07:02 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7450MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_10.out
+Starting rank: n=26, r=13, L=8192, K=64, m=832, S=21, negative messages=2000, operation proxy=1.060e+09.
+Saved completed result: conference_results/raw/finite_length/rank_n026_M002000_seed0020463425_shard000.mat
+Job ID           : 29590771
+Array Job ID     : 29590761_10
+Wall-clock time  : 00:01:03 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7419MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_11.out
+Starting rank: n=28, r=14, L=16384, K=112, m=1568, S=21, negative messages=2000, operation proxy=3.709e+09.
+Saved completed result: conference_results/raw/finite_length/rank_n028_M002000_seed0020463625_shard000.mat
+Job ID           : 29590772
+Array Job ID     : 29590761_11
+Wall-clock time  : 00:01:47 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7466MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_12.out
+Starting rank: n=30, r=15, L=32768, K=195, m=2925, S=21, negative messages=2000, operation proxy=1.291e+10.
+Saved completed result: conference_results/raw/finite_length/rank_n030_M002000_seed0020463825_shard000.mat
+Job ID           : 29590773
+Array Job ID     : 29590761_12
+Wall-clock time  : 00:06:22 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7471MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_13.out
+Starting rank: n=32, r=16, L=65536, K=339, m=5424, S=21, negative messages=2000, operation proxy=4.490e+10.
+Saved completed result: conference_results/raw/finite_length/rank_n032_M002000_seed0020464025_shard000.mat
+Job ID           : 29590774
+Array Job ID     : 29590761_13
+Wall-clock time  : 00:17:01 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7823MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_18.out
+Starting exact-threshold: n=24, r=12, L=4096, K=2, m=24, S=276, negative messages=2000, operation proxy=1.864e+07.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n024_M002000_seed0020563225_shard000.mat
+Job ID           : 29590775
+Array Job ID     : 29590761_18
+Wall-clock time  : 00:00:39 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7412MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_19.out
+Starting exact-threshold: n=26, r=13, L=8192, K=2, m=26, S=325, negative messages=2000, operation proxy=3.809e+07.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n026_M002000_seed0020563425_shard000.mat
+Job ID           : 29590776
+Array Job ID     : 29590761_19
+Wall-clock time  : 00:00:41 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7431MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_2.out
+Starting id: n=28, r=14, L=16384, K=2352, m=32928, S=1, negative messages=2000, operation proxy=7.711e+10.
+Saved completed result: conference_results/raw/finite_length/id_n028_M002000_seed0020363625_shard000.mat
+Job ID           : 29590769
+Array Job ID     : 29590761_2
+Wall-clock time  : 00:25:31 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7478MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_20.out
+Starting exact-threshold: n=28, r=14, L=16384, K=2, m=28, S=378, negative messages=2000, operation proxy=7.792e+07.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n028_M002000_seed0020563625_shard000.mat
+Job ID           : 29590777
+Array Job ID     : 29590761_20
+Wall-clock time  : 00:00:39 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7478MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_21.out
+Starting exact-threshold: n=30, r=15, L=32768, K=3, m=45, S=990, negative messages=2000, operation proxy=2.939e+08.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n030_M002000_seed0020563825_shard000.mat
+Job ID           : 29590778
+Array Job ID     : 29590761_21
+Wall-clock time  : 00:00:45 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7483MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_22.out
+Starting exact-threshold: n=32, r=16, L=65536, K=3, m=48, S=1128, negative messages=2000, operation proxy=6.150e+08.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n032_M002000_seed0020564025_shard000.mat
+Job ID           : 29590779
+Array Job ID     : 29590761_22
+Wall-clock time  : 00:00:52 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7718MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_23.out
+Starting exact-threshold: n=34, r=17, L=131072, K=4, m=68, S=2278, negative messages=2000, operation proxy=2.243e+09.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n034_M002000_seed0020564225_shard000.mat
+Job ID           : 29590780
+Array Job ID     : 29590761_23
+Wall-clock time  : 00:01:24 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8107MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_24.out
+Starting exact-threshold: n=36, r=18, L=262144, K=5, m=90, S=4005, negative messages=2000, operation proxy=7.871e+09.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n036_M002000_seed0020564425_shard000.mat
+Job ID           : 29590781
+Array Job ID     : 29590761_24
+Wall-clock time  : 00:02:14 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8168MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_25.out
+Starting exact-threshold: n=38, r=19, L=524288, K=5, m=95, S=4465, negative messages=2000, operation proxy=1.695e+10.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n038_M002000_seed0020564625_shard000.mat
+Job ID           : 29590782
+Array Job ID     : 29590761_25
+Wall-clock time  : 00:03:58 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8148MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_26.out
+Starting exact-threshold: n=40, r=20, L=1048576, K=6, m=120, S=7140, negative messages=2000, operation proxy=5.750e+10.
+Saved completed result: conference_results/raw/finite_length/exact-threshold_n040_M002000_seed0020564825_shard000.mat
+Job ID           : 29590761
+Array Job ID     : 29590761_26
+Wall-clock time  : 00:10:36 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8202MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590761_9.out
+Starting rank: n=24, r=12, L=4096, K=36, m=432, S=21, negative messages=2000, operation proxy=2.980e+08.
+Saved completed result: conference_results/raw/finite_length/rank_n024_M002000_seed0020463225_shard000.mat
+Job ID           : 29590770
+Array Job ID     : 29590761_9
+Wall-clock time  : 00:00:45 / 1-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7491MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590762_14.out
+Starting rank: n=34, r=17, L=131072, K=591, m=10047, S=21, negative messages=2000, operation proxy=1.566e+11.
+Saved completed result: conference_results/raw/finite_length/rank_n034_M002000_seed0020464225_shard000.mat
+Job ID           : 29633870
+Array Job ID     : 29590762_14
+Wall-clock time  : 01:21:33 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8115MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590762_15.out
+Starting rank: n=36, r=18, L=262144, K=1029, m=18522, S=21, negative messages=2000, operation proxy=5.452e+11.
+Saved completed result: conference_results/raw/finite_length/rank_n036_M002000_seed0020464425_shard000.mat
+Job ID           : 29590762
+Array Job ID     : 29590762_15
+Wall-clock time  : 05:03:12 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8135MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590762_3.out
+Starting id: n=30, r=15, L=32768, K=4096, m=61440, S=1, negative messages=2000, operation proxy=2.686e+11.
+Saved completed result: conference_results/raw/finite_length/id_n030_M002000_seed0020363825_shard000.mat
+Job ID           : 29633867
+Array Job ID     : 29590762_3
+Wall-clock time  : 02:26:13 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7501MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590762_4.out
+Starting id: n=32, r=16, L=65536, K=7131, m=114096, S=1, negative messages=2000, operation proxy=9.351e+11.
+Saved completed result: conference_results/raw/finite_length/id_n032_M002000_seed0020364025_shard000.mat
+Job ID           : 29633868
+Array Job ID     : 29590762_4
+Wall-clock time  : 09:03:17 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [7850MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590762_5.out
+Starting id: n=34, r=17, L=131072, K=12416, m=211072, S=1, negative messages=2000, operation proxy=3.256e+12.
+Saved completed result: conference_results/raw/finite_length/id_n034_M002000_seed0020364225_shard000.mat
+Job ID           : 29633869
+Array Job ID     : 29590762_5
+Wall-clock time  : 1-01:25:43 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8101MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590763_16.out
+Starting rank: n=38, r=19, L=524288, K=1792, m=34048, S=21, negative messages=2000, operation proxy=1.899e+12.
+Saved completed result: conference_results/raw/finite_length/rank_n038_M002000_seed0020464625_shard000.mat
+Job ID           : 29732651
+Array Job ID     : 29590763_16
+Wall-clock time  : 16:31:32 / 3-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8181MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590763_17.out
+Starting rank: n=40, r=20, L=1048576, K=3120, m=62400, S=21, negative messages=2000, operation proxy=6.612e+12.
+Saved completed result: conference_results/raw/finite_length/rank_n040_M002000_seed0020464825_shard000.mat
+Job ID           : 29590763
+Array Job ID     : 29590763_17
+Wall-clock time  : 1-10:54:45 / 3-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.7%  [8213MB of 1099512MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590763_6.out
+Starting id: n=36, r=18, L=262144, K=21618, m=389124, S=1, negative messages=2000, operation proxy=1.134e+13.
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29590763_7.out
+Starting id: n=38, r=19, L=524288, K=37640, m=715160, S=1, negative messages=2000, operation proxy=3.949e+13.
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29899993_6.out
+Starting id: n=36, r=18, L=262144, K=21618, m=389124, S=1, negative messages=2000, operation proxy=1.134e+13.
+Saved completed result: conference_results/raw/finite_length/id_n036_M002000_seed0020364425_shard000.mat
+Job ID           : 29899993
+Array Job ID     : 29899993_6
+Wall-clock time  : 22:42:46 / 3-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.9%  [4754MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900564_7.out
+Starting id: n=38, r=19, L=524288, K=37640, m=715160, S=1, negative messages=50, operation proxy=1.006e+12.
+Saved completed result: conference_results/raw/finite_length/id_n038_M000050_seed0020364625_shard000.mat
+Job ID           : 29900564
+Array Job ID     : 29900564_7
+Wall-clock time  : 1-03:03:38 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4713MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900565_7.out
+Starting id: n=38, r=19, L=524288, K=37640, m=715160, S=1, negative messages=50, operation proxy=1.006e+12.
+Saved completed result: conference_results/raw/finite_length/id_n038_M000050_seed0020364626_shard001.mat
+Job ID           : 29900565
+Array Job ID     : 29900565_7
+Wall-clock time  : 1-03:57:05 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4632MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900566_7.out
+Starting id: n=38, r=19, L=524288, K=37640, m=715160, S=1, negative messages=50, operation proxy=1.006e+12.
+Saved completed result: conference_results/raw/finite_length/id_n038_M000050_seed0020364627_shard002.mat
+Job ID           : 29900566
+Array Job ID     : 29900566_7
+Wall-clock time  : 1-03:06:09 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4671MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900567_7.out
+Starting id: n=38, r=19, L=524288, K=37640, m=715160, S=1, negative messages=50, operation proxy=1.006e+12.
+Saved completed result: conference_results/raw/finite_length/id_n038_M000050_seed0020364628_shard003.mat
+Job ID           : 29900567
+Array Job ID     : 29900567_7
+Wall-clock time  : 1-02:45:21 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4689MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900568_8.out
+Starting id: n=40, r=20, L=1048576, K=65536, m=1310720, S=1, negative messages=50, operation proxy=3.505e+12.
+Saved completed result: conference_results/raw/finite_length/id_n040_M000050_seed0020364825_shard000.mat
+Job ID           : 29900568
+Array Job ID     : 29900568_8
+Wall-clock time  : 1-20:41:21 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4623MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900569_8.out
+Starting id: n=40, r=20, L=1048576, K=65536, m=1310720, S=1, negative messages=50, operation proxy=3.505e+12.
+Saved completed result: conference_results/raw/finite_length/id_n040_M000050_seed0020364826_shard001.mat
+Job ID           : 29900569
+Array Job ID     : 29900569_8
+Wall-clock time  : 1-19:53:37 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4634MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900570_8.out
+Starting id: n=40, r=20, L=1048576, K=65536, m=1310720, S=1, negative messages=50, operation proxy=3.505e+12.
+Saved completed result: conference_results/raw/finite_length/id_n040_M000050_seed0020364827_shard002.mat
+Job ID           : 29900570
+Array Job ID     : 29900570_8
+Wall-clock time  : 1-14:17:28 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4674MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_finite_29900571_8.out
+Starting id: n=40, r=20, L=1048576, K=65536, m=1310720, S=1, negative messages=50, operation proxy=3.505e+12.
+Saved completed result: conference_results/raw/finite_length/id_n040_M000050_seed0020364828_shard003.mat
+Job ID           : 29900571
+Array Job ID     : 29900571_8
+Wall-clock time  : 1-18:50:56 / 2-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4699MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_0.out
+Job ID           : 30176829
+Array Job ID     : 30176825_0
+Wall-clock time  : 00:00:55 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4252MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_1.out
+Job ID           : 30176830
+Array Job ID     : 30176825_1
+Wall-clock time  : 00:00:53 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4257MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_10.out
+Job ID           : 30176839
+Array Job ID     : 30176825_10
+Wall-clock time  : 00:00:41 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4263MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_11.out
+Job ID           : 30176840
+Array Job ID     : 30176825_11
+Wall-clock time  : 00:00:40 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4266MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_12.out
+Job ID           : 30176841
+Array Job ID     : 30176825_12
+Wall-clock time  : 00:00:47 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.5%  [4465MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_13.out
+Job ID           : 30176842
+Array Job ID     : 30176825_13
+Wall-clock time  : 00:01:21 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4598MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_14.out
+Job ID           : 30176843
+Array Job ID     : 30176825_14
+Wall-clock time  : 00:02:59 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4588MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_15.out
+Job ID           : 30176844
+Array Job ID     : 30176825_15
+Wall-clock time  : 00:11:04 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.7%  [4622MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_16.out
+Job ID           : 30176845
+Array Job ID     : 30176825_16
+Wall-clock time  : 00:40:46 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.8%  [4641MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_17.out
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_2.out
+Job ID           : 30176831
+Array Job ID     : 30176825_2
+Wall-clock time  : 00:00:59 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4261MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_3.out
+Job ID           : 30176832
+Array Job ID     : 30176825_3
+Wall-clock time  : 00:00:43 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.3%  [4361MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_4.out
+Job ID           : 30176833
+Array Job ID     : 30176825_4
+Wall-clock time  : 00:00:34 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 1.6%  [1091MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_5.out
+Job ID           : 30176834
+Array Job ID     : 30176825_5
+Wall-clock time  : 00:00:30 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 1.6%  [1092MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_6.out
+Job ID           : 30176835
+Array Job ID     : 30176825_6
+Wall-clock time  : 00:00:30 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 1.6%  [1083MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_7.out
+Job ID           : 30176836
+Array Job ID     : 30176825_7
+Wall-clock time  : 00:00:30 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 1.6%  [1095MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_8.out
+Job ID           : 30176837
+Array Job ID     : 30176825_8
+Wall-clock time  : 00:00:30 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 1.6%  [1090MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30176825_9.out
+Job ID           : 30176838
+Array Job ID     : 30176825_9
+Wall-clock time  : 00:00:30 / 1-00:00:00
+Allocated CPUs            : 32
+Memory used (RAM)         : 6.2%  [4280MB of 68720MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_0.out
+Job ID           : 30201110
+Array Job ID     : 30201109_0
+Wall-clock time  : 00:00:47 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1096MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_1.out
+Job ID           : 30201111
+Array Job ID     : 30201109_1
+Wall-clock time  : 00:00:46 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1107MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_10.out
+Job ID           : 30201120
+Array Job ID     : 30201109_10
+Wall-clock time  : 00:00:47 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1093MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_11.out
+Job ID           : 30201121
+Array Job ID     : 30201109_11
+Wall-clock time  : 00:00:41 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1101MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_12.out
+Job ID           : 30201122
+Array Job ID     : 30201109_12
+Wall-clock time  : 00:00:45 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1106MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_13.out
+Job ID           : 30201123
+Array Job ID     : 30201109_13
+Wall-clock time  : 00:00:47 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1094MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_14.out
+Job ID           : 30201124
+Array Job ID     : 30201109_14
+Wall-clock time  : 00:00:41 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1100MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_15.out
+Job ID           : 30201125
+Array Job ID     : 30201109_15
+Wall-clock time  : 00:00:44 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1094MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_16.out
+Job ID           : 30201126
+Array Job ID     : 30201109_16
+Wall-clock time  : 00:00:48 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1051MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_17.out
+Job ID           : 30201127
+Array Job ID     : 30201109_17
+Wall-clock time  : 00:12:03 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.8%  [8007MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_18.out
+Job ID           : 30201128
+Array Job ID     : 30201109_18
+Wall-clock time  : 00:01:07 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.1%  [7025MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_19.out
+Job ID           : 30201129
+Array Job ID     : 30201109_19
+Wall-clock time  : 00:01:11 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.3%  [7333MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_2.out
+Job ID           : 30201112
+Array Job ID     : 30201109_2
+Wall-clock time  : 00:00:48 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1099MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_20.out
+Job ID           : 30214849
+Array Job ID     : 30201109_20
+Wall-clock time  : 00:01:11 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.2%  [7087MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_21.out
+Job ID           : 30214873
+Array Job ID     : 30201109_21
+Wall-clock time  : 00:01:10 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.4%  [7386MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_22.out
+Job ID           : 30214883
+Array Job ID     : 30201109_22
+Wall-clock time  : 00:01:15 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.4%  [7473MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_23.out
+Job ID           : 30214917
+Array Job ID     : 30201109_23
+Wall-clock time  : 00:01:47 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.8%  [8021MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_24.out
+Job ID           : 30214918
+Array Job ID     : 30201109_24
+Wall-clock time  : 00:02:14 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.8%  [8053MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_25.out
+Job ID           : 30214959
+Array Job ID     : 30201109_25
+Wall-clock time  : 00:03:37 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.9%  [8116MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_26.out
+Job ID           : 30201109
+Array Job ID     : 30201109_26
+Wall-clock time  : 00:12:15 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 5.9%  [8157MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_3.out
+Job ID           : 30201113
+Array Job ID     : 30201109_3
+Wall-clock time  : 00:00:46 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1100MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_4.out
+Job ID           : 30201114
+Array Job ID     : 30201109_4
+Wall-clock time  : 00:00:43 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1103MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_5.out
+Job ID           : 30201115
+Array Job ID     : 30201109_5
+Wall-clock time  : 00:00:46 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1097MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_6.out
+Job ID           : 30201116
+Array Job ID     : 30201109_6
+Wall-clock time  : 00:00:41 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1104MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_7.out
+Job ID           : 30201117
+Array Job ID     : 30201109_7
+Wall-clock time  : 00:00:49 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1098MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_8.out
+Job ID           : 30201118
+Array Job ID     : 30201109_8
+Wall-clock time  : 00:00:42 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1098MB of 137439MB]
+/home/yangshuo/Git/ID_RS_code/logs/bfc_adversarial_30201109_9.out
+Job ID           : 30201119
+Array Job ID     : 30201109_9
+Wall-clock time  : 00:00:46 / 2-00:00:00
+Allocated CPUs            : 64
+Memory used (RAM)         : 0.8%  [1105MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_0.out
+Job ID           : 29853572
+Array Job ID     : 29834485_0
+Wall-clock time  : 09:50:28 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1150MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_1.out
+Job ID           : 29853573
+Array Job ID     : 29834485_1
+Wall-clock time  : 07:12:19 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1194MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_10.out
+Job ID           : 29853582
+Array Job ID     : 29834485_10
+Wall-clock time  : 04:14:48 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1165MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_11.out
+Job ID           : 29853583
+Array Job ID     : 29834485_11
+Wall-clock time  : 04:12:15 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1150MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_12.out
+Job ID           : 29853584
+Array Job ID     : 29834485_12
+Wall-clock time  : 04:06:58 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1183MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_13.out
+Job ID           : 29853585
+Array Job ID     : 29834485_13
+Wall-clock time  : 03:14:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1158MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_14.out
+Job ID           : 29853586
+Array Job ID     : 29834485_14
+Wall-clock time  : 04:02:54 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1138MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_15.out
+Job ID           : 29853587
+Array Job ID     : 29834485_15
+Wall-clock time  : 03:55:20 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1154MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_16.out
+Job ID           : 29853614
+Array Job ID     : 29834485_16
+Wall-clock time  : 03:46:54 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1138MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_17.out
+Job ID           : 29854559
+Array Job ID     : 29834485_17
+Wall-clock time  : 04:09:14 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1174MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_18.out
+Job ID           : 29854608
+Array Job ID     : 29834485_18
+Wall-clock time  : 03:45:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1159MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_19.out
+Job ID           : 29854609
+Array Job ID     : 29834485_19
+Wall-clock time  : 03:50:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1153MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_2.out
+Job ID           : 29853574
+Array Job ID     : 29834485_2
+Wall-clock time  : 07:28:30 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1156MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_20.out
+Job ID           : 29855207
+Array Job ID     : 29834485_20
+Wall-clock time  : 03:33:47 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1174MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_21.out
+Job ID           : 29855309
+Array Job ID     : 29834485_21
+Wall-clock time  : 03:22:01 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1154MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_22.out
+Job ID           : 29855310
+Array Job ID     : 29834485_22
+Wall-clock time  : 01:24:05 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1227MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_23.out
+Job ID           : 29855311
+Array Job ID     : 29834485_23
+Wall-clock time  : 01:22:04 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1205MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_24.out
+Job ID           : 29865769
+Array Job ID     : 29834485_24
+Wall-clock time  : 01:06:37 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1217MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_25.out
+Job ID           : 29866312
+Array Job ID     : 29834485_25
+Wall-clock time  : 00:49:05 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1215MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_26.out
+Job ID           : 29866727
+Array Job ID     : 29834485_26
+Wall-clock time  : 00:46:44 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1205MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_27.out
+Job ID           : 29867258
+Array Job ID     : 29834485_27
+Wall-clock time  : 00:49:09 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1202MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_28.out
+Job ID           : 29867948
+Array Job ID     : 29834485_28
+Wall-clock time  : 00:55:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1207MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_29.out
+Job ID           : 29870380
+Array Job ID     : 29834485_29
+Wall-clock time  : 00:35:59 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1191MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_3.out
+Job ID           : 29853575
+Array Job ID     : 29834485_3
+Wall-clock time  : 04:54:58 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1141MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_30.out
+Job ID           : 29870894
+Array Job ID     : 29834485_30
+Wall-clock time  : 00:35:53 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1195MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_31.out
+Job ID           : 29874885
+Array Job ID     : 29834485_31
+Wall-clock time  : 00:38:43 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1194MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_32.out
+Job ID           : 29875092
+Array Job ID     : 29834485_32
+Wall-clock time  : 00:39:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1203MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_33.out
+Job ID           : 29875257
+Array Job ID     : 29834485_33
+Wall-clock time  : 00:38:45 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1193MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_34.out
+Job ID           : 29875575
+Array Job ID     : 29834485_34
+Wall-clock time  : 00:49:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1227MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_35.out
+Job ID           : 29878881
+Array Job ID     : 29834485_35
+Wall-clock time  : 00:40:09 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1184MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_36.out
+Job ID           : 29881033
+Array Job ID     : 29834485_36
+Wall-clock time  : 00:37:57 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1193MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_37.out
+Job ID           : 29882450
+Array Job ID     : 29834485_37
+Wall-clock time  : 00:30:47 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1183MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_38.out
+Job ID           : 29885782
+Array Job ID     : 29834485_38
+Wall-clock time  : 00:46:55 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1208MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_39.out
+Job ID           : 29885977
+Array Job ID     : 29834485_39
+Wall-clock time  : 00:38:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1216MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_4.out
+Job ID           : 29853576
+Array Job ID     : 29834485_4
+Wall-clock time  : 04:27:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1157MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_40.out
+Job ID           : 29886091
+Array Job ID     : 29834485_40
+Wall-clock time  : 00:28:57 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1213MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_41.out
+Job ID           : 29886856
+Array Job ID     : 29834485_41
+Wall-clock time  : 00:33:39 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1219MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_42.out
+Job ID           : 29887684
+Array Job ID     : 29834485_42
+Wall-clock time  : 00:27:13 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1191MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_43.out
+Job ID           : 29893482
+Array Job ID     : 29834485_43
+Wall-clock time  : 00:29:05 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1205MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_44.out
+Job ID           : 29895145
+Array Job ID     : 29834485_44
+Wall-clock time  : 05:05:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1142MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_45.out
+Job ID           : 29896945
+Array Job ID     : 29834485_45
+Wall-clock time  : 05:15:46 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1145MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_46.out
+Job ID           : 29896946
+Array Job ID     : 29834485_46
+Wall-clock time  : 06:55:23 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1157MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_47.out
+Job ID           : 29897452
+Array Job ID     : 29834485_47
+Wall-clock time  : 02:38:54 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1148MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_48.out
+Job ID           : 29897453
+Array Job ID     : 29834485_48
+Wall-clock time  : 02:25:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1163MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_49.out
+Job ID           : 29898057
+Array Job ID     : 29834485_49
+Wall-clock time  : 04:43:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1154MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_5.out
+Job ID           : 29853577
+Array Job ID     : 29834485_5
+Wall-clock time  : 04:34:43 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1159MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_50.out
+Job ID           : 29898058
+Array Job ID     : 29834485_50
+Wall-clock time  : 05:30:34 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1145MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_51.out
+Job ID           : 29899329
+Array Job ID     : 29834485_51
+Wall-clock time  : 05:02:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1148MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_52.out
+Job ID           : 29899330
+Array Job ID     : 29834485_52
+Wall-clock time  : 03:07:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1140MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_53.out
+Job ID           : 29899882
+Array Job ID     : 29834485_53
+Wall-clock time  : 02:22:06 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1138MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_54.out
+Job ID           : 29899964
+Array Job ID     : 29834485_54
+Wall-clock time  : 02:21:45 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1144MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_55.out
+Job ID           : 29900370
+Array Job ID     : 29834485_55
+Wall-clock time  : 02:18:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1128MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_56.out
+Job ID           : 29901754
+Array Job ID     : 29834485_56
+Wall-clock time  : 02:43:43 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1146MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_57.out
+Job ID           : 29907875
+Array Job ID     : 29834485_57
+Wall-clock time  : 02:16:54 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1129MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_58.out
+Job ID           : 29912867
+Array Job ID     : 29834485_58
+Wall-clock time  : 02:09:53 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1149MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_59.out
+Job ID           : 29913632
+Array Job ID     : 29834485_59
+Wall-clock time  : 04:07:17 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1148MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_6.out
+Job ID           : 29853578
+Array Job ID     : 29834485_6
+Wall-clock time  : 04:34:44 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1162MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_60.out
+Job ID           : 29913724
+Array Job ID     : 29834485_60
+Wall-clock time  : 02:06:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1145MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_61.out
+Job ID           : 29913975
+Array Job ID     : 29834485_61
+Wall-clock time  : 02:06:23 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1135MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_62.out
+Job ID           : 29914733
+Array Job ID     : 29834485_62
+Wall-clock time  : 03:58:10 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1156MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_63.out
+Job ID           : 29915207
+Array Job ID     : 29834485_63
+Wall-clock time  : 01:58:06 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1130MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_64.out
+Job ID           : 29915710
+Array Job ID     : 29834485_64
+Wall-clock time  : 01:56:18 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1130MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_65.out
+Job ID           : 29834485
+Array Job ID     : 29834485_65
+Wall-clock time  : 02:40:11 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1153MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_7.out
+Job ID           : 29853579
+Array Job ID     : 29834485_7
+Wall-clock time  : 04:31:12 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1168MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_8.out
+Job ID           : 29853580
+Array Job ID     : 29834485_8
+Wall-clock time  : 04:27:16 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1144MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834485_9.out
+Job ID           : 29853581
+Array Job ID     : 29834485_9
+Wall-clock time  : 04:20:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1145MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_0.out
+Job ID           : 29864835
+Array Job ID     : 29834488_0
+Wall-clock time  : 03:00:53 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1167MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_1.out
+Job ID           : 29865252
+Array Job ID     : 29834488_1
+Wall-clock time  : 02:54:30 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1180MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_10.out
+Job ID           : 29870394
+Array Job ID     : 29834488_10
+Wall-clock time  : 03:47:15 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1143MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_11.out
+Job ID           : 29870646
+Array Job ID     : 29834488_11
+Wall-clock time  : 03:24:51 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1159MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_12.out
+Job ID           : 29874241
+Array Job ID     : 29834488_12
+Wall-clock time  : 11:30:28 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1161MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_13.out
+Job ID           : 29874242
+Array Job ID     : 29834488_13
+Wall-clock time  : 05:08:52 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1163MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_14.out
+Job ID           : 29874584
+Array Job ID     : 29834488_14
+Wall-clock time  : 04:31:09 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1175MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_15.out
+Job ID           : 29874933
+Array Job ID     : 29834488_15
+Wall-clock time  : 04:07:27 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1160MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_16.out
+Job ID           : 29875179
+Array Job ID     : 29834488_16
+Wall-clock time  : 11:51:44 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1165MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_17.out
+Job ID           : 29875396
+Array Job ID     : 29834488_17
+Wall-clock time  : 09:53:37 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1161MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_18.out
+Job ID           : 29878520
+Array Job ID     : 29834488_18
+Wall-clock time  : 05:15:57 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1160MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_19.out
+Job ID           : 29879745
+Array Job ID     : 29834488_19
+Wall-clock time  : 04:37:19 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1169MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_2.out
+Job ID           : 29865445
+Array Job ID     : 29834488_2
+Wall-clock time  : 02:37:40 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1180MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_20.out
+Job ID           : 29882034
+Array Job ID     : 29834488_20
+Wall-clock time  : 00:48:48 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1203MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_21.out
+Job ID           : 29883484
+Array Job ID     : 29834488_21
+Wall-clock time  : 00:24:53 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1205MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_22.out
+Job ID           : 29885947
+Array Job ID     : 29834488_22
+Wall-clock time  : 00:25:41 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1210MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_23.out
+Job ID           : 29886063
+Array Job ID     : 29834488_23
+Wall-clock time  : 00:29:43 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1209MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_24.out
+Job ID           : 29886334
+Array Job ID     : 29834488_24
+Wall-clock time  : 00:30:23 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1235MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_25.out
+Job ID           : 29887100
+Array Job ID     : 29834488_25
+Wall-clock time  : 00:21:51 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1217MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_26.out
+Job ID           : 29892950
+Array Job ID     : 29834488_26
+Wall-clock time  : 00:36:21 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1232MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_27.out
+Job ID           : 29892951
+Array Job ID     : 29834488_27
+Wall-clock time  : 00:24:13 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1257MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_28.out
+Job ID           : 29894978
+Array Job ID     : 29834488_28
+Wall-clock time  : 00:59:55 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1218MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_29.out
+Job ID           : 29894979
+Array Job ID     : 29834488_29
+Wall-clock time  : 00:35:22 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1217MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_3.out
+Job ID           : 29865631
+Array Job ID     : 29834488_3
+Wall-clock time  : 02:20:58 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1155MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_30.out
+Job ID           : 29896217
+Array Job ID     : 29834488_30
+Wall-clock time  : 00:49:49 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1235MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_31.out
+Job ID           : 29897083
+Array Job ID     : 29834488_31
+Wall-clock time  : 00:30:26 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1237MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_32.out
+Job ID           : 29897922
+Array Job ID     : 29834488_32
+Wall-clock time  : 01:44:03 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1243MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_33.out
+Job ID           : 29898272
+Array Job ID     : 29834488_33
+Wall-clock time  : 00:41:35 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1184MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_34.out
+Job ID           : 29899712
+Array Job ID     : 29834488_34
+Wall-clock time  : 01:37:16 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1234MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_35.out
+Job ID           : 29899883
+Array Job ID     : 29834488_35
+Wall-clock time  : 00:37:07 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1222MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_36.out
+Job ID           : 29900087
+Array Job ID     : 29834488_36
+Wall-clock time  : 02:25:11 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1234MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_37.out
+Job ID           : 29900088
+Array Job ID     : 29834488_37
+Wall-clock time  : 02:05:04 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1226MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_38.out
+Job ID           : 29900609
+Array Job ID     : 29834488_38
+Wall-clock time  : 01:15:19 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1230MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_39.out
+Job ID           : 29907483
+Array Job ID     : 29834488_39
+Wall-clock time  : 00:29:58 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.8%  [1213MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_4.out
+Job ID           : 29866192
+Array Job ID     : 29834488_4
+Wall-clock time  : 03:40:24 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1165MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_40.out
+Job ID           : 29911967
+Array Job ID     : 29834488_40
+Wall-clock time  : 03:27:57 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1161MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_41.out
+Job ID           : 29913349
+Array Job ID     : 29834488_41
+Wall-clock time  : 03:22:36 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1164MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_42.out
+Job ID           : 29913686
+Array Job ID     : 29834488_42
+Wall-clock time  : 01:26:47 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1137MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_43.out
+Job ID           : 29913687
+Array Job ID     : 29834488_43
+Wall-clock time  : 02:10:45 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1165MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_44.out
+Job ID           : 29913766
+Array Job ID     : 29834488_44
+Wall-clock time  : 03:20:09 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1168MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_45.out
+Job ID           : 29914034
+Array Job ID     : 29834488_45
+Wall-clock time  : 03:00:27 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1167MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_46.out
+Job ID           : 29914888
+Array Job ID     : 29834488_46
+Wall-clock time  : 03:36:06 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1172MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_47.out
+Job ID           : 29915483
+Array Job ID     : 29834488_47
+Wall-clock time  : 03:04:50 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1169MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_48.out
+Job ID           : 29915742
+Array Job ID     : 29834488_48
+Wall-clock time  : 04:24:22 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1146MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_49.out
+Job ID           : 29916440
+Array Job ID     : 29834488_49
+Wall-clock time  : 02:17:28 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1161MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_5.out
+Job ID           : 29866623
+Array Job ID     : 29834488_5
+Wall-clock time  : 03:38:20 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1174MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_50.out
+Job ID           : 29919240
+Array Job ID     : 29834488_50
+Wall-clock time  : 03:40:03 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1169MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_51.out
+Job ID           : 29920609
+Array Job ID     : 29834488_51
+Wall-clock time  : 01:21:54 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1156MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_52.out
+Job ID           : 29920792
+Array Job ID     : 29834488_52
+Wall-clock time  : 10:54:57 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1148MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_53.out
+Job ID           : 29920850
+Array Job ID     : 29834488_53
+Wall-clock time  : 02:52:01 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1150MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_54.out
+Job ID           : 29921247
+Array Job ID     : 29834488_54
+Wall-clock time  : 02:44:28 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1160MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_55.out
+Job ID           : 29921277
+Array Job ID     : 29834488_55
+Wall-clock time  : 02:17:32 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1153MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_56.out
+Job ID           : 29921525
+Array Job ID     : 29834488_56
+Wall-clock time  : 13:27:24 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1153MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_57.out
+Job ID           : 29921526
+Array Job ID     : 29834488_57
+Wall-clock time  : 03:36:11 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1139MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_58.out
+Job ID           : 29921608
+Array Job ID     : 29834488_58
+Wall-clock time  : 04:46:27 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.6%  [1137MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_59.out
+Job ID           : 29834488
+Array Job ID     : 29834488_59
+Wall-clock time  : 04:42:02 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1175MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_6.out
+Job ID           : 29866967
+Array Job ID     : 29834488_6
+Wall-clock time  : 03:05:15 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1180MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_7.out
+Job ID           : 29867696
+Array Job ID     : 29834488_7
+Wall-clock time  : 02:58:04 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 2.0%  [1365MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_8.out
+Job ID           : 29869940
+Array Job ID     : 29834488_8
+Wall-clock time  : 03:20:27 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1177MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_conf_29834488_9.out
+Job ID           : 29870281
+Array Job ID     : 29834488_9
+Wall-clock time  : 04:08:32 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 1.7%  [1180MB of 68720MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834484_0.out
+Job ID           : 29834490
+Array Job ID     : 29834484_0
+Wall-clock time  : 06:26:20 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 14.6%  [20131MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834484_1.out
+Job ID           : 29834491
+Array Job ID     : 29834484_1
+Wall-clock time  : 00:27:30 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 0.9%  [1169MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834484_2.out
+Job ID           : 29834484
+Array Job ID     : 29834484_2
+Wall-clock time  : 02:47:25 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 3.3%  [4509MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834487_0.out
+Job ID           : 29834492
+Array Job ID     : 29834487_0
+Wall-clock time  : 10:08:42 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 14.6%  [20143MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834487_1.out
+Job ID           : 29834493
+Array Job ID     : 29834487_1
+Wall-clock time  : 00:26:29 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 0.8%  [1146MB of 137439MB]
+/home/yangshuo/Downloads/ID_RS_code/logs/bp_bank_29834487_2.out
+Job ID           : 29834487
+Array Job ID     : 29834487_2
+Wall-clock time  : 02:10:02 / 18:00:00
+Allocated CPUs            : 8
+Memory used (RAM)         : 3.3%  [4504MB of 137439MB]

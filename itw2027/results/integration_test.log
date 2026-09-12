@@ -1,0 +1,45 @@
+Validated completed point: /Users/yangshuo/Git/ID_RS_code/itw2027/results/source/noisy/waterfall/id/n_40/Rc_0p5/points/result_n_40_awgn_ebno_p0p5.mat
+Validated completed point: /Users/yangshuo/Git/ID_RS_code/itw2027/results/source/noisy/rate_pareto/rank/n_40/Rc_0p6667/points/result_n_40_awgn_ebno_p2p5.mat
+Starting parallel pool (parpool) using the 'threads' profile ...
+Connected to parallel pool with 2 workers.
+Started thread pool with 2 workers.
+Chunk 1/2 complete (positions 1:4, elapsed 0.0 min).
+Chunk 2/2 complete (positions 5:8, elapsed 0.0 min).
+Chunk 1/4 complete (positions 1:4, elapsed 0.0 min).
+Chunk 2/4 complete (positions 5:8, elapsed 0.0 min).
+Chunk 3/4 complete (positions 9:12, elapsed 0.0 min).
+Chunk 4/4 complete (positions 13:16, elapsed 0.0 min).
+All conference simulation smoke tests passed.
+Preparing source bank: n=8, K=9, m=36, S=1, tuples=8100
+  source tuples 128/8100
+  source tuples 1408/8100
+  source tuples 2688/8100
+  source tuples 3968/8100
+  source tuples 5248/8100
+  source tuples 6528/8100
+  source tuples 7808/8100
+  source tuples 8100/8100
+Simulating n=8, awgn, Eb/N0=0 dB, G=4050 tuples/frame
+  coded BFC error 0.3442, FPR 0.05679, FNR 0.6316, LDPC FER 1 (2 frames, 0.3s, fixed_frames)
+Simulating n=8, awgn, Eb/N0=6 dB, G=4050 tuples/frame
+  coded BFC error 0.03185, FPR 0.0637, FNR 0, LDPC FER 0 (2 frames, 0.0s, fixed_frames)
+Preparing source bank: n=16, K=4, m=32, S=21, tuples=4050
+  source tuples 128/4050
+  source tuples 1408/4050
+  source tuples 2688/4050
+  source tuples 3968/4050
+  source tuples 4050/4050
+Simulating n=16, awgn, Eb/N0=0 dB, G=2025 tuples/frame
+  coded BFC error 0.4462, FPR 0.09284, FNR 0.7995, LDPC FER 1 (2 frames, 0.3s, fixed_frames)
+Simulating n=16, awgn, Eb/N0=6 dB, G=2025 tuples/frame
+  coded BFC error 0.03654, FPR 0.07309, FNR 0, LDPC FER 0 (2 frames, 0.0s, fixed_frames)
+Preparing source bank: n=30, K=3, m=45, S=990, tuples=2160
+  source tuples 128/2160
+  source tuples 1408/2160
+  source tuples 2160/2160
+Simulating n=30, awgn, Eb/N0=0 dB, G=1080 tuples/frame
+  coded BFC error 0.4861, FPR 0.03333, FNR 0.9389, LDPC FER 1 (2 frames, 0.4s, fixed_frames)
+Simulating n=30, awgn, Eb/N0=6 dB, G=1080 tuples/frame
+  coded BFC error 0.01389, FPR 0.02778, FNR 0, LDPC FER 0 (2 frames, 0.0s, fixed_frames)
+ITW2027: noiseless exact enumeration and six packed BP smoke points passed.
+Parallel pool using the 'threads' profile is shutting down.

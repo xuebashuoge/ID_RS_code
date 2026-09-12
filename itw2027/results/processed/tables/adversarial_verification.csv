@@ -1,0 +1,28 @@
+func_type,n,r,L,K,m,S,theorem_bound,operation_proxy,verified,status,observed_R,observed_fpr,completed_at,interpretation
+exact-threshold,24,12,4096,2,24,276,0.0673828125,2269184,1,verified_exactly,276,0.0673828125,07-Sep-2026 23:01:38,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,26,13,8192,2,26,325,0.0396728515625,5341184,1,verified_exactly,325,0.0396728515625,07-Sep-2026 23:03:00,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,28,14,16384,2,28,378,0.0230712890625,12419072,1,verified_exactly,378,0.0230712890625,08-Sep-2026 03:00:13,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,30,15,32768,3,45,990,0.0604248046875,97419264,1,verified_exactly,1980,0.0604248046875,08-Sep-2026 03:01:56,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,32,16,65536,3,48,1128,0.034423828125,221970432,1,verified_exactly,2256,0.034423828125,08-Sep-2026 03:03:47,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,34,17,131072,4,68,2278,0.0521392822265625,1194852352,1,verified_exactly,6834,0.0521392822265625,08-Sep-2026 03:06:01,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,36,18,262144,5,90,4005,0.0611114501953125,5250744320.0,1,verified_exactly,16020,0.0611114501953125,08-Sep-2026 03:08:41,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,38,19,524288,5,95,4465,0.03406524658203125,11707351040.0,1,verified_exactly,17860,0.03406524658203125,08-Sep-2026 03:12:21,arbitrary support of matching size; not the named rank/threshold function
+exact-threshold,40,20,1048576,6,120,7140,0.034046173095703125,44927287296.0,1,verified_exactly,35700,0.034046173095703125,08-Sep-2026 03:25:03,arbitrary support of matching size; not the named rank/threshold function
+id,24,12,4096,776,9312,1,0.189208984375,6356992,1,verified_exactly,775,0.189208984375,07-Sep-2026 10:31:36,arbitrary support of matching size; not the named rank/threshold function
+id,26,13,8192,1351,17563,1,0.164794921875,22134784,1,verified_exactly,1350,0.164794921875,07-Sep-2026 10:32:53,arbitrary support of matching size; not the named rank/threshold function
+id,28,14,16384,2352,32928,1,0.14349365234375,77070336,1,verified_exactly,2351,0.14349365234375,07-Sep-2026 10:34:02,arbitrary support of matching size; not the named rank/threshold function
+id,30,15,32768,4096,61440,1,0.124969482421875,268435456,1,verified_exactly,4095,0.124969482421875,07-Sep-2026 11:39:35,arbitrary support of matching size; not the named rank/threshold function
+id,32,16,65536,7131,114096,1,0.108795166015625,934674432,0,skipped_by_cost_guard,,,,arbitrary support of matching size; not the named rank/threshold function
+id,34,17,131072,12416,211072,1,0.09471893310546875,3254779904.0,0,skipped_by_cost_guard,,,,arbitrary support of matching size; not the named rank/threshold function
+id,36,18,262144,21618,389124,1,0.08246231079101562,11334057984.0,0,skipped_by_cost_guard,,,,arbitrary support of matching size; not the named rank/threshold function
+id,38,19,524288,37640,715160,1,0.07179069519042969,39468400640.0,0,skipped_by_cost_guard,,,,arbitrary support of matching size; not the named rank/threshold function
+id,40,20,1048576,65536,1310720,1,0.062499046325683594,137438953472.0,0,skipped_by_cost_guard,,,,arbitrary support of matching size; not the named rank/threshold function
+rank,24,12,4096,36,432,21,0.179443359375,3244032,1,verified_exactly,735,0.179443359375,07-Sep-2026 12:36:28,arbitrary support of matching size; not the named rank/threshold function
+rank,26,13,8192,64,832,21,0.1614990234375,11534336,1,verified_exactly,1323,0.1614990234375,07-Sep-2026 12:45:34,arbitrary support of matching size; not the named rank/threshold function
+rank,28,14,16384,112,1568,21,0.14227294921875,40370176,1,verified_exactly,2331,0.14227294921875,07-Sep-2026 12:46:59,arbitrary support of matching size; not the named rank/threshold function
+rank,30,15,32768,195,2925,21,0.12432861328125,140574720,1,verified_exactly,4074,0.12432861328125,07-Sep-2026 12:47:54,arbitrary support of matching size; not the named rank/threshold function
+rank,32,16,65536,339,5424,21,0.108306884765625,488767488,1,verified_exactly,7098,0.108306884765625,07-Sep-2026 12:50:41,arbitrary support of matching size; not the named rank/threshold function
+rank,34,17,131072,591,10047,21,0.0945281982421875,1704198144,1,verified_exactly,12390,0.0945281982421875,07-Sep-2026 12:54:59,arbitrary support of matching size; not the named rank/threshold function
+rank,36,18,262144,1029,18522,21,0.0823516845703125,5934415872.0,1,verified_exactly,21588,0.0823516845703125,07-Sep-2026 13:54:14,arbitrary support of matching size; not the named rank/threshold function
+rank,38,19,524288,1792,34048,21,0.07173728942871094,20669530112.0,1,verified_exactly,37611,0.07173728942871094,07-Sep-2026 14:35:23,arbitrary support of matching size; not the named rank/threshold function
+rank,40,20,1048576,3120,62400,21,0.06246471405029297,71974256640.0,1,verified_exactly,65499,0.06246471405029297,07-Sep-2026 23:12:33,arbitrary support of matching size; not the named rank/threshold function
