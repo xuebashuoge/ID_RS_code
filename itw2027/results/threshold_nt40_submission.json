@@ -7,7 +7,8 @@
   "frames_per_point": 2500,
   "snr_points": 22,
   "n_t": 40,
-  "last_observed_bank_status": "RUNNING",
-  "last_observed_points_status": "PENDING (Dependency)",
-  "results_imported": false
+  "last_observed_bank_status": "COMPLETED",
+  "last_observed_points_status": "COMPLETED (22/22)",
+  "results_imported": true,
+  "imported_at_utc": "2026-09-13T06:42:08.186414+00:00"
 }

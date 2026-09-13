@@ -61,4 +61,4 @@ Each noiseless shard retains checkpointing, a seed, a signature, and actual samp
 
 For optional adversarial regeneration, start with `sbatch --array=0 --time=02:00:00 itw2027/slurm/adversarial.slurm`. With existing source files this validates nothing new and simply reuses the completed result; choose a fresh `BFC_RESULTS_ROOT` to recompute. Do not disable large-K cost guards for the main paper. Skipped cases remain explicitly skipped.
 
-No server jobs were submitted as part of this implementation. This avoids recomputing completed evidence and leaves the user in control of the server campaign.
+The subsequent matched-length threshold campaign completed: bank 30503621 took 13 min 52 s; all 22 tasks in array 30503622 completed, with a maximum of 69 minutes per point and peak reported MaxRSS about 1.22 GiB. Its source tree is `/home/yangshuo/Git/itw2027_nt40_20260913/itw2027/results/source/noisy/threshold_nt40/`. The data are imported; no rerun is needed. The full accounting is saved in `results/threshold_nt40_accounting.txt`.

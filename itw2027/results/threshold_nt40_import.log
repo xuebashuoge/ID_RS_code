@@ -1,0 +1,3 @@
+Exported 22 compact evidence files under results/evidence/noisy/threshold_nt40/.
+All files subsequently read and validated by the Python builder.
+MATLAB exited 137 after export in its native LicenseLogger thread; see runtime_notes.md.

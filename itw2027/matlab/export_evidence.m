@@ -5,6 +5,11 @@ src = fullfile(root,'results','source');
 dst = fullfile(root,'results','evidence');
 if nargin>=1, src=source_root; end
 if nargin>=2, dst=evidence_root; end
+% dir resolves macOS /tmp to /private/tmp. Canonicalize before taking a
+% relative path; substring erasure could otherwise produce "privatenoisy".
+old=pwd; cleanup=onCleanup(@()cd(old)); %#ok<NASGU>
+cd(src); src=pwd; cd(old);
+exported=0;
 for kind = {'noiseless','noisy'}
     files = dir(fullfile(src,kind{1},'**','*.mat'));
     for k = 1:numel(files)
@@ -27,11 +32,14 @@ for kind = {'noiseless','noisy'}
         elseif ~isfield(x,'metadata')
             continue;
         end
-        rel = erase(file,[src filesep]);
+        assert(startsWith(file,[src filesep]),'Result is outside the source root.');
+        rel = file(numel(src)+2:end);
         output = fullfile(dst,rel);
         if ~isfolder(fileparts(output)), mkdir(fileparts(output)); end
         save(output,'-struct','x','-v7');
+        exported=exported+1;
     end
 end
-fprintf('Exported compact evidence to %s\n',dst);
+assert(exported>0,'No compatible evidence files were found.');
+fprintf('Exported %d compact evidence files to %s\n',exported,dst);
 end

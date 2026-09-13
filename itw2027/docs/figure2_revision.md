@@ -1,5 +1,7 @@
 # Figure 2 audit and matched-length rerun — 13 September 2026
 
+**Completed and imported:** all 22 replacement points passed the parameter, fixed-frame, and paired-error checks. Figure 2 and the parameter table now use n_t=40 for every function. The older threshold data in the first diagnostic table below remain labelled as archival.
+
 ## The apparent rank-only errors were largely a plotting defect
 
 The old plotting helper replaced zero observations with NaN and drew lines without markers. A nonzero observation surrounded by zeros had no line segment and was invisible. In particular, ID at 1.8 dB and threshold at 1.5/1.9 dB were present in the saved results but not visible. Adjacent nonzero rank points did produce segments. This was an error in our presentation, not evidence that only rank's channel code fails.
@@ -39,7 +41,7 @@ At true FER 4e-4, observing zero failures in 2,500 frames has probability about 
 
 For a high-SNR precision study, preselect a small set of SNRs instead of uniformly extending all 22 points. Around FER=1e-4, 100,000 frames give only ten expected failures (roughly 32% relative standard error); one million frames give about 100 (roughly 10% relative standard error). About 29,956 zero-failure frames would be required to put a one-sided 95% upper bound below 1e-4. These are frame-level statements, not precision claims based on millions of packed tuples. A modest extension to 10,000 frames is useful as a check, but does not make 1e-4 FER precise.
 
-Recommendation: first replace the mismatched threshold data with the fixed 2,500-frame n_t=40 run and inspect the corrected plot. Do not launch a million-frame campaign just to remove a plotting artifact. If the paper will compare high-SNR LDPC reliability quantitatively, then add a separate predeclared, larger frame experiment at selected SNRs. No such extension was submitted here.
+The matched-length replacement is now complete. The corrected plot still shows sparse residual high-SNR events in all three functions; this does not establish a function-dependent FER. Do not launch a million-frame campaign just to remove a plotting artifact. If the paper will compare high-SNR LDPC reliability quantitatively, then add a separate predeclared, larger frame experiment at selected SNRs. No such extension was submitted here.
 
 Statistical reference: [NIST exact binomial confidence intervals](https://itl.nist.gov/div898/handbook/prc/section2/prc241.htm). Decoder interface: [MathWorks ldpcDecode](https://www.mathworks.com/help/comm/ref/ldpcdecode.html).
 
@@ -54,6 +56,8 @@ Statistical reference: [NIST exact binomial confidence intervals](https://itl.ni
 - Point array: **30503622**, 22 tasks, concurrency 4, 8 CPUs/8 GB/14 hours per task; dependent on the bank.
 - Results: `itw2027/results/source/noisy/threshold_nt40/` under the run directory.
 
-This is an isolated copy; neither existing server checkout was switched or modified. The matched-length result is pending, not yet used in the corrected legacy preview. Resubmission script: `itw2027/slurm/submit_threshold_nt40.sh`. Do not resubmit it while these jobs are active.
+The bank and all 22 point jobs completed successfully. The imported results replace the old threshold waterfall in the selected Figure 2; the n_t=42 data and the historical rate-sweep remain archived. The parameter table and paper prose now describe 810 tags, no padding, and 80 effective channel uses for every function. No job resubmission is needed.
 
-After all 22 points complete, copy the `threshold_nt40/` tree into the local `itw2027/results/source/noisy/`, run `export_evidence`, then rebuild. The builder requires all 22 replacement points and selects them instead of the old threshold waterfall; it preserves the original n_t=42 archive and rate-sweep data. The parameter CSV/table updates automatically. The manuscript prose about 18 padding bits/84.0467 uses must then be updated to no padding/80 uses; it remains explicitly marked pending in the draft snippet.
+The new threshold has FP 0.00680691358 at 1.5 dB and no observed FN or failed frames there. It has one failed frame with 21 FN at 1.7 dB, two failed frames with 86 FN at 2.0 dB, one failed frame with 134 FN at 2.1 dB, and one failed frame with one FN at 2.4 dB. These isolated observations are now all visible. Its finite rates are R_t=0.1726722649 and R_eff=0.08633613245; the uniform noiseless FP bound is 0.03404617310.
+
+The full matched comparison is in `results/processed/tables/matched_nt40_comparison.csv`; the 148-point archive contains the 126 selected noisy points plus the 22 superseded threshold waterfall points. All 2,500-frame samples remain separate.

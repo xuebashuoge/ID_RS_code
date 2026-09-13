@@ -1,6 +1,6 @@
 # Presentation and theorem alignment
 
-**13 September revision:** use n_t=40 for all three noisy functions. The replacement threshold run is pending; current numerical values below describe the archived n_t=42 threshold until replacement. See `figure2_revision.md`.
+**Matched-length revision complete:** Figure 2 uses n_t=40 for all three functions. The 22 new threshold points are validated; the older n_t=42 run remains archived. See `figure2_revision.md`.
 
 ## Space budget and primary story
 
@@ -22,7 +22,7 @@ This distinguishes the finite rate/error tradeoff from the asymptotic achievabil
 
 ## Noisy subsection: Figure 2
 
-Use BPSK-AWGN, length 64,800 DVB-S2 LDPC, rate 1/2, BP with at most 50 iterations and early termination. Three function settings: ID n_t=40, rank n_t=40, exact-threshold n_t=42. Every SNR point uses 2,500 fixed frames; the grid is 0.5–2.6 dB in steps of 0.1 dB. `E_b` is energy per occupied **payload** bit, including the exact packing efficiency in the noise normalization.
+Use BPSK-AWGN, length 64,800 DVB-S2 LDPC, rate 1/2, BP with at most 50 iterations and early termination. Three function settings: ID n_t=40, rank n_t=40, exact-threshold n_t=40. Every SNR point uses 2,500 fixed frames; the grid is 0.5–2.6 dB in steps of 0.1 dB. `E_b` is energy per occupied **payload** bit, including the exact packing efficiency in the noise normalization.
 
 **Panel (a).** Horizontal axis: E_b/N_0 in dB. Vertical axis: error probability, logarithmic above 1e-6 with a linear segment down to zero. Solid: class-conditional empirical FN for each function. Dashed: measured payload FER. Shading: saved 95% frame-cluster percentile-bootstrap intervals for FN. Every point has a marker, including isolated nonzero observations. Zero estimates are plotted at zero in the linear segment; upper confidence limits remain in the tables rather than being substituted for observations.
 
@@ -34,13 +34,13 @@ The source bank is shared across SNRs within each experiment: identical high-SNR
 
 ## Table I: finite rates and packing
 
-Rows: the three representative function settings above. Columns in the compact LaTeX table: function, n_t, m, exact S, R_t, G, R_eff. State N_b=64800, N_i=32400 in the caption; n_eff is 80, 80, and 84.0467, respectively. The CSV also includes K, T, B, padding, asymptotic references, and the packing gain G relative to sending one tag per same physical LDPC frame. The large integers in this table are the supported **message lengths in bits**, not message counts 2^m.
+Rows: the three representative function settings above. Columns in the compact LaTeX table: function, n_t, m, exact S, R_t, G, R_eff. State N_b=64800, N_i=32400 in the caption; n_eff is 80 for all three functions, with G=810 and no padding. The CSV also includes K, T, B, padding, asymptotic references, and the packing gain G relative to sending one tag per same physical LDPC frame. The large integers in this table are the supported **message lengths in bits**, not message counts 2^m.
 
 This table makes the rate definition auditable, exposes rounding/padding, and quantifies why packing is useful without a costly additional experiment. A finite rate is tied to the shown nonzero error certificate; it is not the computation capacity.
 
 ## Optional material, excluded from the main page budget
 
-- `optional_rate_tradeoff.pdf`: x=n_eff, y=max(empirical FP, empirical FN), at 1.5 dB over channel rates 1/3, 2/5, 1/2, 3/5, 2/3. This is a tradeoff for the sampled ensemble, not a maximal error or an optimization proof. No simulated full-message transmission baseline is claimed.
+- `optional_rate_tradeoff.pdf`: x=n_eff, y=max(empirical FP, empirical FN), at 1.5 dB over channel rates 1/3, 2/5, 1/2, 3/5, 2/3. This optional historical sweep still uses threshold n_t=42 and is not part of the matched-length Figure 2. This is a tradeoff for the sampled ensemble, not a maximal error or an optimization proof. No simulated full-message transmission baseline is claimed.
 - `finite_rate_at_1percent.csv`: x=n_t and y=largest certified finite R at B<=0.01; aligned and padded messages are distinguished. It solves the exact support-size certificate within the balanced r,T allocation. It is not a global optimum over every RS allocation.
 - Adversarial table: parameter/weight, n_t, expected and observed root counts, verified/skipped status. Do not label its arbitrary supports as actual rank/threshold functions.
 - No new Rayleigh, broad SNR, or large-field brute-force sweeps are needed for the current claims.

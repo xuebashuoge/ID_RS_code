@@ -1,6 +1,6 @@
 # Evidence audit and rate calculations
 
-**13 September update:** the original Figure 2 omitted isolated nonzero points because it used line-only traces with NaNs at zeros. This is fixed. Upper-limit triangles are removed, actual zero estimates are drawn, and the n_t=40 threshold replacement is submitted. See `figure2_revision.md`; historical n_t=42 values below remain archival.
+**13 September update:** the original Figure 2 omitted isolated nonzero points because it used line-only traces with NaNs at zeros. This is fixed. Upper-limit triangles are removed, actual zero estimates are drawn, and the n_t=40 threshold replacement is complete and selected for Figure 2. See `figure2_revision.md`; historical n_t=42 values below remain archival.
 
 ## Branches and source provenance
 
@@ -23,7 +23,7 @@ The noiseless raw files record their original simulation commit, including `a9ee
 | Old `results_temp/fixed_msg_*`, adaptive noisy sweeps, min-sum plots, Rayleigh sweeps, 200-frame calibration | Different sampling/decoder/design or pilot role | Exclude from the selected evidence; retain old branch files for history |
 | Existing paper-ready PNG/PDF/summary tables | Old plot focus/normalization/uncertainty conventions | Rebuild selected presentation from compact evidence |
 
-The six bank source paths are:
+The six historical bank source paths are listed below. The selected threshold waterfall now uses the additional bank at `/home/yangshuo/Git/itw2027_nt40_20260913/itw2027/results/source/noisy/threshold_nt40/source_banks/exact-threshold/E2_0p1/bank_n_40.mat`.
 
 ```text
 /home/yangshuo/Downloads/ID_RS_code/results/noisy_channel_confirmatory_bp/waterfall/source_banks/id/E2_0p1/bank_n_40.mat
@@ -75,9 +75,9 @@ At noiseless n_t=40:
 | Rank (20) | 62,400 | 2.0027e−5 | 3.6240e−5 | 0.0624647 | 2,000 |
 | Exact threshold beta=2 | 120 | 0.00678110 | 0.00703716 | 0.0340462 | 2,000 |
 
-The noisy threshold setting uses n_t=42, m=168; it should not be presented as the exact same noiseless n_t=40 point. Its paired noiseless reference comes from its own source bank.
+The current noisy threshold setting uses n_t=40, m=120 and hence the same parameters as the noiseless n_t=40 point. Its paired noisy-experiment reference uses a separate source bank. The older n_t=42, m=168 waterfall is archived and excluded from the selected figure.
 
-At 1.5 dB in the noisy waterfall, FP is 2.9630e−6, 2.4691e−5, and 0.00669364 for ID, rank, and threshold, respectively. ID/rank have zero observed FN, while threshold has FN 0.00039533 and one failed payload frame in 2,500. These are ensemble estimates, not worst-case error probabilities. Zero events do not establish zero channel error: the one-sided 95% frame-event upper bound is approximately 0.001198.
+At 1.5 dB in the matched-length noisy waterfall, FP is 2.9630e−6, 2.4691e−5, and 0.00680691 for ID, rank, and threshold, respectively. All three have zero observed FN and zero failed payload frames in 2,500 at this SNR. These are ensemble estimates, not worst-case error probabilities. Zero events do not establish zero channel error: the one-sided 95% frame-event upper bound is approximately 0.001198.
 
 ## Interpretation limits and checks
 

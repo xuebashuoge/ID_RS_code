@@ -1,6 +1,6 @@
 # ITW 2027 simulation package
 
-This branch implements **two paper figures and one three-row parameter table** for the supplied theorems. The original evidence is available and validated. **Revision of 13 September: a matched-length exact-threshold run at n_t=40 is submitted; the current Figure 2 is a corrected legacy preview until those 22 points complete.** See [the Figure 2 audit](docs/figure2_revision.md). The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
+This branch implements **two paper figures and one three-row parameter table** for the supplied theorems. The original evidence is available and validated. **The matched-length exact-threshold run is complete: Figure 2 now uses n_t=40, G=810, and n_eff=80 for all three functions, with all 22 replacement points validated.** See [the Figure 2 audit](docs/figure2_revision.md). The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
 
 Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/evidence_audit.md), and [the Slurm resource plan](docs/server_jobs.md). LaTeX subsection text and captions are in [paper_results.tex](docs/paper_results.tex). The existing untracked `paper/` directory was left untouched.
 
@@ -54,7 +54,7 @@ bash itw2027/slurm/submit.sh noisy waterfall
 bash itw2027/slurm/submit.sh noisy rate_pareto
 ```
 
-The copy helper is intended to run **on unimelb** in the new checkout. It leaves original server files untouched. No Slurm jobs were submitted during development. Full banks and original result files are ignored in Git; the small evidence files and all paper outputs are included.
+The copy helper is intended to run **on unimelb** in the new checkout. It leaves original server files untouched. The matched-length threshold rerun (jobs 30503621/30503622) completed and its results are included. Full banks and original result files are ignored in Git; the small evidence files and all paper outputs are included.
 
 For fully fresh noiseless regeneration, see the resource plan before `submit.sh noiseless`: it uses more, smaller shards and therefore generates a new negative-message sample. Do not pool the old sample and new sample without an explicit sampling design. Keep the regenerated dataset separate, replace the source input as one complete dataset, and export to a fresh evidence directory when evaluating it.
 

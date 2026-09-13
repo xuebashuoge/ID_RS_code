@@ -1,5 +1,3 @@
-% REVISION PENDING: threshold n_t=40 replacement submitted 13 September.
-% Numerical values below still describe the archived n_t=42 threshold.
 % Suggested replacements for the empty numerical subsections in the supplied
 % manuscript. Place at repository root or adjust the itw2027/ relative paths.
 % This is a results fragment, not a full manuscript; review final page count.
@@ -48,9 +46,8 @@ code over BPSK-AWGN, using belief-propagation decoding with at most $50$
 iterations. Each SNR point contains $2{,}500$ frames.
 Table~\ref{tab:itw27_parameters} reports the implemented finite rates,
 using $G=\lfloor N_i/n_t\rfloor$ and
-$R_{\rm eff}=G\log_2(m)/N_b$. The effective uses are $80$, $80$, and
-$84.0467$ for ID, rank, and threshold, respectively; the threshold frame
-has $18$ padding bits. These are amortized resource costs, while decoding
+$R_{\rm eff}=G\log_2(m)/N_b$. All three functions use $n_t=40$, packing $G=810$ tags per frame
+without padding, so the effective use is $n_{\rm eff}=80$. These are amortized resource costs, while decoding
 still uses the full physical frame.
 
 Fig.~\ref{fig:itw27_noisy} separates the channel-induced FN behavior from

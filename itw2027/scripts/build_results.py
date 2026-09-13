@@ -123,7 +123,8 @@ def noisy():
     if replacement:
         assert len(replacement)==22, 'Incomplete n_t=40 replacement: export all 22 points before rebuilding.'
         assert all(r['family']=='exact-threshold' and r['n_t']==40 for r in replacement)
-        assert len({round(r['ebno_db'],6) for r in replacement})==22
+        assert {round(r['ebno_db'],6) for r in replacement}=={round(.5+.1*i,6) for i in range(22)}
+        assert all((r['K'],r['m'],r['S'],r['G'],r['padding'],r['R_c'])==(6,120,7140,810,0,.5) for r in replacement)
         rows=[r for r in legacy if not (r['experiment']=='waterfall' and r['family']=='exact-threshold')]
         rows += [dict(r,experiment='waterfall',source_experiment='threshold_nt40') for r in replacement]
     else:
@@ -234,6 +235,8 @@ def provenance():
         if not p.is_file(): continue
         rel=p.relative_to(ROOT/'results/source')
         base='/home/yangshuo/Git/ID_RS_code/conference_results/raw/' if rel.parts[0]=='noiseless' else '/home/yangshuo/Downloads/ID_RS_code/results/noisy_channel_confirmatory_bp/'
+        if rel.parts[:2]==('noisy','threshold_nt40'):
+            base='/home/yangshuo/Git/itw2027_nt40_20260913/itw2027/results/source/noisy/'
         if rel.parts[0] not in ('noisy','noiseless'): continue
         rows.append(dict(local=str(p.relative_to(ROOT)),remote=base+str(Path(*rel.parts[1:])),bytes=p.stat().st_size,
                          sha256=hashlib.sha256(p.read_bytes()).hexdigest(),reuse='source_bank_copy_on_server' if 'source_banks' in p.parts else 'completed_evidence'))
@@ -268,6 +271,8 @@ if __name__=='__main__':
             'adversarial_verified':sum(bool(x['verified']) for x in b),
             'adversarial_skipped':sum(not bool(x['verified']) for x in b),
             'noisy_points':len(c),'frames_per_point':2500,'all_paired_error_checks_passed':True,
+            'archived_noisy_points':len(list((EVIDENCE/'noisy').rglob('result*.mat'))),
+            'matched_threshold_points':sum(x.get('source_experiment')=='threshold_nt40' for x in c),
             'noisy_comparison_nt_matched':all(x['n_t']==40 for x in c if x['experiment']=='waterfall'),
             'new_channel_simulation_required_for_selected_figures':any(x['n_t']!=40 for x in c if x['experiment']=='waterfall')}
     (OUT/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
