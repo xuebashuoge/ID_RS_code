@@ -6,8 +6,8 @@ Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/
 
 ## Outputs
 
-- `results/processed/figures/figure1_noiseless.{pdf,png}`: error distributions and rate sequences.
-- `results/processed/figures/figure2_noisy.{pdf,png}`: separate false-negative and false-positive behavior.
+- `results/processed/figures/figure1_noiseless.{pdf,png}`: per-function median/maximum/bound panels and rate sequences.
+- `results/processed/figures/figure2_noisy.{pdf,png}`: one row per function, with FN/FER on the left and FP/reference/diagnostic on the right. All quantities have legends; no shading is drawn.
 - `results/processed/tables/paper_parameters.{csv,tex}`: three representative configurations, packing and rates.
 - `results/processed/tables/finite_rate_at_1percent.csv`: largest certified message and rate within the balanced RS parameter choice, including odd lengths and padding; aligned and unrestricted message lengths are distinguished.
 - `results/processed/tables/rate_sequences.csv`: fixed-exponent and vanishing-exponent calculations, through tag length 4096. These large lengths are analytical evaluations, not implemented GF simulations.

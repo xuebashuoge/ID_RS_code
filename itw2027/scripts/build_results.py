@@ -165,63 +165,125 @@ def rate_results():
     csv_write('finite_rate_at_1percent.csv',finite)
     return rows
 
+def legend_line(label, **kwargs):
+    return Line2D([], [], label=label, **kwargs)
+
+
+def clean_axis(ax):
+    ax.grid(axis='y', which='major', color='0.88', linewidth=.55)
+    ax.tick_params(axis='both', which='both', direction='out', length=3)
+    ax.set_axisbelow(True)
+
+
 def figure_noiseless(rows,adv,rates):
-    fig,axes=plt.subplots(1,2,figsize=(7.1,2.8),layout='constrained')
-    ax=axes[0]
-    for f in FAMILIES:
+    # Three small panels separate overlapping family bounds without changing
+    # coordinates. Nested markers distinguish coincident median and maximum.
+    fig=plt.figure(figsize=(7.1,4.0))
+    grid=fig.add_gridspec(3,2,left=.10,right=.99,bottom=.20,top=.70,
+                         width_ratios=[1,1.02],hspace=.36,wspace=.32)
+    panels=[]
+    for i,f in enumerate(FAMILIES):
+        ax=fig.add_subplot(grid[i,0]);panels.append(ax)
         rr=sorted([r for r in rows if r['family']==f],key=lambda x:x['n_t'])
-        xx=[r['n_t'] for r in rr]; cc=COLORS[f]
-        # Exact zero is shown at an annotated display floor, never deleted.
-        ax.plot(xx,[max(r['median'],2e-7) for r in rr],'-o',ms=3,color=cc,label=LABELS[f])
-        ax.fill_between(xx,[max(r['q05'],2e-7) for r in rr],[max(r['q95'],2e-7) for r in rr],color=cc,alpha=.12)
-        ax.plot(xx,[max(r['sample_max'],2e-7) for r in rr],':',color=cc)
-        ax.plot(xx,[r['bound'] for r in rr],'--',color=cc)
-        zz=[r for r in rr if r['median']==0]
-        ax.scatter([r['n_t'] for r in zz],[2e-7]*len(zz),marker='v',facecolors='white',edgecolors=cc,zorder=5)
-    ax.set(yscale='log',xlabel=r'Tag length $n_t$',ylabel=r'Exact per-message FP probability',ylim=(1.2e-7,1),title='(a) Finite-length error')
-    ax.grid(alpha=.2,which='both')
-    ax=axes[1]
-    for f in FAMILIES:
+        xx=[r['n_t'] for r in rr];cc=COLORS[f]
+        ax.plot(xx,[r['bound'] for r in rr],color='0.25',ls='--',lw=1.1,zorder=1)
+        ax.plot(xx,[r['sample_max'] for r in rr],ls='none',marker='s',ms=6,
+                markerfacecolor='none',markeredgecolor=cc,markeredgewidth=1,zorder=3)
+        ax.plot(xx,[r['median'] for r in rr],color=cc,lw=.9,marker='o',ms=2.6,zorder=4)
+        # Common limits retain direct comparisons of magnitudes across rows.
+        ax.set_yscale('log');ax.set_ylim(3e-7,.4)
+        ax.set_yticks([1e-6,1e-3,1e-1]);ax.set_xlim(23,41)
+        ax.set_xticks([24,28,32,36,40])
+        ax.text(.98,1.025,LABELS[f],ha='right',va='bottom',color=cc,
+                transform=ax.transAxes,fontsize=10)
+        if i<2: ax.tick_params(labelbottom=False)
+        else: ax.set_xlabel(r'Tag length $n_t$')
+        clean_axis(ax)
+    panels[1].set_ylabel('FP probability',labelpad=4)
+    fig.text(.29,.98,'(a) Finite-length error',ha='center',va='top',fontsize=11)
+    fig.legend(handles=[
+        legend_line('Median',color='0.25',lw=.9,marker='o',markersize=3),
+        legend_line('Sample maximum',color='0.25',ls='none',marker='s',markersize=6,markerfacecolor='none'),
+        legend_line(r'Bound $B=S(K-1)/T$',color='0.25',ls='--')],
+        loc='upper left',bbox_to_anchor=(.075,.925),ncol=1,frameon=False,
+        handlelength=2.1,labelspacing=.23,borderaxespad=0)
+
+    ax=fig.add_subplot(grid[:,1])
+    markers={'id':'o','rank':'s','exact-threshold':'^'}
+    for i,f in enumerate(FAMILIES):
         for seq,style in [('fixed_E','-'),('vanishing_E','--')]:
             rr=[r for r in rates if r['family']==f and r['sequence']==seq]
-            ax.plot([r['n_t'] for r in rr],[r['rate'] for r in rr],style,color=COLORS[f])
-    ax.axhline(.5,color='gray',lw=.8,ls=':');ax.axhline(1/6,color='gray',lw=.8,ls=':')
-    ax.text(3900,.51,r'$1/2$',ha='right',fontsize=10);ax.text(3900,.178,r'$1/6$',ha='right',fontsize=10)
-    ax.set(xscale='log',xlabel=r'Tag length $n_t$',ylabel=r'$R_t=\log_2(m)/n_t$',ylim=(0,.65),title='(b) Certified rate sequences')
-    ax.grid(alpha=.2)
-    fig.legend(handles=[Line2D([],[],color=COLORS[f],label=LABELS[f]) for f in FAMILIES],loc='outside upper center',ncol=3,frameon=False)
+            # Markers are spread across log(n), with alternating high-n
+            # positions for the nearly coincident ID/rank curves.
+            targets={'id':[32,64,128,512,2048],
+                     'rank':[44,88,176,256,1024,4096],
+                     'exact-threshold':[36,72,144,512,2048]}[f]
+            ns=np.array([r['n_t'] for r in rr])
+            positions=sorted({int(np.argmin(abs(np.log(ns)-np.log(t)))) for t in targets})
+            ax.plot([r['n_t'] for r in rr],[r['rate'] for r in rr],style,
+                    color=COLORS[f],lw=1.15,marker=markers[f],ms=4,
+                    markerfacecolor='white',markevery=positions)
+    ax.axhline(.5,color='0.5',lw=.9,ls=':');ax.axhline(1/6,color='0.5',lw=.9,ls=':')
+    ax.text(4300,.506,r'$1/2$',ha='right',va='bottom',fontsize=10)
+    ax.text(4300,.174,r'$1/6$',ha='right',va='bottom',fontsize=10)
+    ax.set(xscale='log',xlabel=r'Tag length $n_t$',ylabel=r'$R_t=\log_2(m)/n_t$',ylim=(.08,.62))
+    clean_axis(ax)
+    fig.text(.77,.98,'(b) Certified rate sequences',ha='center',va='top',fontsize=11)
+    fig.legend(handles=[
+        legend_line(r'$E=0.1$',color='0.25',ls='-'),
+        legend_line(r'$E=n_t^{-1/2}$',color='0.25',ls='--'),
+        legend_line('Asymptotic benchmarks',color='0.5',ls=':')],
+        loc='upper left',bbox_to_anchor=(.57,.925),ncol=1,frameon=False,
+        handlelength=2.1,labelspacing=.23,borderaxespad=0)
+    fig.legend(handles=[legend_line({'id':'ID','rank':'Rank','exact-threshold':'Threshold'}[f],color=COLORS[f],ls='none',
+              marker=markers[f],markerfacecolor='white',ms=4) for f in FAMILIES],
+              loc='lower center',bbox_to_anchor=(.77,.005),ncol=3,frameon=False,
+              handletextpad=.3,columnspacing=.7,borderpad=.2)
     savefig(fig,'figure1_noiseless')
 
-def plot_error(ax,rr,key,color,style,label):
-    xx=np.array([r['ebno_db'] for r in rr]);yy=np.array([r[key] for r in rr])
-    positive=yy>0
-    # Mark EVERY observation: line-only plotting lost isolated nonzero points
-    # when zero-valued neighbours were replaced with NaNs.
-    ax.plot(xx,yy,style,color=color,label=label,marker='o' if style=='-' else 's',
-            markersize=3,markerfacecolor='white' if style!='-' else color)
-    if key in ('fpr','fnr'):
-        lower=np.array([r[key+'_lower95'] for r in rr]);upper=np.array([r[key+'_upper95'] for r in rr])
-        ax.fill_between(xx,lower,upper,where=positive,color=color,alpha=.1)
 
 def figure_noisy(rows):
-    fig,axes=plt.subplots(1,2,figsize=(7.1,2.8),layout='constrained')
-    for f in FAMILIES:
+    fig,axes=plt.subplots(3,2,figsize=(7.1,4.15),sharex=True,sharey=True)
+    fig.subplots_adjust(left=.095,right=.99,bottom=.135,top=.70,hspace=.32,wspace=.18)
+    fig.text(.30,.985,'(a) False negatives',ha='center',va='top',fontsize=11)
+    fig.text(.78,.985,'(b) False positives',ha='center',va='top',fontsize=11)
+    fig.legend(handles=[
+        legend_line('Observed FN',color='0.25',ls='-',marker='o',ms=3),
+        legend_line('Payload FER',color='0.3',ls='--',marker='s',ms=5,markerfacecolor='none')],
+        loc='upper left',bbox_to_anchor=(.09,.93),frameon=False,
+        labelspacing=.3,handlelength=2.0,borderaxespad=0)
+    fig.legend(handles=[
+        legend_line('Observed FP',color='0.25',ls='none',marker='o',ms=4,markerfacecolor='white'),
+        legend_line('Noiseless FP',color='0.25',ls='-',lw=.9),
+        legend_line(r'$\min(1,B+\widehat{\mathrm{FER}})$: diagnostic',color='0.3',ls='--')],
+        loc='upper left',bbox_to_anchor=(.575,.93),frameon=False,
+        labelspacing=.23,handlelength=2.0,borderaxespad=0)
+    for i,f in enumerate(FAMILIES):
         rr=sorted([r for r in rows if r['family']==f and r['experiment']=='waterfall'],key=lambda x:x['ebno_db'])
-        cc=COLORS[f]
-        plot_error(axes[0],rr,'fnr',cc,'-',LABELS[f])
-        plot_error(axes[0],rr,'fer',cc,'--',None)
-        plot_error(axes[1],rr,'fpr',cc,'-',LABELS[f])
-        plot_error(axes[1],rr,'noiseless_fpr',cc,':',None)
-        axes[1].plot([r['ebno_db'] for r in rr],[r['diagnostic_fp_envelope'] for r in rr],'--',color=cc)
-    for ax in axes:
-        ax.set_yscale('symlog',linthresh=1e-6,linscale=.5)
-        ax.set(xlabel=r'$E_b/N_0$ (dB, payload bit)',ylabel='Error probability',ylim=(0,1.3))
-        ax.set_yticks([0,1e-6,1e-4,1e-2,1])
-        ax.set_yticklabels(['0',r'$10^{-6}$',r'$10^{-4}$',r'$10^{-2}$','1'])
-        ax.grid(alpha=.2,which='both')
-    axes[0].set_title('(a) False negatives');axes[1].set_title('(b) False positives')
-    fig.legend(handles=[Line2D([],[],color=COLORS[f],label=LABELS[f]) for f in FAMILIES],loc='outside upper center',ncol=3,frameon=False)
+        xx=np.array([r['ebno_db'] for r in rr]);cc=COLORS[f]
+        left,right=axes[i]
+        # A hollow large square surrounds the smaller FN dot if they coincide.
+        left.plot(xx,[r['fer'] for r in rr],color='0.3',ls='--',lw=.85,
+                  marker='s',ms=4.8,markerfacecolor='none',zorder=2)
+        left.plot(xx,[r['fnr'] for r in rr],color=cc,lw=1.0,
+                  marker='o',ms=2.8,zorder=3)
+        right.plot(xx,[r['diagnostic_fp_envelope'] for r in rr],color='0.3',ls='--',lw=1.1,zorder=1)
+        right.plot(xx,[r['noiseless_fpr'] for r in rr],color='0.2',lw=.85,zorder=2)
+        # Points on a reference line explicitly show agreement, without a
+        # second coincident line. No horizontal offsets or artificial floors.
+        right.plot(xx,[r['fpr'] for r in rr],color=cc,ls='none',marker='o',ms=3.6,
+                   markerfacecolor='white',markeredgewidth=1.05,zorder=4)
+        for ax in (left,right):
+            ax.set_yscale('symlog',linthresh=1e-6,linscale=.5)
+            ax.set_ylim(-1.2e-7,1.5);ax.set_xlim(.44,2.66)
+            ax.set_yticks([0,1e-3,1]);ax.set_yticklabels(['0',r'$10^{-3}$','1'])
+            ax.set_xticks([.5,1,1.5,2,2.5]);clean_axis(ax)
+            ax.text(.98,1.025,LABELS[f],transform=ax.transAxes,
+                    ha='right',va='bottom',fontsize=10,color=cc)
+    axes[1,0].set_ylabel('Error probability',labelpad=4)
+    for ax in axes[-1]: ax.set_xlabel(r'$E_b/N_0$ (dB, payload bit)')
     savefig(fig,'figure2_noisy')
+
     fig,ax=plt.subplots(figsize=(3.5,2.7),layout='constrained')
     for f in FAMILIES:
         rr=sorted([r for r in rows if r['family']==f and r['experiment']=='rate_pareto' and abs(r['ebno_db']-1.5)<1e-8],key=lambda x:x['n_eff'])

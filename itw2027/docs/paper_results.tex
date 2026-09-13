@@ -25,16 +25,16 @@ rates approach $1/2$ for constant weights and $1/6$ for $\beta=2$.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure1_noiseless.pdf}
-  \caption{Noiseless RS tagging. (a) Exact per-message FP probabilities:
-  solid curves show medians, shaded regions the fifth--95th percentiles,
-  dotted curves the sample maxima, and dashed curves $S(K-1)/T$.
+  \caption{Noiseless RS tagging. (a) Separate panels for ID, rank, and
+  exact threshold on common probability scales. Filled circles and solid
+  curves show medians, hollow squares show sample maxima, and dashed curves
+  show $B=S(K-1)/T$. Nested markers indicate coincident values.
   There are $2{,}000$ sampled negative messages per setting except ID at
-  $n_t=38,40$, with $200$ each. Zero lower quantiles are clipped to the
-  display floor $2\times10^{-7}$. Sample maxima do not establish maximal
-  error. (b) Deterministic finite-rate calculations with fixed $E=0.1$
-  (solid) and $E(n_t)=1/\sqrt{n_t}$ (dashed); horizontal dotted lines
-  indicate the asymptotic benchmarks. Colors identify the same functions
-  in both panels.}
+  $n_t=38,40$, with $200$ each. Sample maxima do not establish maximal error.
+  (b) Deterministic finite-rate calculations with fixed $E=0.1$ (solid)
+  and $E(n_t)=1/\sqrt{n_t}$ (dashed); dotted lines indicate asymptotic
+  benchmarks. Colors identify the functions; markers in (b) are placed
+  at selected original coordinates to distinguish nearly coincident curves.}
   \label{fig:itw27_noiseless}
 \end{figure*}
 
@@ -74,14 +74,16 @@ maximal error over messages and functions.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure2_noisy.pdf}
-  \caption{Packed BFC over BPSK-AWGN. The energy normalization is per
-  occupied payload bit. (a) Conditional FN (solid) and observed payload
-  FER (dashed). (b) Conditional FP (solid), paired noiseless FP (dotted),
-  and the diagnostic $\min\{1,S(K-1)/T+\widehat{\mathrm{FER}}\}$ (dashed).
-  Shading denotes $95\%$ frame-cluster bootstrap intervals for nonzero
-  FP/FN observations. All observations have markers, including isolated
-  nonzero points. Zero estimates are shown at zero using an axis that is
-  linear below $10^{-6}$ and logarithmic above it; zero observations do not
-  establish zero true error probability.}
+  \caption{Packed BFC over BPSK-AWGN with $n_t=40$ and $n_{\rm eff}=80$.
+  Rows correspond to ID, rank, and exact threshold on common probability
+  scales. (a) Conditional FN: colored solid curves with filled circles;
+  observed payload FER: gray dashed curves with hollow squares.
+  (b) Conditional FP: colored hollow circles; paired noiseless FP: thin
+  solid reference curves; the diagnostic
+  $\min\{1,B+\widehat{\mathrm{FER}}\}$: dashed curves, with $B=S(K-1)/T$.
+  Points on a reference curve indicate agreement. Every observed point,
+  including isolated nonzero events and zeros, is retained. The axes are
+  linear below $10^{-6}$ and logarithmic above it. Zero observations do
+  not establish zero true error probability.}
   \label{fig:itw27_noisy}
 \end{figure*}
