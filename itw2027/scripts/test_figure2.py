@@ -18,6 +18,7 @@ class Figure2(unittest.TestCase):
         try:
             fig=captured['figure2_noisy']
             self.assertEqual(len(fig.axes),6)
+            self.assertAlmostEqual(fig.get_size_inches()[0],3.5)
             for i in range(3):
                 fn=fig.axes[2*i].lines[1]
                 fp=fig.axes[2*i+1].lines[2]
@@ -27,7 +28,7 @@ class Figure2(unittest.TestCase):
                 self.assertEqual(fp.get_linestyle(),'None')
             self.assertFalse(any(ax.collections for ax in fig.axes))
             labels=[t.get_text() for legend in fig.legends for t in legend.get_texts()]
-            for label in ('Observed FN','Payload FER','Observed FP','Noiseless FP'):
+            for label in ('FN','FER','FP','Noiseless','Diagnostic'):
                 self.assertIn(label,labels)
         finally:
             for fig in captured.values(): plt.close(fig)

@@ -1,6 +1,8 @@
 # ITW 2027 simulation package
 
-This branch implements **two paper figures and one three-row parameter table** for the supplied theorems. The original evidence is available and validated. **The matched-length exact-threshold run is complete: Figure 2 now uses n_t=40, G=810, and n_eff=80 for all three functions, with all 22 replacement points validated.** See [the Figure 2 audit](docs/figure2_revision.md). The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
+This branch implements **two single-column paper figures and one three-row parameter table** for the supplied theorems. The original evidence is available and validated. **The matched-length exact-threshold run is complete: Figure 2 now uses n_t=40, G=810, and n_eff=80 for all three functions, with all 22 replacement points validated.** See [the Figure 2 audit](docs/figure2_revision.md). The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
+
+The current drawing revision uses native 3.5-inch figures and one-sentence captions. [Current draft with replacements](docs/current_draft_single_column.tex) preserves the supplied draft's theory and bibliography; [figure blocks only](docs/single_column_figures.tex) are available for direct insertion. [IEEE column-size preview](results/processed/figures/single_column_layout_preview.pdf) shows both figures at print size, each in its own column. The draft remains a body fragment, as supplied, without a new preamble.
 
 Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/evidence_audit.md), and [the Slurm resource plan](docs/server_jobs.md). LaTeX subsection text and captions are in [paper_results.tex](docs/paper_results.tex). The existing untracked `paper/` directory was left untouched.
 

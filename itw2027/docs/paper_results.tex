@@ -12,6 +12,7 @@ conservative design $KS_{\rm up}(rK)\leq 2^{n_t(1/2-E)}$, where
 $S_{\rm up}(m)=S$ for ID/rank and $S_{\rm up}(m)=m^2/2$ for threshold.
 The finite computation rate is $R_t=\log_2(m)/n_t$.
 
+We sample $2{,}000$ negative messages per setting ($200$ for ID at $n_t=38,40$); maxima refer only to this sample. The uniform bound is $B=S(K-1)/T$.
 Fig.~\ref{fig:itw27_noiseless}(a) uses $E=0.1$ and evaluates every RS
 position for each sampled negative message. The sampled probabilities
 satisfy Proposition~\ref{prop:finite_error}; its uniform bound is especially
@@ -22,21 +23,12 @@ Fig.~\ref{fig:itw27_noiseless}(b) distinguishes fixed-$E$ rate sequences
 from $E(n_t)=1/\sqrt{n_t}$, for which the error bound vanishes while the
 rates approach $1/2$ for constant weights and $1/6$ for $\beta=2$.
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure1_noiseless.pdf}
-  \caption{Noiseless RS tagging. (a) Separate panels for ID, rank, and
-  exact threshold on common probability scales. Filled circles and solid
-  curves show medians, hollow squares show sample maxima, and dashed curves
-  show $B=S(K-1)/T$. Nested markers indicate coincident values.
-  There are $2{,}000$ sampled negative messages per setting except ID at
-  $n_t=38,40$, with $200$ each. Sample maxima do not establish maximal error.
-  (b) Deterministic finite-rate calculations with fixed $E=0.1$ (solid)
-  and $E(n_t)=1/\sqrt{n_t}$ (dashed); dotted lines indicate asymptotic
-  benchmarks. Colors identify the functions; markers in (b) are placed
-  at selected original coordinates to distinguish nearly coincident curves.}
+  \includegraphics[width=\columnwidth]{itw2027/results/processed/figures/figure1_noiseless.pdf}
+  \caption{Noiseless RS tagging: (a) sampled FP probabilities and uniform bounds; (b) finite rates and asymptotic benchmarks.}
   \label{fig:itw27_noiseless}
-\end{figure*}
+\end{figure}
 
 % Insert in the noisy-channel section, replacing its empty subsection.
 \subsection{Numerical Results}
@@ -53,11 +45,12 @@ still uses the full physical frame.
 Fig.~\ref{fig:itw27_noisy} separates the channel-induced FN behavior from
 the intrinsic FP floor. Every recorded payload-correct frame reproduces
 the paired noiseless decisions, consistent with the mechanism in
-Proposition~\ref{prop:noisy_finite_error}. The dashed FP curves substitute
-observed payload FER into the additive expression and are empirical
-diagnostics, not estimates of the maximal channel-error guarantee $\xi$.
+Proposition~\ref{prop:noisy_finite_error}. The dashed FP curves show $\min\{1,B+\widehat{\mathrm{FER}}\}$,
+with $B=S(K-1)/T$, as an empirical diagnostic rather than a maximal-error
+estimate. The axes are linear below $10^{-6}$ to display zero estimates,
+which do not establish zero true error probability.
 The shared source bank explains repeated high-SNR FP floors; the
-class-conditional estimates and frame-cluster intervals do not establish
+class-conditional estimates do not establish
 maximal error over messages and functions.
 
 \begin{table}[t]
@@ -71,19 +64,9 @@ maximal error over messages and functions.
   \input{itw2027/results/processed/tables/paper_parameters.tex}
 \end{table}
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{itw2027/results/processed/figures/figure2_noisy.pdf}
-  \caption{Packed BFC over BPSK-AWGN with $n_t=40$ and $n_{\rm eff}=80$.
-  Rows correspond to ID, rank, and exact threshold on common probability
-  scales. (a) Conditional FN: colored solid curves with filled circles;
-  observed payload FER: gray dashed curves with hollow squares.
-  (b) Conditional FP: colored hollow circles; paired noiseless FP: thin
-  solid reference curves; the diagnostic
-  $\min\{1,B+\widehat{\mathrm{FER}}\}$: dashed curves, with $B=S(K-1)/T$.
-  Points on a reference curve indicate agreement. Every observed point,
-  including isolated nonzero events and zeros, is retained. The axes are
-  linear below $10^{-6}$ and logarithmic above it. Zero observations do
-  not establish zero true error probability.}
+  \includegraphics[width=\columnwidth]{itw2027/results/processed/figures/figure2_noisy.pdf}
+  \caption{Packed BFC over AWGN: (a) FN and payload FER; (b) FP, noiseless reference, and additive diagnostic.}
   \label{fig:itw27_noisy}
-\end{figure*}
+\end{figure}

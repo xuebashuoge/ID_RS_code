@@ -1,0 +1,13 @@
+{
+  "source_sha256": "8f57e584d161a23fcb30c95d2b377a23e2feee0e507c840dafe1fda988323e01",
+  "changed_figure_labels": [
+    "fig:itw27_noiseless",
+    "fig:itw27_noisy"
+  ],
+  "caption_word_counts": {
+    "fig:itw27_noiseless": 16,
+    "fig:itw27_noisy": 16
+  },
+  "native_figure_width_inches": 3.5,
+  "changes": "Two figure* floats replaced by figure/columnwidth with concise captions; essential sample/axis interpretation moved to nearby simulation prose. Theory and bibliography unchanged. Trailing whitespace in the pasted draft was normalized."
+}
