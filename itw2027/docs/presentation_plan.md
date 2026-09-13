@@ -1,5 +1,7 @@
 # Presentation and theorem alignment
 
+**13 September revision:** use n_t=40 for all three noisy functions. The replacement threshold run is pending; current numerical values below describe the archived n_t=42 threshold until replacement. See `figure2_revision.md`.
+
 ## Space budget and primary story
 
 Use two wide, two-panel figures and one small three-row table, with about 250–350 words of discussion. Allocate approximately one content page overall, subject to the full manuscript's float placement. If space is tighter, use only the error panels in the paper and move the rate-sequence panel to the linked preprint; keep the finite-rate table. Do not add a separate third rate/latency figure.
@@ -22,7 +24,7 @@ This distinguishes the finite rate/error tradeoff from the asymptotic achievabil
 
 Use BPSK-AWGN, length 64,800 DVB-S2 LDPC, rate 1/2, BP with at most 50 iterations and early termination. Three function settings: ID n_t=40, rank n_t=40, exact-threshold n_t=42. Every SNR point uses 2,500 fixed frames; the grid is 0.5–2.6 dB in steps of 0.1 dB. `E_b` is energy per occupied **payload** bit, including the exact packing efficiency in the noise normalization.
 
-**Panel (a).** Horizontal axis: E_b/N_0 in dB. Vertical axis: error probability, logarithmic. Solid: class-conditional empirical FN for each function. Dashed: measured payload FER. Shading: saved 95% frame-cluster percentile-bootstrap intervals for FN. First-zero-event downward triangles show a conservative one-sided frame-based 95% upper limit (about 0.00120, with a small class-size adjustment for odd G). Later zero points are retained in tables, not drawn as positive estimates.
+**Panel (a).** Horizontal axis: E_b/N_0 in dB. Vertical axis: error probability, logarithmic above 1e-6 with a linear segment down to zero. Solid: class-conditional empirical FN for each function. Dashed: measured payload FER. Shading: saved 95% frame-cluster percentile-bootstrap intervals for FN. Every point has a marker, including isolated nonzero observations. Zero estimates are plotted at zero in the linear segment; upper confidence limits remain in the tables rather than being substituted for observations.
 
 This demonstrates the channel-induced FN mechanism and the waterfall. Residual errors and nonmonotonic rare-event estimates are preserved. Packing produces many decisions per frame but cannot turn 2,500 independent frames into millions of independent channel trials.
 

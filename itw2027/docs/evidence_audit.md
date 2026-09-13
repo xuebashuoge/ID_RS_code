@@ -1,5 +1,7 @@
 # Evidence audit and rate calculations
 
+**13 September update:** the original Figure 2 omitted isolated nonzero points because it used line-only traces with NaNs at zeros. This is fixed. Upper-limit triangles are removed, actual zero estimates are drawn, and the n_t=40 threshold replacement is submitted. See `figure2_revision.md`; historical n_t=42 values below remain archival.
+
 ## Branches and source provenance
 
 The new branch starts from `single_message` commit `aaa2424d8fc2a52c6926f45c170f8f0169db8df3`. The noisy simulation engine was copied into `itw2027/matlab/noisy/` from `noisy_channel_revised` commit `20ed9cd1a909836ab2907397c4c5ef7b9afa17e2`. It is isolated to avoid switching branches or replacing the noiseless functions. New wrappers validate compatible completed points, isolate result locations, and fail jobs that do not finish the fixed sample.
@@ -82,7 +84,7 @@ At 1.5 dB in the noisy waterfall, FP is 2.9630e−6, 2.4691e−5, and 0.00669364
 1. All 27 finite-length cells satisfy the exact algebraic bound for every sampled negative message. The sampled maximum is not a supremum over all messages or functions.
 2. All 126 noisy points pass per-frame error identities. Correct payload decoding gives exactly the paired noiseless decisions. The class-weighted bad-frame event bounds FN and the extra possible FP contribution without inserting a G factor.
 3. The original channel FER counts errors in occupied payload bits, excluding padding. It is therefore labelled **payload FER**. It is not the maximal full-information-word FER xi assumed by the theorem. `B+observed FER` is an empirical diagnostic only; no rigorous maximal-error curve is estimated from the Monte Carlo sample.
-4. Confidence intervals use frame clusters. Nonzero-event bootstrap intervals with only one or a few contributing frames are necessarily unstable. Zero-event markers use independent-frame resolution, never the legacy tuple-level rule of three. For unequal class counts in odd-G frames a conservative max-class-size/mean-class-size factor is included.
+4. Confidence intervals use frame clusters. Nonzero-event bootstrap intervals with only one or a few contributing frames are necessarily unstable. Zero-event confidence limits in the saved tables use independent-frame resolution, never the legacy tuple-level rule of three. The revised plot shows the observed zero values directly. For unequal class counts in odd-G frames a conservative max-class-size/mean-class-size factor is included.
 5. The original balanced source bank alternates positive/negative examples. It estimates class-conditional behavior for the specified functions. It is not uniform sampling from all 2^m inputs, nor worst-case query selection.
 6. A 64,800-symbol physical frame remains the decoding unit. n_eff is amortized resource cost per decision, not an 80-symbol latency code. Packing gain G compares serving G tasks in one frame with using one otherwise identical frame per task; it is not a simulated throughput benchmark including computation and queuing.
 7. The supplied draft's statement that the union bound is loose whenever S>1 is too strong. For unrestricted supports, disjoint K−1 root sets attain it when feasible. A safe sentence is: “The uniform bound may be conservative for a specified Boolean function because collision sets can overlap or have fewer than K−1 roots.”

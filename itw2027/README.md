@@ -1,6 +1,6 @@
 # ITW 2027 simulation package
 
-This branch implements **two paper figures and one three-row parameter table** for the supplied theorems. All selected empirical results are available and validated. No new large channel simulations are needed for these figures. The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
+This branch implements **two paper figures and one three-row parameter table** for the supplied theorems. The original evidence is available and validated. **Revision of 13 September: a matched-length exact-threshold run at n_t=40 is submitted; the current Figure 2 is a corrected legacy preview until those 22 points complete.** See [the Figure 2 audit](docs/figure2_revision.md). The rate curves and the integer finite-rate optimization are new deterministic calculations. The MATLAB scripts also support regeneration on the server.
 
 Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/evidence_audit.md), and [the Slurm resource plan](docs/server_jobs.md). LaTeX subsection text and captions are in [paper_results.tex](docs/paper_results.tex). The existing untracked `paper/` directory was left untouched.
 

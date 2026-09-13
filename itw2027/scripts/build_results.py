@@ -116,7 +116,18 @@ def noisy():
             runtime_hours=r['runtime_seconds']/3600,seed=r['scenario']['seed'],
             source=str(p.relative_to(ROOT)))
         rows.append(row)
-    assert len(rows)==126 and sum(r['experiment']=='waterfall' for r in rows)==66
+    replacement=[r for r in rows if r['experiment']=='threshold_nt40']
+    legacy=[r for r in rows if r['experiment'] in ('waterfall','rate_pareto')]
+    assert len(legacy)==126 and sum(r['experiment']=='waterfall' for r in legacy)==66
+    csv_write('noisy_archived_and_new_points.csv',rows)
+    if replacement:
+        assert len(replacement)==22, 'Incomplete n_t=40 replacement: export all 22 points before rebuilding.'
+        assert all(r['family']=='exact-threshold' and r['n_t']==40 for r in replacement)
+        assert len({round(r['ebno_db'],6) for r in replacement})==22
+        rows=[r for r in legacy if not (r['experiment']=='waterfall' and r['family']=='exact-threshold')]
+        rows += [dict(r,experiment='waterfall',source_experiment='threshold_nt40') for r in replacement]
+    else:
+        rows=legacy
     csv_write('noisy_all_points.csv',rows)
     representative=[r for r in rows if r['experiment']=='waterfall' and abs(r['ebno_db']-1.5)<1e-8]
     csv_write('representative_1p5dB.csv',representative)
@@ -183,15 +194,13 @@ def figure_noiseless(rows,adv,rates):
 def plot_error(ax,rr,key,color,style,label):
     xx=np.array([r['ebno_db'] for r in rr]);yy=np.array([r[key] for r in rr])
     positive=yy>0
-    ax.plot(xx,np.where(positive,yy,np.nan),style,color=color,label=label)
+    # Mark EVERY observation: line-only plotting lost isolated nonzero points
+    # when zero-valued neighbours were replaced with NaNs.
+    ax.plot(xx,yy,style,color=color,label=label,marker='o' if style=='-' else 's',
+            markersize=3,markerfacecolor='white' if style!='-' else color)
     if key in ('fpr','fnr'):
         lower=np.array([r[key+'_lower95'] for r in rr]);upper=np.array([r[key+'_upper95'] for r in rr])
-        ax.fill_between(xx,np.maximum(lower,3e-7),np.maximum(upper,3e-7),where=positive,color=color,alpha=.1)
-    if (~positive).any():
-        # Display only a single first-zero upper-limit marker to avoid implying
-        # independent replication by source-bank reuse across SNRs.
-        i=np.flatnonzero(~positive)[0]
-        ax.scatter(xx[i],rr[i].get(key+'_zero_upper95',rr[i]['zero_frame_upper95']),marker='v',facecolors='white',edgecolors=color,zorder=5)
+        ax.fill_between(xx,lower,upper,where=positive,color=color,alpha=.1)
 
 def figure_noisy(rows):
     fig,axes=plt.subplots(1,2,figsize=(7.1,2.8),layout='constrained')
@@ -204,7 +213,10 @@ def figure_noisy(rows):
         plot_error(axes[1],rr,'noiseless_fpr',cc,':',None)
         axes[1].plot([r['ebno_db'] for r in rr],[r['diagnostic_fp_envelope'] for r in rr],'--',color=cc)
     for ax in axes:
-        ax.set(yscale='log',xlabel=r'$E_b/N_0$ (dB, payload bit)',ylabel='Error probability',ylim=(3e-7,1.3))
+        ax.set_yscale('symlog',linthresh=1e-6,linscale=.5)
+        ax.set(xlabel=r'$E_b/N_0$ (dB, payload bit)',ylabel='Error probability',ylim=(0,1.3))
+        ax.set_yticks([0,1e-6,1e-4,1e-2,1])
+        ax.set_yticklabels(['0',r'$10^{-6}$',r'$10^{-4}$',r'$10^{-2}$','1'])
         ax.grid(alpha=.2,which='both')
     axes[0].set_title('(a) False negatives');axes[1].set_title('(b) False positives')
     fig.legend(handles=[Line2D([],[],color=COLORS[f],label=LABELS[f]) for f in FAMILIES],loc='outside upper center',ncol=3,frameon=False)
@@ -256,6 +268,7 @@ if __name__=='__main__':
             'adversarial_verified':sum(bool(x['verified']) for x in b),
             'adversarial_skipped':sum(not bool(x['verified']) for x in b),
             'noisy_points':len(c),'frames_per_point':2500,'all_paired_error_checks_passed':True,
-            'new_channel_simulation_required_for_selected_figures':False}
+            'noisy_comparison_nt_matched':all(x['n_t']==40 for x in c if x['experiment']=='waterfall'),
+            'new_channel_simulation_required_for_selected_figures':any(x['n_t']!=40 for x in c if x['experiment']=='waterfall')}
     (OUT/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2));print('Parameter table:',t)

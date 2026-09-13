@@ -20,11 +20,17 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
         case 'waterfall'
             rates = 1/2;
             ebno_db = 0.5:0.1:2.6;
+        case 'threshold_nt40'
+            % Matched-length replacement, isolated from the n=42 archive.
+            representatives = representatives(2);
+            representatives.n = 40;
+            rates = 1/2;
+            ebno_db = 0.5:0.1:2.6;
         case 'rate_pareto'
             rates = [1/3 2/5 1/2 3/5 2/3];
             ebno_db = [1.0 1.5 2.0 2.5];
         otherwise
-            error('Experiment must be "waterfall" or "rate_pareto".');
+            error('Experiment must be waterfall, rate_pareto, or threshold_nt40.');
     end
 
     root_dir = fullfile('results', 'noisy_channel_confirmatory_bp', experiment);
@@ -48,6 +54,9 @@ function [configs, bank_configs] = noisy_channel_confirmatory_configs(experiment
             cfg.mc.max_frames = max(cfg.mc.fixed_frame_counts);
             cfg.mc.min_frames = cfg.mc.max_frames;
             cfg.mc.max_runtime_seconds = 16*60*60;
+            if strcmp(experiment,'threshold_nt40')
+                cfg.mc.max_runtime_seconds = 12*60*60;
+            end
             cfg.mc.progress_interval_seconds = 30*60;
             cfg.mc.cluster_bootstrap_replicates = 2000;
             cfg.memory.frames_per_batch = 4;

@@ -6,5 +6,6 @@
   "noisy_points": 126,
   "frames_per_point": 2500,
   "all_paired_error_checks_passed": true,
-  "new_channel_simulation_required_for_selected_figures": false
+  "noisy_comparison_nt_matched": false,
+  "new_channel_simulation_required_for_selected_figures": true
 }

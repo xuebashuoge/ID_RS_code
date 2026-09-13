@@ -1,0 +1,4 @@
+PASS: sign-aligned AWGN BP error masks agree at 0.0 dB over 8 distinct-codeword pairs.
+PASS: sign-aligned AWGN BP error masks agree at 0.8 dB over 8 distinct-codeword pairs.
+PASS: sign-aligned AWGN BP error masks agree at 1.5 dB over 8 distinct-codeword pairs.
+PASS: threshold n_t=40 config: K=6,m=120,S=7140,G=810,padding=0.

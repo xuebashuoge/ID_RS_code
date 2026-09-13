@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-13",
+  "host": "unimelb",
+  "remote_directory": "/home/yangshuo/Git/itw2027_nt40_20260913",
+  "bank_job": "30503621",
+  "point_array": "30503622",
+  "frames_per_point": 2500,
+  "snr_points": 22,
+  "n_t": 40,
+  "last_observed_bank_status": "RUNNING",
+  "last_observed_points_status": "PENDING (Dependency)",
+  "results_imported": false
+}
