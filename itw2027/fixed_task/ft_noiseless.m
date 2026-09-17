@@ -1,5 +1,7 @@
 function result = ft_noiseless(task,out)
 d=ft_config(task.family,task.nt); [support,support_bits]=ft_support(d);
+first_position=1;
+if isfield(task,'first_position'), first_position=task.first_position; end
 % Same original messages at every nt; per-message seeds independent of nt.
 negative=zeros(task.messages,d.K,'uint32');
 for j=1:task.messages
@@ -11,7 +13,7 @@ if isfile(path)
     saved=load(path); result=saved.result; assert(isequal(result.task,task));
     if result.complete, return; end
 else
-    result=struct('task',task,'config',d,'complete',false,'next_position',1, ...
+    result=struct('task',task,'config',d,'complete',false,'next_position',first_position, ...
         'hits',zeros(task.messages,1),'runtime_seconds',0);
 end
 clock=tic; prim=get_primpoly(d.r); stop=min(d.T,task.positions);
@@ -30,8 +32,12 @@ for first=result.next_position:task.chunk_size:stop
 end
 result.runtime_seconds=result.runtime_seconds+toc(clock);
 result.complete=result.next_position>stop;
-result.full_enumeration=stop==d.T;
-result.probabilities=result.hits/(result.next_position-1);
+result.full_enumeration=first_position==1 && stop==d.T;
+result.probabilities=result.hits/(result.next_position-first_position);
+result.counts=struct('false_positives_per_message',result.hits, ...
+    'negative_trials_per_message',result.next_position-first_position);
+result.metrics=struct('FP_per_message',result.probabilities,'FN',0);
+result.fn_basis='Analytically zero by construction; no positive Monte Carlo trials claimed';
 ft_save(path,result);
 assert(result.complete,'FT:Incomplete','Noiseless checkpointed; resubmit this task.');
 end

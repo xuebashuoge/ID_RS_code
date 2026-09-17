@@ -42,6 +42,9 @@ for scheme={'bfc','conventional'}
     result=ft_noisy(noisy,out);
     assert(all(result.per_frame(:,4:5)==0,'all'));
     assert(all(result.per_frame(:,3)==result.per_frame(:,6)));
+    assert(result.metrics.FN==0 && result.metrics.FER==0);
+    assert(result.counts.negative_trials==540 && result.counts.positive_trials==540);
+    assert(result.counts.false_positives==sum(result.per_frame(:,3)));
     again=ft_noisy(noisy,out); assert(isequal(result,again));
 end
 % Exercise each family on a failing channel and verify resumable checkpoints.
@@ -62,4 +65,13 @@ for family={'id','rank','exact'}
     assert(sum(result.per_frame(:,4))>0);
 end
 fprintf('Fixed-task tests passed.\n');
+% Position sharding must exactly reproduce an unsplit enumeration.
+task=struct('kind','noiseless','family','exact','nt',28,'messages',3, ...
+    'first_message',1,'seed_group',9,'first_position',1,'positions',128, ...
+    'chunk_size',64,'runtime_limit',600,'output','whole.mat');
+whole=ft_noiseless(task,out);
+task.positions=64; task.output='part1.mat'; part1=ft_noiseless(task,out);
+task.first_position=65; task.positions=128; task.output='part2.mat'; part2=ft_noiseless(task,out);
+assert(isequal(whole.hits,part1.hits+part2.hits));
+fprintf('Position-shard equivalence passed.\n');
 end

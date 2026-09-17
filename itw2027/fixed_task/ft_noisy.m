@@ -16,6 +16,8 @@ if isfile(path)
 else
     result=struct('task',task,'config',d,'complete',false,'frames_done',0, ...
         'rate',rate,'snr_definition','Es/N0; real AWGN variance N0/2','runtime_seconds',0);
+    result.channel=struct('Nb',enc.BlockLength,'Ni',enc.NumInformationBits, ...
+        'Rc',rate,'G',d.G,'algorithm',d.algorithm,'max_iterations',d.max_iterations);
     % Columns: negative, positive, FP, FN, FER, noiseless FP, iterations.
     result.columns={'negative','positive','fp','fn','fer','noiseless_fp','iterations'};
     result.per_frame=zeros(task.frames,7);
@@ -57,6 +59,12 @@ for frame=result.frames_done+1:task.frames
     if toc(clock)>task.runtime_limit, break; end
 end
 result.runtime_seconds=result.runtime_seconds+toc(clock);
+totals=sum(result.per_frame(1:result.frames_done,:),1);
+result.counts=struct('negative_trials',totals(1),'positive_trials',totals(2), ...
+    'false_positives',totals(3),'false_negatives',totals(4), ...
+    'frame_errors',totals(5),'frames',result.frames_done,'noiseless_false_positives',totals(6));
+result.metrics=struct('FP',totals(3)/totals(1),'FN',totals(4)/totals(2), ...
+    'FER',totals(5)/result.frames_done,'noiseless_FP',totals(6)/totals(1));
 result.complete=result.frames_done==task.frames; ft_save(path,result);
 assert(result.complete,'FT:Incomplete','Channel checkpointed; resubmit this task.');
 end

@@ -35,17 +35,19 @@ def manifests(out, stage, pilot=None):
             if not high_error or not low_error or max(high_error) >= min(low_error):
                 raise ValueError(f'{scheme}: pilot does not bracket one clear waterfall; extend/review pilot')
             low, high = max(high_error), min(low_error)
+            last_nonzero = max(r['snr_db'] for r in selected if r['fer'] > .02)
+            tail_points = {round(last_nonzero + offset, 2) for offset in (.1, .2, .3)}
             grid = sorted(set(np.round(np.arange(low-.4, high+.41, .1), 2).tolist()
                               + [-5.5, -3., 0., 3.5]))
             grids[scheme] = grid
-            budgets[scheme] = {str(x): (10000 if high-.1 <= x <= high+.1 else 2500) for x in grid}
+            budgets[scheme] = {str(x): (10000 if x in tail_points else 2500) for x in grid}
         # Both schemes use the same x samples in the comparison panel.
         combined = sorted(set(grids['bfc'] + grids['conventional']))
         for scheme in grids:
             for x in combined:
                 budgets[scheme].setdefault(str(x), 2500)
             grids[scheme] = combined
-        shard_size = 250
+        shard_size = 2500
     banks, noisy, noiseless = [], [], []
     max_frames = max(max(v.values()) for v in budgets.values())
     for family in FAMILIES:
@@ -53,7 +55,7 @@ def manifests(out, stage, pilot=None):
             bank_name = f'banks/{family}_{shard:03d}.mat'
             banks.append(dict(kind='bank', family=family, frames=shard_size,
                               first_frame=shard*shard_size+1, seed_group=group,
-                              output=bank_name, runtime_limit=9000))
+                              output=bank_name, runtime_limit=5400))
         schemes = ('bfc', 'conventional') if family == 'exact' else ('bfc',)
         for scheme in schemes:
             for si, snr in enumerate(grids[scheme]):
@@ -63,17 +65,20 @@ def manifests(out, stage, pilot=None):
                                       first_frame=shard*shard_size+1, seed_group=group,
                                       bank=f'banks/{family}_{shard:03d}.mat',
                                       output=f'noisy/{family}_{scheme}_{snr:+06.2f}_{shard:03d}.mat',
-                                      runtime_limit=5400 if stage == 'pilot' else 18000))
+                                      runtime_limit=5400))
         nts = [40] if stage == 'pilot' else list(range(28, 41, 2))
         count = 2 if stage == 'pilot' else (200 if family == 'id' else 2000)
         chunk_messages = 2 if stage == 'pilot' else (25 if family == 'id' else 250)
         for nt in nts:
             for shard in range(count // chunk_messages):
-                noiseless.append(dict(kind='noiseless', family=family, nt=nt,
+                total_positions=512 if stage=='pilot' else 2**(nt//2)
+                for start in range(1,total_positions+1,262144):
+                    noiseless.append(dict(kind='noiseless', family=family, nt=nt,
                                       messages=chunk_messages, first_message=shard*chunk_messages+1,
-                                      seed_group=group, positions=512 if stage == 'pilot' else 2**(nt//2),
+                                      seed_group=group, first_position=start,
+                                      positions=min(start+262143,total_positions),
                                       chunk_size=64, runtime_limit=2700 if stage == 'pilot' else 18000,
-                                      output=f'noiseless/{family}_{nt}_{shard:03d}.mat'))
+                                      output=f'noiseless/{family}_{nt}_{shard:03d}_{start:07d}.mat'))
     for name, tasks in [('banks', banks), ('noisy', noisy), ('noiseless', noiseless)]:
         save_json(out / f'{name}.json', tasks)
     save_json(out / 'design.json', dict(stage=stage, grids=grids, frames_per_point=budgets,
@@ -125,6 +130,7 @@ def collect(out):
     for (family, scheme, snr), group in sorted(groups.items()):
         a = np.concatenate(group['data']); totals = a.sum(axis=0)
         record = dict(family=family, scheme=scheme, snr_db=snr, frames=len(a),
+                      negative_trials=int(totals[0]), positive_trials=int(totals[1]),
                       fp=totals[2]/totals[0], fn=totals[3]/totals[1], fer=totals[4]/len(a),
                       noiseless_fp=totals[5]/totals[0], mean_iterations=totals[6]/len(a))
         for metric, col, denom in [('fp', 2, a[:, 0]), ('fn', 3, a[:, 1]), ('fer', 4, np.ones(len(a)))]:
@@ -169,19 +175,28 @@ def summarize(out):
         groups={}
         for task in json.loads((out/'noiseless.json').read_text()):
             result=read_result(out,task)
-            if not result['full_enumeration']: raise ValueError('Partial enumeration is not paper evidence')
-            key=(task['family'],task['nt']); g=groups.setdefault(key,{'values':[],'ids':set(),'bound':result['config']['bound']})
-            ids=set(range(task['first_message'],task['first_message']+task['messages']))
-            if ids & g['ids']: raise ValueError('Overlapping message shards')
-            g['ids'].update(ids); g['values'].extend(np.atleast_1d(result['probabilities']))
+            key=(task['family'],task['nt'])
+            expected=200 if task['family']=='id' else 2000
+            g=groups.setdefault(key,{'hits':np.zeros(expected),'ranges':[[] for _ in range(expected)],'bound':result['config']['bound']})
+            first=task.get('first_position',1); last=task['positions']
+            if result['next_position']!=last+1: raise ValueError('Incomplete position range')
+            for offset,hits in enumerate(np.atleast_1d(result['hits'])):
+                index=task['first_message']-1+offset
+                g['hits'][index]+=hits; g['ranges'][index].append((first,last))
         fig,axes=plt.subplots(1,3,figsize=(10,3.1),layout='constrained')
         table=[]
         for ax,family in zip(axes,FAMILIES):
             for nt in range(28,41,2):
-                g=groups[(family,nt)]; v=np.array(g['values'])
-                expected=200 if family=='id' else 2000
-                if len(v)!=expected: raise ValueError('Wrong negative-message sample size')
-                table.append(dict(family=family,nt=nt,mean=v.mean(),sample_max=v.max(),bound=g['bound'],messages=len(v)))
+                g=groups[(family,nt)]; T=2**(nt//2)
+                for ranges in g['ranges']:
+                    next_position=1
+                    for first,last in sorted(ranges):
+                        if first!=next_position: raise ValueError('Missing or overlapping position ranges')
+                        next_position=last+1
+                    if next_position!=T+1: raise ValueError('Partial enumeration is not paper evidence')
+                v=g['hits']/T
+                table.append(dict(family=family,nt=nt,mean=v.mean(),sample_max=v.max(),bound=g['bound'],messages=len(v),
+                                  fn=0,fp_count=int(g['hits'].sum()),negative_trials=len(v)*T))
             rows=[r for r in table if r['family']==family]
             for metric in ('mean','sample_max','bound'):
                 ax.plot([r['nt'] for r in rows],[r[metric] for r in rows],'o-',label=metric)

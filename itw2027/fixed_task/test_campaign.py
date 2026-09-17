@@ -31,7 +31,12 @@ class CampaignTest(unittest.TestCase):
             tasks=json.loads((production/'noisy.json').read_text())
             design=json.loads((production/'design.json').read_text())
             self.assertEqual(design['grids']['bfc'],design['grids']['conventional'])
-            self.assertTrue(all(t['frames']==250 and t['seed_group']==2 for t in tasks))
+            self.assertTrue(all(t['frames']==2500 and t['seed_group']==2 for t in tasks))
+            tasks_n=json.loads((production/'noiseless.json').read_text())
+            for family in campaign.FAMILIES:
+                ranges=sorted((t['first_position'],t['positions']) for t in tasks_n
+                              if t['family']==family and t['nt']==40 and t['first_message']==1)
+                self.assertEqual(ranges,[(1,262144),(262145,524288),(524289,786432),(786433,1048576)])
             campaign.summarize(out)
             self.assertTrue((out/'noisy.pdf').exists())
             # Missing shards must never be silently omitted.

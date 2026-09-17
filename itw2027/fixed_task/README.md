@@ -17,10 +17,26 @@ variance N0/2, LLR=4y/N0. Conventional exact-threshold transmits all 540
 and paired noise streams are used for the two schemes at shared SNRs.
 ID/rank full-message transmission is infeasible within the same frame budget.
 
+## Saved results (not only plotted probabilities)
+
+Every noisy MAT file contains result.counts (negative_trials, positive_trials,
+false_positives, false_negatives, frame_errors, frames, noiseless_false_positives),
+result.metrics (FP, FN, FER, noiseless_FP), and result.per_frame with columns
+negative, positive, fp, fn, fer, noiseless_fp, iterations. result.channel records
+the actual channel dimensions/rate for BFC or conventional transmission.
+Configuration, seed group, frame range, SNR, completion and runtime are saved.
+Each noiseless file saves per-message FP collision counts, index-trial counts,
+FP probabilities, and explicitly records FN=0 as an analytical property,
+not a Monte Carlo observation. Position shards retain their exact ranges.
+summary.csv retains separate FP, FN and FER probabilities, counts, trial
+denominators and uncertainty intervals. Raw MAT files are never deleted by
+aggregation. Source banks and deterministic seeds permit regeneration without
+storing millions of 100000-bit ID messages or all received channel samples.
+
 Pilot: -5.5:0.5:3.5 dB, 100 independent frames per point. Three banks are
 shared across SNRs (not counted as independent source draws when pooling).
-Production: a separate seed group, 2500 frames/point, with 10000 at selected
-points near the high-SNR pilot waterfall edge. The pilot must bracket a
+Production: a separate seed group, 2500 frames/point, with 10000 at three
+points just above the last pilot point with FER >0.02. The pilot must bracket a
 clear waterfall for both rates before generating production manifests.
 The selected grid uses 0.1 dB steps near the measured waterfalls plus anchor
 points. Review design.json and pilot plots before submitting production.
@@ -56,13 +72,17 @@ external dataset is needed; $DATASET is left unchanged.
 
 ## Resources and recovery
 
-Arrays initially cap banks at 4 jobs (8 CPUs/32 GB/3 h each), channel tasks
-at 8 (8 CPUs/16 GB/6 h each), noiseless tasks at 2 (8 CPUs/32 GB/6 h each).
-Pilot channel jobs request 2 h and pilot noiseless jobs request 1 h.
+After the completed server pilot, banks are capped at 4 jobs (8 CPUs/8 GB/2 h
+each), channel tasks at 8 (8 CPUs/8 GB/2 h each), and noiseless tasks at 16
+(2 CPUs/8 GB/6 h each). Pilot noiseless jobs request 1 h.
 A 20-minute server smoke test gates all simulation arrays via afterok.
 Pilot banks contain 100 frames; production banks and channel shards contain
-250. Benchmark runtime and memory before production; resize shards to target
-2-4 h and request measured duration plus headroom. Do not request 1 TB by default.
+2500. Measured pilot bank times were 2-3 minutes per 100 frames (including
+MATLAB startup), and channel points took 30-100 seconds per 100 frames.
+The new 2-hour requests leave substantial headroom for 2500-frame shards.
+Noiseless production also shards positions into ranges of at most 262144;
+aggregation verifies disjoint, complete coverage of all T positions for
+every sampled message before computing its probability. Do not request 1 TB.
 The noiseless evaluator is chunked/vectorized, not a 64-worker pool.
 
 Bank/channel checkpoints are saved every 5/10 frames; noiseless checkpoints
@@ -78,3 +98,5 @@ successful bank completion. jobs.txt records submitted array IDs.
 Production parameter selection is based on the separate pilot, not on
 optional stopping within the production sample. All generated manifests and
 source commit hashes should be retained with results.
+An afterok postprocessing job validates complete coverage and generates
+summary tables and PDFs after all simulation arrays finish.
