@@ -144,7 +144,7 @@ def collect(out):
 def summarize(out):
     records = collect(out)
     with (out / 'summary.csv').open('w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=records[0].keys())
+        writer = csv.DictWriter(f, fieldnames=records[0].keys(), lineterminator='\n')
         writer.writeheader(); writer.writerows(records)
     import matplotlib
     matplotlib.use('Agg')
@@ -204,7 +204,7 @@ def summarize(out):
         axes[0].set_ylabel('Noiseless FP probability')
         fig.savefig(out/'noiseless.pdf'); plt.close(fig)
         with (out/'noiseless_summary.csv').open('w',newline='') as f:
-            writer=csv.DictWriter(f,fieldnames=table[0].keys()); writer.writeheader(); writer.writerows(table)
+            writer=csv.DictWriter(f,fieldnames=table[0].keys(),lineterminator='\n'); writer.writeheader(); writer.writerows(table)
     print(f'Validated {len(records)} channel points; wrote summary.csv and plots to {out}')
 
 
