@@ -4,60 +4,79 @@
 
 \subsection{Numerical Results}
 \label{sec:noiseless_numerical}
-We consider identification ($S=1$), rank with fixed rank $20$ ($S=21$),
-and the exact-threshold function with $\beta=2$
-($S=\binom{m}{2}\sim m^2/2$).
-For even $n_t$, we choose $r=n_t/2$, $T=2^r$, and $m=rK$ using the
-conservative design $KS_{\rm up}(rK)\leq 2^{n_t(1/2-E)}$, where
-$S_{\rm up}(m)=S$ for ID/rank and $S_{\rm up}(m)=m^2/2$ for threshold.
-The finite computation rate is $R_t=\log_2(m)/n_t$.
+We evaluate identification ($S=1$), the rank test
+$f(i)=\1\{\operatorname{int}(i)\leq20\}$ ($S=21$), and the exact-threshold
+test $f(i)=\1\{\|i\|_1=2\}$ ($S=\binom{m}{2}$). For
+$n_t\in\{24,26,\ldots,40\}$ and $E_2=0.1$, we set $r=n_t/2$, $T=2^r$,
+and $m=rK$, with the largest $K$ satisfying
+$K S_{\rm up}(rK)\leq2^{n_t(1/2-E_2)}$, where $S_{\rm up}=S$ for
+identification and rank, and $S_{\rm up}(m)=m^2/2$ is a conservative
+envelope for the exact-threshold support. The finite rate is
+$R_t=\log_2(m)/n_t$. For each setting, we sample $2{,}000$ negative
+messages ($200$ for identification at $n_t=38,40$) and enumerate all $T$
+RS positions, giving the exact conditional FP probability of each sampled
+message; FN is zero by construction.
 
-We sample $2{,}000$ negative messages per setting ($200$ for ID at $n_t=38,40$); maxima refer only to this sample. The uniform bound is $B=S(K-1)/T$.
-Fig.~\ref{fig:itw27_noiseless}(a) uses $E=0.1$ and evaluates every RS
-position for each sampled negative message. The sampled probabilities
-satisfy Proposition~\ref{prop:finite_error}; its uniform bound is especially
-conservative for the specified ID and rank functions. Separately, $22$
-completed arbitrary-support tests attain $S(K-1)/T$ exactly, illustrating
-tightness for unrestricted supports of the corresponding sizes.
-Fig.~\ref{fig:itw27_noiseless}(b) distinguishes fixed-$E$ rate sequences
-from $E(n_t)=1/\sqrt{n_t}$, for which the error bound vanishes while the
-rates approach $1/2$ for constant weights and $1/6$ for $\beta=2$.
+Fig.~\ref{fig:itw27_noiseless}(a) directly checks
+Proposition~\ref{prop:finite_error}: every sampled FP probability is below
+$B=S(K-1)/T$. At $n_t=40$, the sampled maxima are
+$3.81\times10^{-6}$, $3.62\times10^{-5}$, and $7.04\times10^{-3}$ for
+identification, rank, and exact threshold, respectively, versus bounds
+$0.0625$, $0.0625$, and $0.0340$, showing that the uniform guarantee can be
+conservative for these functions. Separately, $22$ tested arbitrary
+supports attain $B$ exactly; this confirms tightness for those unrestricted
+supports, not for the named rank and threshold functions.
+Fig.~\ref{fig:itw27_noiseless}(b) deterministically evaluates the certified
+design. With fixed $E_2=0.1$, the rates approach $0.4$
+for constant weights and $2/15$ for $\beta=2$; with
+$E_2(n_t)=n_t^{-1/2}$, the bound $2^{-\sqrt{n_t}}$ vanishes while the rates
+approach the asymptotic benchmarks $1/2$ and $1/6$. Finite-length
+prefactors explain values above a benchmark at small $n_t$.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{itw2027/results/processed/figures/figure1_noiseless.pdf}
-  \caption{Noiseless RS tagging: (a) sampled FP probabilities and uniform bounds; (b) finite rates and asymptotic benchmarks.}
+  \caption{Noiseless RS tagging: (a) sampled conditional FP probabilities and uniform bounds; (b) certified finite rates and asymptotic benchmarks.}
   \label{fig:itw27_noiseless}
 \end{figure}
 
 % Insert in the noisy-channel section, replacing its empty subsection.
 \subsection{Numerical Results}
 \label{sec:noisy_numerical}
-We concatenate the tags with a length-$64{,}800$, rate-$1/2$ DVB-S2 LDPC
-code over BPSK-AWGN, using belief-propagation decoding with at most $50$
-iterations. Each SNR point contains $2{,}500$ frames.
-Table~\ref{tab:itw27_parameters} reports the implemented finite rates,
-using $G=\lfloor N_i/n_t\rfloor$ and
-$R_{\rm eff}=G\log_2(m)/N_b$. All three functions use $n_t=40$, packing $G=810$ tags per frame
-without padding, so the effective use is $n_{\rm eff}=80$. These are amortized resource costs, while decoding
-still uses the full physical frame.
+We concatenate the tags with a rate-$1/2$ normal-frame DVB-S2 LDPC code
+($N_b=64{,}800$, $N_i=32{,}400$), transmit BPSK over AWGN, and use
+belief-propagation decoding with early termination and at most $50$
+iterations. The sweep uses $E_b/N_0=0.5,0.6,\ldots,2.6$ dB and $2{,}500$
+frames per point, where $E_b$ is normalized per occupied payload bit. A
+fixed, balanced bank of positive and negative examples is reused across
+SNRs for each function, so FP and FN are class-conditional; frames, rather
+than packed tags, are the sampling units for channel-error uncertainty.
+All functions use $E_2=0.1$ and $n_t=40$, giving $G=810$ tags per frame
+without padding, $n_{\rm eff}=N_b/G=80$, and
+$R_{\rm eff}=G\log_2(m)/N_b$ (Table~\ref{tab:itw27_parameters}). This rate
+is amortized; each decision still requires decoding the full LDPC frame.
 
-Fig.~\ref{fig:itw27_noisy} separates the channel-induced FN behavior from
-the intrinsic FP floor. Every recorded payload-correct frame reproduces
-the paired noiseless decisions, consistent with the mechanism in
-Proposition~\ref{prop:noisy_finite_error}. The dashed FP curves show $\min\{1,B+\widehat{\mathrm{FER}}\}$,
-with $B=S(K-1)/T$, as an empirical diagnostic rather than a maximal-error
-estimate. The axes are linear below $10^{-6}$ to display zero estimates,
-which do not establish zero true error probability.
-The shared source bank explains repeated high-SNR FP floors; the
-class-conditional estimates do not establish
-maximal error over messages and functions.
+Fig.~\ref{fig:itw27_noisy}(a) shows the LDPC waterfall and the resulting
+channel-induced FN events. At every plotted point, each payload-correct
+frame reproduces its paired noiseless decisions, and every FN is confined
+to a payload-error frame. This verifies the simulated error-event
+decomposition behind Proposition~\ref{prop:noisy_finite_error}, including
+the absence of a factor $G$ in an individual task's bound. As payload FER falls,
+Fig.~\ref{fig:itw27_noisy}(b) shows FP approaching the corresponding
+noiseless collision floor. At $1.5$ dB, no payload errors or FNs occur in
+$2{,}500$ frames, while FP is $2.96\times10^{-6}$, $2.47\times10^{-5}$,
+and $6.81\times10^{-3}$ for identification, rank, and exact threshold.
+The dashed $\min\{1,B+\widehat{\mathrm{FER}}\}$ curves visualize the
+additive structure but are not rigorous theorem bounds: the empirical
+payload FER is not the maximal $\xi$ assumed by the proposition. Nor do
+zero observed failures imply zero error; their one-sided $95\%$ frame-level
+upper limit is $1.20\times10^{-3}$.
 
 \begin{table}[t]
   \centering
-  \caption{Representative configurations with $N_b=64{,}800$,
-  $N_i=32{,}400$, and inner design $E=0.1$.
-  Rates use exponential message-length scaling.}
+  \caption{Implemented configurations with $N_b=64{,}800$,
+  $N_i=32{,}400$, and inner design $E_2=0.1$; $m$ is the message length
+  in bits, and rates use exponential message-length scaling.}
   \label{tab:itw27_parameters}
   \normalsize
   \setlength{\tabcolsep}{2pt}
@@ -67,6 +86,6 @@ maximal error over messages and functions.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{itw2027/results/processed/figures/figure2_noisy.pdf}
-  \caption{Packed BFC over AWGN: (a) FN and payload FER; (b) FP, noiseless reference, and additive diagnostic.}
+  \caption{Packed BFC over AWGN: (a) channel-induced FN and payload FER; (b) conditional FP, paired noiseless reference, and empirical additive diagnostic.}
   \label{fig:itw27_noisy}
 \end{figure}

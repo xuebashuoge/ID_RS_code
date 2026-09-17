@@ -8,8 +8,9 @@ Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/
 
 ## Outputs
 
-- `results/processed/figures/figure1_noiseless.{pdf,png}`: per-function median/maximum/bound panels and rate sequences.
-- `results/processed/figures/figure2_noisy.{pdf,png}`: one row per function, with FN/FER on the left and FP/reference/diagnostic on the right. All quantities have legends; no shading is drawn.
+- `results/processed/figures/figure1_noiseless.{pdf,png}`: combined-function mean/maximum/bound panel and rate sequences.
+- `results/processed/figures/figure2_noisy.{pdf,png}`: one FN/FER row per function on the left and a combined-function FP/reference/diagnostic panel on the right. Compact legends sit inside the axes; no shading is drawn.
+- `results/processed/figures/figure2_noisy_three_panel.{pdf,png}`: one panel per function family, with FER, FN, and FP calculated from their aggregate counts and denominators, together with noiseless FP and the diagnostic FP upper bound.
 - `results/processed/tables/paper_parameters.{csv,tex}`: three representative configurations, packing and rates.
 - `results/processed/tables/finite_rate_at_1percent.csv`: largest certified message and rate within the balanced RS parameter choice, including odd lengths and padding; aligned and unrestricted message lengths are distinguished.
 - `results/processed/tables/rate_sequences.csv`: fixed-exponent and vanishing-exponent calculations, through tag length 4096. These large lengths are analytical evaluations, not implemented GF simulations.
@@ -24,8 +25,16 @@ Start with [the presentation plan](docs/presentation_plan.md), [the audit](docs/
 Python uses the required `torch28` conda environment. Dependencies are `numpy`, `scipy`, and `matplotlib` (versions used: Python environment's NumPy, SciPy 1.16.2, Matplotlib 3.10.5). No HDF5 Python dependency is required.
 
 ```bash
-conda run --no-capture-output -n torch28 python itw2027/scripts/test_rates.py
-conda run --no-capture-output -n torch28 python itw2027/scripts/build_results.py
+cd itw2027/scripts
+conda run --no-capture-output -n torch28 python -m unittest \
+  test_figure1.py test_figure2.py test_rates.py test_noisy_results_three_panel.py
+# Build either result pipeline independently:
+conda run --no-capture-output -n torch28 python noiseless_results.py
+conda run --no-capture-output -n torch28 python noisy_results.py
+# Build the alternative three-panel noisy figure:
+conda run --no-capture-output -n torch28 python noisy_results_three_panel.py
+# The original command remains available and builds both standard figures:
+conda run --no-capture-output -n torch28 python build_results.py
 ```
 
 The builder fails on missing coverage, duplicate noiseless shard seeds, incorrect support sizes/rates, incomplete fixed-frame runs, or violated paired decoding identities. It does not silently replace missing empirical results with theory. `results/processed/validation.json` records the resulting coverage.
