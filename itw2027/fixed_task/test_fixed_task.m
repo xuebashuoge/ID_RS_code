@@ -74,4 +74,19 @@ task.positions=64; task.output='part1.mat'; part1=ft_noiseless(task,out);
 task.first_position=65; task.positions=128; task.output='part2.mat'; part2=ft_noiseless(task,out);
 assert(isequal(whole.hits,part1.hits+part2.hits));
 fprintf('Position-shard equivalence passed.\n');
+% New fields must support endpoint indices, padded sources and exact decoding.
+for nt=[42 44 46]
+    for family={'id','rank','exact'}
+        d=ft_config(family{1},nt); [support,bits]=ft_support(d);
+        [~,original]=ft_sample(d,bits,false(2,1),819);
+        d40=ft_config(family{1},40); [~,bits40]=ft_support(d40);
+        [~,original40]=ft_sample(d40,bits40,false(2,1),819);
+        assert(isequal(original,original40));
+        u=uint32([1;d.T]); prim=get_primpoly(d.r);
+        x=rs_evaluation_points_at(d.r,u,prim,'extended');
+        c=evaluate_rs_positions_vec(support([1;d.S],:),x,d.r,prim);
+        assert(all(decode_bfc_tuples_vec(u,c,support,d.r,d.K,d.T,d.memory,'extended')));
+    end
+end
+fprintf('nt=42,44,46 field/padding checks passed.\n');
 end

@@ -3,11 +3,90 @@
 import argparse
 import csv
 import json
+import hashlib
+import os
 from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
 FAMILIES = ('id', 'rank', 'exact')
+
+
+def task_sources(out, name):
+    """Read-only reuse of original manifests without rewriting task metadata."""
+    reuse_path=out/'reuse.json'
+    sources=[]
+    if reuse_path.exists():
+        reuse=json.loads(reuse_path.read_text())
+        base=(out/reuse['base']).resolve()
+        source=base/f'{name}.json'
+        if hashlib.sha256(source.read_bytes()).hexdigest()!=reuse['sha256'][name]:
+            raise ValueError(f'Reused manifest changed: {source}')
+        sources.extend((base,t) for t in json.loads(source.read_text()))
+    sources.extend((out,t) for t in json.loads((out/f'{name}.json').read_text()))
+    return sources
+
+
+def extend(out, base):
+    """Only missing channel shards and nt=42,44,46; original seeds unchanged."""
+    out=out.resolve(); base=base.resolve()
+    if out==base or (out/'design.json').exists():
+        raise ValueError('Extension requires a fresh output directory')
+    old_design=json.loads((base/'design.json').read_text())
+    if old_design['stage']!='production' or (base/'reuse.json').exists():
+        raise ValueError('Expected the original production campaign')
+    records=collect(base)  # Validate every existing noisy result before reuse.
+    for task in json.loads((base/'noiseless.json').read_text()):
+        read_result(base,task)
+    original=json.loads((base/'noisy.json').read_text())
+    groups={}
+    for task in original:
+        groups.setdefault((task['family'],task['scheme'],task['snr_db']),[]).append(task)
+    noisy=[]
+    for key,tasks in sorted(groups.items()):
+        template=min(tasks,key=lambda t:t['first_frame'])
+        if template['frames']!=2500 or template['seed_group']!=2:
+            raise ValueError('Unexpected source sampling design')
+        existing={t['first_frame'] for t in tasks}
+        if existing not in ({1},{1,2501,5001,7501}):
+            raise ValueError(f'Unexpected existing frame coverage: {key}')
+        for first in (1,2501,5001,7501):
+            if first in existing: continue
+            shard=(first-1)//2500
+            bank=base/f"banks/{template['family']}_{shard:03d}.mat"
+            if not bank.exists(): raise ValueError(f'Missing reusable bank: {bank}')
+            task=dict(template,first_frame=first,runtime_limit=3000,
+                      bank=os.path.relpath(bank,out),
+                      output=f"noisy/{template['family']}_{template['scheme']}_{template['snr_db']:+06.2f}_{shard:03d}.mat")
+            noisy.append(task)
+    noiseless=[]
+    limits={'id':6600,'rank':3000,'exact':1500}
+    for family in FAMILIES:
+        messages=25 if family=='id' else 250
+        for nt in (42,44,46):
+            for shard in range(8):
+                for start in range(1,2**(nt//2)+1,262144):
+                    noiseless.append(dict(kind='noiseless',family=family,nt=nt,
+                        messages=messages,first_message=shard*messages+1,seed_group=2,
+                        first_position=start,positions=min(start+262143,2**(nt//2)),
+                        chunk_size=64,runtime_limit=limits[family],
+                        output=f'noiseless/{family}_{nt}_{shard:03d}_{start:07d}.mat'))
+    save_json(out/'noisy.json',noisy)
+    save_json(out/'noiseless.json',noiseless)
+    for family in FAMILIES:
+        tasks=[t for t in noiseless if t['family']==family]
+        probe=next(t for t in tasks if t['nt']==46)
+        save_json(out/f'probe_{family}.json',[probe])
+        save_json(out/f'noiseless_{family}.json',[t for t in tasks if t!=probe])
+    save_json(out/'reuse.json',dict(base=os.path.relpath(base,out),sha256={
+        name:hashlib.sha256((base/f'{name}.json').read_bytes()).hexdigest()
+        for name in ('noisy','noiseless')}))
+    save_json(out/'design.json',dict(stage='extension',target_frames=10000,
+        grids=old_design['grids'],noiseless_nt=list(range(28,47,2)),
+        snr_definition='Es/N0',shard_frames=2500,
+        reused_channel_frames=sum(r['frames'] for r in records),
+        new_channel_frames=sum(t['frames'] for t in noisy)))
+    print(f'{out}: {len(noisy)} new channel jobs, {len(noiseless)} new noiseless jobs; banks reused')
 
 
 def save_json(path, value):
@@ -112,10 +191,9 @@ def interval(values, denominator, rng):
 
 
 def collect(out):
-    tasks = json.loads((out / 'noisy.json').read_text())
     groups = {}
-    for task in tasks:
-        result = read_result(out, task)
+    for source,task in task_sources(out,'noisy'):
+        result = read_result(source, task)
         data = np.atleast_2d(result['per_frame'])
         if len(data) != task['frames'] or result['frames_done'] != task['frames']:
             raise ValueError('Frame count mismatch')
@@ -125,18 +203,30 @@ def collect(out):
         if ids & group['frames']:
             raise ValueError('Overlapping frame shards')
         group['frames'].update(ids); group['data'].append(data)
+    design=json.loads((out/'design.json').read_text())
+    if design.get('target_frames'):
+        expected={(f,s,x) for f in FAMILIES for s in (('bfc','conventional') if f=='exact' else ('bfc',))
+                  for x in design['grids'][s]}
+        if set(groups)!=expected: raise ValueError('Missing or extra SNR/task combinations')
+        for group in groups.values():
+            if group['frames']!=set(range(1,design['target_frames']+1)):
+                raise ValueError('Incomplete target frame coverage')
     records = []
     rng = np.random.default_rng(1739)
     for (family, scheme, snr), group in sorted(groups.items()):
         a = np.concatenate(group['data']); totals = a.sum(axis=0)
+        if not np.all(a[:,0]==a[:,1]): raise ValueError('Balanced-error plot requires balanced classes')
         record = dict(family=family, scheme=scheme, snr_db=snr, frames=len(a),
                       negative_trials=int(totals[0]), positive_trials=int(totals[1]),
                       fp=totals[2]/totals[0], fn=totals[3]/totals[1], fer=totals[4]/len(a),
-                      noiseless_fp=totals[5]/totals[0], mean_iterations=totals[6]/len(a))
-        for metric, col, denom in [('fp', 2, a[:, 0]), ('fn', 3, a[:, 1]), ('fer', 4, np.ones(len(a)))]:
-            lo, hi = interval(a[:, col], denom, rng)
+                      noiseless_fp=totals[5]/totals[0], mean_iterations=totals[6]/len(a),
+                      balanced_error=(totals[2]+totals[3])/(totals[0]+totals[1]),
+                      noiseless_balanced_error=.5*totals[5]/totals[0])
+        for metric, values, denom in [('fp', a[:,2], a[:,0]), ('fn', a[:,3], a[:,1]),
+                ('fer', a[:,4], np.ones(len(a))), ('balanced_error',a[:,2]+a[:,3],a[:,0]+a[:,1])]:
+            lo, hi = interval(values, denom, rng)
             record[metric+'_lo95'], record[metric+'_hi95'] = lo, hi
-            record[metric+'_events'] = int(totals[col])
+            record[metric+'_events'] = int(values.sum())
         records.append(record)
     return records
 
@@ -146,35 +236,13 @@ def summarize(out):
     with (out / 'summary.csv').open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=records[0].keys(), lineterminator='\n')
         writer.writeheader(); writer.writerows(records)
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(1, 3, figsize=(10, 3.1), layout='constrained')
-    for ax, family in zip(axes, FAMILIES):
-        for scheme in ('bfc', 'conventional'):
-            rows = sorted([r for r in records if r['family']==family and r['scheme']==scheme],
-                          key=lambda r:r['snr_db'])
-            if not rows: continue
-            for metric, marker in [('fn','o'),('fp','s')]:
-                x=np.array([r['snr_db'] for r in rows]); y=np.array([r[metric] for r in rows])
-                line,=ax.plot(x,np.where(y>0,y,np.nan),marker=marker,markersize=3,
-                              linestyle='-' if scheme=='bfc' else '--',label=f'{scheme} {metric.upper()}')
-                for r in rows:
-                    if r[metric]==0:
-                        ax.scatter(r['snr_db'],r[metric+'_hi95'],marker='v',s=18,color=line.get_color())
-            if scheme=='bfc':
-                # Each point uses its actual source sample; do not pool repeated banks across SNR.
-                ax.plot([r['snr_db'] for r in rows],[r['noiseless_fp'] or np.nan for r in rows],
-                        ':',color='gray',label='paired noiseless FP')
-        ax.set(yscale='log',xlabel='SNR $E_s/N_0$ (dB)',title=family,ylim=(1e-7,1.1))
-        ax.grid(True,alpha=.2); ax.legend(fontsize=6)
-    axes[0].set_ylabel('Conditional task error probability')
-    fig.savefig(out/'noisy.pdf'); fig.savefig(out/'noisy.png',dpi=200); plt.close(fig)
+    from figures import plot_noisy, plot_noiseless
+    plot_noisy(records,out)
     design=json.loads((out/'design.json').read_text())
-    if design['stage']=='production':
+    if design['stage'] in ('production','extension'):
         groups={}
-        for task in json.loads((out/'noiseless.json').read_text()):
-            result=read_result(out,task)
+        for source,task in task_sources(out,'noiseless'):
+            result=read_result(source,task)
             key=(task['family'],task['nt'])
             expected=200 if task['family']=='id' else 2000
             g=groups.setdefault(key,{'hits':np.zeros(expected),'ranges':[[] for _ in range(expected)],'bound':result['config']['bound']})
@@ -183,10 +251,9 @@ def summarize(out):
             for offset,hits in enumerate(np.atleast_1d(result['hits'])):
                 index=task['first_message']-1+offset
                 g['hits'][index]+=hits; g['ranges'][index].append((first,last))
-        fig,axes=plt.subplots(1,3,figsize=(10,3.1),layout='constrained')
         table=[]
-        for ax,family in zip(axes,FAMILIES):
-            for nt in range(28,41,2):
+        for family in FAMILIES:
+            for nt in design.get('noiseless_nt',list(range(28,41,2))):
                 g=groups[(family,nt)]; T=2**(nt//2)
                 for ranges in g['ranges']:
                     next_position=1
@@ -197,12 +264,7 @@ def summarize(out):
                 v=g['hits']/T
                 table.append(dict(family=family,nt=nt,mean=v.mean(),sample_max=v.max(),bound=g['bound'],messages=len(v),
                                   fn=0,fp_count=int(g['hits'].sum()),negative_trials=len(v)*T))
-            rows=[r for r in table if r['family']==family]
-            for metric in ('mean','sample_max','bound'):
-                ax.plot([r['nt'] for r in rows],[r[metric] for r in rows],'o-',label=metric)
-            ax.set(yscale='log',xlabel='$n_t$',title=family); ax.grid(True,alpha=.2); ax.legend(fontsize=7)
-        axes[0].set_ylabel('Noiseless FP probability')
-        fig.savefig(out/'noiseless.pdf'); plt.close(fig)
+        plot_noiseless(table,out)
         with (out/'noiseless_summary.csv').open('w',newline='') as f:
             writer=csv.DictWriter(f,fieldnames=table[0].keys(),lineterminator='\n'); writer.writeheader(); writer.writerows(table)
     print(f'Validated {len(records)} channel points; wrote summary.csv and plots to {out}')
@@ -210,9 +272,17 @@ def summarize(out):
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
-    parser.add_argument('action',choices=['pilot','production','summarize'])
+    parser.add_argument('action',choices=['pilot','production','extension','summarize','replot'])
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--pilot',type=Path)
+    parser.add_argument('--base',type=Path)
     args=parser.parse_args()
     if args.action=='summarize': summarize(args.out)
+    elif args.action=='replot':
+        if args.base is None: parser.error('replot requires --base')
+        from figures import replot_from_tables
+        replot_from_tables(args.base,args.out)
+    elif args.action=='extension':
+        if args.base is None: parser.error('extension requires --base')
+        extend(args.out,args.base)
     else: manifests(args.out,args.action,args.pilot)

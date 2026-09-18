@@ -17,6 +17,7 @@ else
         'hits',zeros(task.messages,1),'runtime_seconds',0);
 end
 clock=tic; prim=get_primpoly(d.r); stop=min(d.T,task.positions);
+chunks_since_save=0;
 for first=result.next_position:task.chunk_size:stop
     indices=first:min(first+task.chunk_size-1,stop);
     x=rs_evaluation_points_at(d.r,uint32(indices),prim,'extended');
@@ -26,8 +27,11 @@ for first=result.next_position:task.chunk_size:stop
         result.hits=result.hits+ismember(values(:,j),valid(:,j));
     end
     result.next_position=indices(end)+1;
-    ft_save(path,result);
-    fprintf('%s nt %d positions %d/%d %.1fs\n',task.family,task.nt,indices(end),stop,toc(clock));
+    chunks_since_save=chunks_since_save+1;
+    if chunks_since_save>=20 || indices(end)==stop || toc(clock)>task.runtime_limit
+        ft_save(path,result); chunks_since_save=0;
+        fprintf('%s nt %d positions %d/%d %.1fs\n',task.family,task.nt,indices(end),stop,toc(clock));
+    end
     if toc(clock)>task.runtime_limit, break; end
 end
 result.runtime_seconds=result.runtime_seconds+toc(clock);

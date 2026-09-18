@@ -1,5 +1,10 @@
 # Fixed-task ITW campaign (branch itw_gpt)
 
+The current revision is described in [EXTENSION.md](EXTENSION.md): reuse all
+completed production data, extend nt through 46, top up every noisy point to
+10000 frames, and use balanced-error plots with a broken exact-panel x axis.
+Its separate submission script caps concurrent simulation tasks at 32.
+
 This campaign is independent of historical exponent-selected message lengths.
 Tasks: ID at m=100000 with one deterministic random target; rank <=20 at
 m=5000 (S=21); exact Hamming weight 2 at m=100 (S=4950). Right padding is

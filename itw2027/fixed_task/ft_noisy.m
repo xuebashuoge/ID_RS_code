@@ -64,7 +64,8 @@ result.counts=struct('negative_trials',totals(1),'positive_trials',totals(2), ..
     'false_positives',totals(3),'false_negatives',totals(4), ...
     'frame_errors',totals(5),'frames',result.frames_done,'noiseless_false_positives',totals(6));
 result.metrics=struct('FP',totals(3)/totals(1),'FN',totals(4)/totals(2), ...
-    'FER',totals(5)/result.frames_done,'noiseless_FP',totals(6)/totals(1));
+    'FER',totals(5)/result.frames_done,'noiseless_FP',totals(6)/totals(1), ...
+    'balanced_error',(totals(3)+totals(4))/(totals(1)+totals(2)));
 result.complete=result.frames_done==task.frames; ft_save(path,result);
 assert(result.complete,'FT:Incomplete','Channel checkpointed; resubmit this task.');
 end

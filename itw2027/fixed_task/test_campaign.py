@@ -26,6 +26,8 @@ class CampaignTest(unittest.TestCase):
             self.assertEqual(len(records),76)
             zero=next(r for r in records if r['fer']==0)
             self.assertAlmostEqual(zero['fer_hi95'],1-.05**.01)
+            for row in records:
+                self.assertAlmostEqual(row['balanced_error'],.5*(row['fp']+row['fn']))
             production=Path(directory)/'production'
             campaign.manifests(production,'production',out)
             tasks=json.loads((production/'noisy.json').read_text())
@@ -43,6 +45,70 @@ class CampaignTest(unittest.TestCase):
             (out/'noisy.json').write_text(json.dumps(json.loads((out/'noisy.json').read_text()) +
                 [dict(json.loads((out/'noisy.json').read_text())[0],output='missing.mat')]))
             with self.assertRaises(ValueError): campaign.collect(out)
+
+    def test_incremental_reuse_and_seed_preservation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory)/'production'; base.mkdir()
+            grids={s:[-4.4,-4.1] for s in ('bfc','conventional')}
+            campaign.save_json(base/'design.json',dict(stage='production',grids=grids))
+            tasks=[]
+            for family in campaign.FAMILIES:
+                for shard in range(4):
+                    bank=base/f'banks/{family}_{shard:03d}.mat'
+                    bank.parent.mkdir(exist_ok=True); bank.touch()
+                for scheme in (('bfc','conventional') if family=='exact' else ('bfc',)):
+                    for si,snr in enumerate(grids[scheme]):
+                        for shard in range(4 if si==0 else 1):
+                            t=dict(kind='noisy',family=family,scheme=scheme,snr_db=snr,snr_index=si+1,
+                                   frames=2500,first_frame=shard*2500+1,seed_group=2,
+                                   bank=f'banks/{family}_{shard:03d}.mat',runtime_limit=5400,
+                                   output=f'noisy/{family}_{scheme}_{snr:+06.2f}_{shard:03d}.mat')
+                            tasks.append(t); self.write_result(base,t)
+            campaign.save_json(base/'noisy.json',tasks)
+            campaign.save_json(base/'noiseless.json',[])
+            out=Path(directory)/'extension'; campaign.extend(out,base)
+            added=json.loads((out/'noisy.json').read_text())
+            self.assertEqual(len(added),12)
+            self.assertEqual({t['first_frame'] for t in added},{2501,5001,7501})
+            self.assertTrue(all(t['snr_index']==2 and t['seed_group']==2 for t in added))
+            self.assertTrue(all((out/t['bank']).exists() for t in added))
+            with self.assertRaises(ValueError): campaign.collect(out)
+            for task in added: self.write_result(out,task)
+            records=campaign.collect(out)
+            self.assertTrue(all(r['frames']==10000 and r['positive_trials']==2700000 for r in records))
+            new_ns=json.loads((out/'noiseless.json').read_text()); self.assertEqual(len(new_ns),1344)
+            for family in campaign.FAMILIES:
+                probe=json.loads((out/f'probe_{family}.json').read_text())
+                rest=json.loads((out/f'noiseless_{family}.json').read_text())
+                self.assertEqual(len(probe),1); self.assertEqual(len(rest),447)
+                self.assertEqual(probe[0]['nt'],46); self.assertNotIn(probe[0],rest)
+                for nt in (42,44,46):
+                    ranges=sorted((t['first_position'],t['positions']) for t in new_ns
+                                  if t['family']==family and t['nt']==nt and t['first_message']==1)
+                    cursor=1
+                    for first,last in ranges:
+                        self.assertEqual(first,cursor); cursor=last+1
+                    self.assertEqual(cursor,2**(nt//2)+1)
+            # Changing the old manifest must invalidate reuse, not silently resample.
+            (base/'noisy.json').write_text((base/'noisy.json').read_text()+'\n')
+            with self.assertRaises(ValueError): campaign.task_sources(out,'noisy')
+
+    @staticmethod
+    def write_result(root,task):
+        a=np.zeros((task['frames'],7)); a[:,:2]=270
+        a[0,2:5]=[1,2,1]
+        path=root/task['output']; path.parent.mkdir(parents=True,exist_ok=True)
+        savemat(path,{'result':dict(task=task,complete=True,frames_done=task['frames'],per_frame=a)})
+
+    def test_noiseless_png_export(self):
+        from figures import plot_noiseless
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            rows=[dict(family=f,nt=n,mean=.001,sample_max=.002,bound=.01)
+                  for f in campaign.FAMILIES for n in (28,40,42,44,46)]
+            plot_noiseless(rows,out)
+            self.assertGreater((out/'noiseless.png').stat().st_size,1000)
+            self.assertGreater((out/'noiseless.pdf').stat().st_size,1000)
 
 
 if __name__=='__main__': unittest.main()
