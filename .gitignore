@@ -12,9 +12,11 @@ itw2027/results/source/
 itw2027/results/rerun*/
 itw2027/scripts/__pycache__/
 paper
-# ITW2027 fixed-task: sync rendered figures, not regenerable simulation artifacts.
+# ITW2027 fixed-task: sync rendered figures and per-run results, not source banks.
 itw2027/fixed_task/results/**
 !itw2027/fixed_task/results/**/
 !itw2027/fixed_task/results/**/*.png
 !itw2027/fixed_task/results/**/*.pdf
+!itw2027/fixed_task/results/**/noiseless/*.mat
+!itw2027/fixed_task/results/**/noisy/*.mat
 itw2027/fixed_task/__pycache__/
