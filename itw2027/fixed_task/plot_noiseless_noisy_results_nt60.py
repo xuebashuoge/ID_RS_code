@@ -8,18 +8,91 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
+from scipy.io import loadmat
 
-from noiseless_noisy_results import (
-    FAMILIES,
-    FAMILY_COLORS,
-    FAMILY_LABELS,
-    FIGSIZE,
-    _completed_result,
-    _clean_axis,
-    _save,
-    _series,
-    collect_noiseless,
-)
+from collections import defaultdict
+
+FAMILIES = ('id', 'rank', 'exact')
+FAMILY_COLORS = {'id': '#0072B2', 'rank': '#D55E00', 'exact': '#009E73'}
+FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact': 'Exact'}
+FIGSIZE = (3.5, 1.92)
+EXPECTED_NT = tuple(range(28, 47, 2))
+EXPECTED_MESSAGES = {'id': 200, 'rank': 2000, 'exact': 2000}
+
+
+def _completed_result(path):
+    result = loadmat(path, simplify_cells=True)['result']
+    if not result['complete']:
+        raise ValueError(f'Incomplete result: {path}')
+    return result
+
+
+def collect_noiseless(roots):
+    groups = {}
+    for root in roots:
+        for path in sorted((root / 'noiseless').glob('*.mat')):
+            result = _completed_result(path)
+            task = result['task']
+            family, nt = str(task['family']), int(task['nt'])
+            hits = np.atleast_1d(result['hits'])
+            first_position, last_position = int(task['first_position']), int(task['positions'])
+            if int(result['next_position']) != last_position + 1:
+                raise ValueError(f'Incomplete position shard: {path}')
+            config = result['config']
+            group = groups.setdefault((family, nt), dict(
+                T=int(config['T']), bound=float(config['bound']), messages=defaultdict(dict)))
+            if group['T'] != int(config['T']) or group['bound'] != float(config['bound']):
+                raise ValueError(f'Inconsistent noiseless configuration: {path}')
+            first_message = int(task['first_message'])
+            for offset, value in enumerate(hits):
+                message = first_message + offset
+                interval = (first_position, last_position)
+                if interval in group['messages'][message]:
+                    raise ValueError(f'Duplicate noiseless shard: {path}')
+                group['messages'][message][interval] = int(value)
+    expected_groups = {(family, nt) for family in FAMILIES for nt in EXPECTED_NT}
+    if set(groups) != expected_groups:
+        raise ValueError('Noiseless evidence does not cover every family and tag length')
+    table = []
+    for family in FAMILIES:
+        for nt in EXPECTED_NT:
+            group = groups[(family, nt)]
+            expected_messages = set(range(1, EXPECTED_MESSAGES[family] + 1))
+            if set(group['messages']) != expected_messages:
+                raise ValueError(f'Incomplete message coverage: {(family, nt)}')
+            probabilities = []
+            for message in sorted(group['messages']):
+                cursor, hits = 1, 0
+                for (first, last), count in sorted(group['messages'][message].items()):
+                    if first != cursor:
+                        raise ValueError(f'Missing/overlapping positions: {(family, nt, message)}')
+                    cursor, hits = last + 1, hits + count
+                if cursor != group['T'] + 1:
+                    raise ValueError(f'Partial enumeration: {(family, nt, message)}')
+                probabilities.append(hits / group['T'])
+            values = np.asarray(probabilities)
+            table.append(dict(family=family, nt=nt, mean=float(values.mean()),
+                              sample_max=float(values.max()), bound=group['bound']))
+    return table
+
+
+def _clean_axis(ax):
+    ax.grid(axis='y', which='major', color='0.88', linewidth=.55)
+    ax.tick_params(axis='both', which='both', direction='out', length=3)
+    ax.set_axisbelow(True)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+
+def _save(fig, out):
+    fig.savefig(out / 'combined_results.pdf')
+    fig.savefig(out / 'combined_results.png', dpi=300)
+    plt.close(fig)
+
+
+def _series(records, family, scheme):
+    return sorted((r for r in records if r['family'] == family and r['scheme'] == scheme),
+                  key=lambda r: r['snr_db'])
 
 
 def collect_noisy(root, target_frames=10_000):
@@ -90,7 +163,7 @@ def plot_combined(records, table, out):
     bfc_ax = fig.add_subplot(noisy_grid[0, 0])
     conventional_ax = fig.add_subplot(noisy_grid[0, 1], sharey=bfc_ax)
 
-    # Keep the noiseless panel identical to noiseless_noisy_results.py.
+    # Keep the noiseless panel identical to plot_noiseless_noisy_results.py.
     styles = {'mean': ('-', 'o', None), 'sample_max': ('--', 's', 'white'),
               'bound': (':', None, None)}
     limits = {'id': (6e-8, 1.5), 'rank': (1e-6, 1.5), 'exact': (3e-4, 1.5)}
@@ -220,7 +293,8 @@ def main():
     parser.add_argument('--out', type=Path, default=None)
     args = parser.parse_args()
 
-    out = args.noisy if args.out is None else args.out
+    default_out = here / 'figures'
+    out = default_out if args.out is None else args.out
     out.mkdir(parents=True, exist_ok=True)
     records = collect_noisy(args.noisy)
     table = collect_noiseless((args.base, args.extension))

@@ -8,17 +8,121 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
+from collections import defaultdict
+from scipy.io import loadmat
 
-from noiseless_noisy_results import (
-    FAMILIES,
-    FAMILY_COLORS,
-    FAMILY_LABELS,
-    FIGSIZE,
-    _clean_axis,
-    _series,
-    collect_noiseless,
-)
-from noiseless_noisy_results_nt60 import collect_noisy
+FAMILIES = ('id', 'rank', 'exact')
+FAMILY_COLORS = {'id': '#0072B2', 'rank': '#D55E00', 'exact': '#009E73'}
+FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact': 'Exact'}
+FIGSIZE = (3.5, 1.92)
+EXPECTED_NT = tuple(range(28, 47, 2))
+EXPECTED_MESSAGES = {'id': 200, 'rank': 2000, 'exact': 2000}
+
+
+def _completed_result(path):
+    result = loadmat(path, simplify_cells=True)['result']
+    if not result['complete']:
+        raise ValueError(f'Incomplete result: {path}')
+    return result
+
+
+def collect_noiseless(roots):
+    groups = {}
+    for root in roots:
+        for path in sorted((root / 'noiseless').glob('*.mat')):
+            result = _completed_result(path); task = result['task']
+            family, nt = str(task['family']), int(task['nt'])
+            hits = np.atleast_1d(result['hits'])
+            first, last = int(task['first_position']), int(task['positions'])
+            if int(result['next_position']) != last + 1:
+                raise ValueError(f'Incomplete position shard: {path}')
+            config = result['config']
+            group = groups.setdefault((family, nt), dict(
+                T=int(config['T']), bound=float(config['bound']), messages=defaultdict(dict)))
+            if (group['T'], group['bound']) != (int(config['T']), float(config['bound'])):
+                raise ValueError(f'Inconsistent noiseless configuration: {path}')
+            for offset, value in enumerate(hits):
+                message = int(task['first_message']) + offset
+                interval = (first, last)
+                if interval in group['messages'][message]:
+                    raise ValueError(f'Duplicate noiseless shard: {path}')
+                group['messages'][message][interval] = int(value)
+    expected = {(family, nt) for family in FAMILIES for nt in EXPECTED_NT}
+    if set(groups) != expected:
+        raise ValueError('Noiseless evidence does not cover every family and tag length')
+    table = []
+    for family in FAMILIES:
+        for nt in EXPECTED_NT:
+            group = groups[(family, nt)]
+            if set(group['messages']) != set(range(1, EXPECTED_MESSAGES[family] + 1)):
+                raise ValueError(f'Incomplete message coverage: {(family, nt)}')
+            probabilities = []
+            for message in sorted(group['messages']):
+                cursor, total = 1, 0
+                for (first, last), count in sorted(group['messages'][message].items()):
+                    if first != cursor:
+                        raise ValueError(f'Missing/overlapping positions: {(family, nt, message)}')
+                    cursor, total = last + 1, total + count
+                if cursor != group['T'] + 1:
+                    raise ValueError(f'Partial enumeration: {(family, nt, message)}')
+                probabilities.append(total / group['T'])
+            values = np.asarray(probabilities)
+            table.append(dict(family=family, nt=nt, mean=float(values.mean()),
+                              sample_max=float(values.max()), bound=group['bound']))
+    return table
+
+
+def collect_noisy(root, target_frames=10_000):
+    noisy = root / 'noisy_n_t_60'
+    if not noisy.is_dir():
+        raise FileNotFoundError(f'Missing noisy nt=60 result directory: {noisy}')
+    groups = {}
+    for path in sorted(noisy.glob('*.mat')):
+        result = _completed_result(path); task = result['task']
+        if int(task['nt']) != 60:
+            raise ValueError(f'Not an nt=60 result: {path}')
+        data = np.atleast_2d(result['per_frame']); frames = int(task['frames'])
+        if len(data) != frames or int(result['frames_done']) != frames:
+            raise ValueError(f'Frame-count mismatch: {path}')
+        if not np.all(data[:, 0] == data[:, 1]):
+            raise ValueError(f'Unbalanced class counts: {path}')
+        key = (str(task['family']), str(task['scheme']), float(task['snr_db']))
+        fp_bound = float(result['config']['bound'])
+        group = groups.setdefault(key, {'data': [], 'frames': set(), 'fp_bound': fp_bound})
+        if group['fp_bound'] != fp_bound:
+            raise ValueError(f'Inconsistent FP bound: {path}')
+        first = int(task['first_frame']); frame_ids = set(range(first, first + frames))
+        if frame_ids & group['frames']:
+            raise ValueError(f'Overlapping noisy shards: {path}')
+        group['frames'].update(frame_ids); group['data'].append(data)
+    expected_frames = set(range(1, target_frames + 1)); records = []
+    for (family, scheme, snr), group in sorted(groups.items()):
+        if group['frames'] != expected_frames:
+            raise ValueError(f'Incomplete frame coverage: {(family, scheme, snr)}')
+        totals = np.concatenate(group['data']).sum(axis=0)
+        records.append(dict(family=family, scheme=scheme, snr_db=snr,
+            frames=len(group['frames']), negative_trials=int(totals[0]),
+            positive_trials=int(totals[1]),
+            balanced_error=(totals[2] + totals[3]) / (totals[0] + totals[1]),
+            noiseless_balanced_error=.5 * totals[5] / totals[0],
+            balanced_fp_bound=.5 * group['fp_bound']))
+    expected_keys = {(family, scheme) for family in FAMILIES
+                     for scheme in (('bfc', 'conventional') if family == 'exact' else ('bfc',))}
+    if {(r['family'], r['scheme']) for r in records} != expected_keys:
+        raise ValueError('Missing or extra noisy family/scheme groups')
+    return records
+
+
+def _series(records, family, scheme):
+    return sorted((r for r in records if r['family'] == family and r['scheme'] == scheme),
+                  key=lambda r: r['snr_db'])
+
+
+def _clean_axis(ax):
+    ax.grid(axis='y', which='major', color='0.88', linewidth=.55)
+    ax.tick_params(axis='both', which='both', direction='out', length=3)
+    ax.set_axisbelow(True)
+    ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False)
 
 
 THREE_PANEL_FIGSIZE = (FIGSIZE[0], 2.18)
@@ -98,14 +202,21 @@ def _plot_noisy(noisy_axes, records):
         fp_bound = reference_row['balanced_fp_bound']
         mask = ((x >= bfc_limits[0]) & (x <= bfc_limits[1]) & (y > 0))
         if empirical_floor > 0:
-            mask &= y > empirical_floor
+            floor_points = np.flatnonzero(mask & (y <= empirical_floor))
+
+            if family == 'exact' and floor_points.size:
+                first_floor_point = floor_points[0]
+                mask &= y > empirical_floor
+                mask[first_floor_point] = True
+            else:
+                mask &= y > empirical_floor
 
         color = FAMILY_COLORS[family]
         ax.plot(x[mask], y[mask], color=color, lw=.8, ls='-', marker='o',
                 ms=1.9, markerfacecolor=color, markeredgecolor=color,
                 markeredgewidth=.6)
         ax.hlines(fp_bound, *bfc_limits, color=color, lw=.7, ls=':')
-        ax.text(.025, .5, FAMILY_LABELS[family], transform=ax.transAxes,
+        ax.text(.025, .35, FAMILY_LABELS[family], transform=ax.transAxes,
                 color=color, fontsize=5.1, ha='left', va='bottom',
                 bbox=dict(facecolor='white', edgecolor='none', pad=.15))
 
@@ -138,8 +249,12 @@ def _plot_noisy(noisy_axes, records):
         axis='both', which='both', labelsize=4.5, pad=1.2)
     _clean_axis(exact_conventional_ax)
 
+    # Use denser SNR ticks for ID and Rank, while retaining the original
+    # three endpoint/center ticks for Exact.
+    for ax in (id_ax, rank_ax):
+        ax.set_xticks([-5., -4.75, -4.5, -4.25, -4.])
     exact_bfc_ax.set_xticks([-5., -4.5, -4.])
-    exact_conventional_ax.set_xticks([1.5, 2., 2.2])
+    exact_conventional_ax.set_xticks([1.5, 1.85, 2.2])
     for ax in (id_ax, rank_ax, exact_bfc_ax):
         ax.get_xticklabels()[-1].set_horizontalalignment('right')
     exact_conventional_ax.get_xticklabels()[0].set_horizontalalignment('left')
@@ -182,8 +297,8 @@ def plot_combined(records, table, out):
     noisy_grid = outer[0, 1].subgridspec(
         3, 2, width_ratios=[1.35, 1.], hspace=.32, wspace=.09)
     id_ax = fig.add_subplot(noisy_grid[0, :])
-    rank_ax = fig.add_subplot(noisy_grid[1, :], sharex=id_ax)
-    exact_bfc_ax = fig.add_subplot(noisy_grid[2, 0], sharex=id_ax)
+    rank_ax = fig.add_subplot(noisy_grid[1, :])
+    exact_bfc_ax = fig.add_subplot(noisy_grid[2, 0])
     exact_conventional_ax = fig.add_subplot(
         noisy_grid[2, 1], sharey=exact_bfc_ax)
 
@@ -191,7 +306,7 @@ def plot_combined(records, table, out):
     _plot_noisy(
         (id_ax, rank_ax, exact_bfc_ax, exact_conventional_ax), records)
 
-    fig.text(.245, .975, '(a) Noiseless channel', ha='center', va='top',
+    fig.text(.295, .975, '(a) Noiseless channel', ha='center', va='top',
              fontsize=7.1)
     fig.text(.755, .975, '(b) Noisy channel', ha='center', va='top',
              fontsize=7.1)
@@ -213,7 +328,8 @@ def main():
     parser.add_argument('--out', type=Path, default=None)
     args = parser.parse_args()
 
-    out = args.noisy if args.out is None else args.out
+    default_out = here / 'figures'
+    out = default_out if args.out is None else args.out
     out.mkdir(parents=True, exist_ok=True)
     records = collect_noisy(args.noisy)
     table = collect_noiseless((args.base, args.extension))
