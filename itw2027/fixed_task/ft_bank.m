@@ -1,5 +1,5 @@
 function result = ft_bank(task,out)
-d=ft_config(task.family); [support,support_bits]=ft_support(d);
+d=ft_task_config(task); [support,support_bits]=ft_support(d);
 path=fullfile(out,task.output);
 signature=task;
 if isfile(path)

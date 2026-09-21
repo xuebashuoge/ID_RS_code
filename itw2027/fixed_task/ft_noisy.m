@@ -1,8 +1,9 @@
 function result = ft_noisy(task,out)
-d=ft_config(task.family); path=fullfile(out,task.output);
+d=ft_task_config(task); path=fullfile(out,task.output);
 saved=load(fullfile(out,task.bank)); bank=saved.result;
 assert(bank.complete && bank.frames_done==task.frames);
 assert(strcmp(bank.config.family,task.family));
+assert(bank.config.nt==d.nt && bank.config.G==d.G && bank.config.m==d.m);
 assert(bank.task.first_frame==task.first_frame && bank.task.seed_group==task.seed_group);
 if strcmp(task.scheme,'bfc'), rate=1/3; else
     assert(strcmp(task.scheme,'conventional') && strcmp(task.family,'exact'));
@@ -10,6 +11,8 @@ if strcmp(task.scheme,'bfc'), rate=1/3; else
 end
 enc=ldpcEncoderConfig(dvbs2ldpc(rate)); dec=ldpcDecoderConfig(enc,'bp');
 assert(enc.BlockLength==d.Nb);
+if strcmp(task.scheme,'bfc'), payload_length=d.Ni; else, payload_length=d.G*d.m; end
+assert(payload_length<=enc.NumInformationBits);
 if isfile(path)
     saved=load(path); result=saved.result; assert(isequal(result.task,task));
     if result.complete, return; end
@@ -17,7 +20,8 @@ else
     result=struct('task',task,'config',d,'complete',false,'frames_done',0, ...
         'rate',rate,'snr_definition','Es/N0; real AWGN variance N0/2','runtime_seconds',0);
     result.channel=struct('Nb',enc.BlockLength,'Ni',enc.NumInformationBits, ...
-        'Rc',rate,'G',d.G,'algorithm',d.algorithm,'max_iterations',d.max_iterations);
+        'Rc',rate,'G',d.G,'algorithm',d.algorithm,'max_iterations',d.max_iterations, ...
+        'payload_bits',payload_length,'padding_bits',enc.NumInformationBits-payload_length);
     % Columns: negative, positive, FP, FN, FER, noiseless FP, iterations.
     result.columns={'negative','positive','fp','fn','fer','noiseless_fp','iterations'};
     result.per_frame=zeros(task.frames,7);
@@ -27,7 +31,8 @@ for frame=result.frames_done+1:task.frames
     if strcmp(task.scheme,'bfc')
         info=pack_bfc_tuples(bank.u(:,frame),bank.c(:,frame),d.r,enc.NumInformationBits,d.G);
     else
-        info=reshape(bank.messages(:,:,frame).',[],1);
+        info=false(enc.NumInformationBits,1);
+        info(1:payload_length)=reshape(bank.messages(:,:,frame).',[],1);
     end
     assert(numel(info)==enc.NumInformationBits);
     coded=ldpcEncode(info,enc);
@@ -46,7 +51,7 @@ for frame=result.frames_done+1:task.frames
             d.r,d.K,d.T,d.memory,'extended');
         reference=sum(~labels & bank.noiseless(:,frame));
     else
-        messages=reshape(decoded,d.m,d.G).';
+        messages=reshape(decoded(1:payload_length),d.m,d.G).';
         f=ft_labels(messages,d,[]); reference=0;
     end
     result.per_frame(frame,:)=[sum(~labels),sum(labels),sum(f & ~labels), ...

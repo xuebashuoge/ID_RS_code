@@ -10,6 +10,10 @@ cd "${SLURM_SUBMIT_DIR:?}"
 module load "${ITW_MATLAB_MODULE:-MATLAB/2024b_Update_3}"
 export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+if [[ "${FT_TEST_ONLY:-0}" == 60 ]]; then
+    matlab -batch "addpath('itw2027/fixed_task'); test_noisy_nt60;"
+    exit 0
+fi
 if [[ "${FT_TEST_ONLY:-0}" == 1 ]]; then
     matlab -batch "addpath('itw2027/fixed_task'); test_fixed_task;"
     exit 0
