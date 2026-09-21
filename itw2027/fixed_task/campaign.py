@@ -236,7 +236,7 @@ def summarize(out):
     with (out / 'summary.csv').open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=records[0].keys(), lineterminator='\n')
         writer.writeheader(); writer.writerows(records)
-    from figures import plot_noisy, plot_noiseless
+    from figures import plot_noisy, plot_noiseless, plot_combined
     plot_noisy(records,out)
     design=json.loads((out/'design.json').read_text())
     if design['stage'] in ('production','extension'):
@@ -265,6 +265,7 @@ def summarize(out):
                 table.append(dict(family=family,nt=nt,mean=v.mean(),sample_max=v.max(),bound=g['bound'],messages=len(v),
                                   fn=0,fp_count=int(g['hits'].sum()),negative_trials=len(v)*T))
         plot_noiseless(table,out)
+        plot_combined(records,table,out)
         with (out/'noiseless_summary.csv').open('w',newline='') as f:
             writer=csv.DictWriter(f,fieldnames=table[0].keys(),lineterminator='\n'); writer.writeheader(); writer.writerows(table)
     print(f'Validated {len(records)} channel points; wrote summary.csv and plots to {out}')

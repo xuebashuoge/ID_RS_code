@@ -110,5 +110,26 @@ class CampaignTest(unittest.TestCase):
             self.assertGreater((out/'noiseless.png').stat().st_size,1000)
             self.assertGreater((out/'noiseless.pdf').stat().st_size,1000)
 
+    def test_combined_figure_export(self):
+        from figures import plot_combined
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)
+            table=[dict(family=f,nt=n,mean=10**(-2-i),sample_max=2*10**(-2-i),
+                        bound=10**(-i))
+                   for f,i in zip(campaign.FAMILIES,(2,1,0)) for n in (28,34,40,46)]
+            records=[]
+            for f,i in zip(campaign.FAMILIES,(2,1,0)):
+                for x,j in zip((-5.,-4.5,-4.),(0,1,2)):
+                    records.append(dict(family=f,scheme='bfc',snr_db=x,frames=10000,
+                                        balanced_error=10**(-j-1),
+                                        noiseless_balanced_error=10**(-i-3)))
+            for x,y in ((1.1,.5),(1.5,.2),(2.,1e-3),(2.5,0.)):
+                records.append(dict(family='exact',scheme='conventional',snr_db=x,
+                                    frames=10000,balanced_error=y,
+                                    noiseless_balanced_error=1e-3))
+            plot_combined(records,table,out)
+            self.assertGreater((out/'combined_results.png').stat().st_size,1000)
+            self.assertGreater((out/'combined_results.pdf').stat().st_size,1000)
+
 
 if __name__=='__main__': unittest.main()

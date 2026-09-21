@@ -38,6 +38,13 @@ denominators and uncertainty intervals. Raw MAT files are never deleted by
 aggregation. Source banks and deterministic seeds permit regeneration without
 storing millions of 100000-bit ID messages or all received channel samples.
 
+`results/extension_20260918/combined_results.{pdf,png}` is the compact
+3.5-by-1.92-inch two-panel summary. Its noiseless panel stacks the three
+functions vertically; its noisy panel overlays the functions by color and
+uses a marked -3.5-to-1.5-dB x-axis break. Line style distinguishes the
+plotted quantities or channel schemes. Rebuild it directly from the completed
+MAT counts with `conda run -n torch28 python itw2027/fixed_task/replot_combined.py`.
+
 Pilot: -5.5:0.5:3.5 dB, 100 independent frames per point. Three banks are
 shared across SNRs (not counted as independent source draws when pooling).
 Production: a separate seed group, 2500 frames/point, with 10000 at three
