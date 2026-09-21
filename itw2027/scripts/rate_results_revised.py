@@ -2,7 +2,7 @@
 """Build the revised two-panel finite-rate figure.
 
 Panel (a) retains the fixed-E_2 rate sequences from ``rate_results.py``.
-Panel (b) directly displays the rate--error-exponent trade-off at n_t=40.
+Panel (b) directly displays the rate--error-exponent trade-off at n_t=60.
 """
 import numpy as np
 
@@ -18,13 +18,13 @@ from results_common import COLORS, clean_axis, csv_write, legend_line, savefig
 import matplotlib.pyplot as plt
 
 
-TRADEOFF_N_T = 40
+TRADEOFF_N_T = 60
 TRADEOFF_E2 = np.linspace(.01, .25, 97)
 FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact-threshold': 'Exact'}
 
 
 def revised_rate_sequences():
-    """Return the fixed-length sequences and the n_t=40 E_2 trade-off."""
+    """Return the fixed-length sequences and the fixed-n_t E_2 trade-off."""
     rows = []
     for family in FAMILIES:
         for E_2 in FIXED_E2:
@@ -118,7 +118,7 @@ def figure_rate_results_revised(rows):
             textcoords='offset points', color=COLORS[family],
             ha='right', va='center', fontsize=6.3,
         )
-    ax.set_title(r'(b) Fixed $n_t=40$', fontsize=9, pad=3)
+    ax.set_title(rf'(b) Fixed $n_t={TRADEOFF_N_T}$', fontsize=9, pad=3)
     ax.set_xlim(0, .26)
     ax.set_xlabel(r'$E_2$')
     ax.set_xticks([.05, .10, .15, .20, .25])
