@@ -13,10 +13,9 @@ itw2027/results/rerun*/
 itw2027/scripts/__pycache__/
 paper
 # ITW2027 fixed-task: sync rendered figures and per-run results, not source banks.
-itw2027/fixed_task/results/**
-!itw2027/fixed_task/results/**/
-!itw2027/fixed_task/results/**/*.png
-!itw2027/fixed_task/results/**/*.pdf
-!itw2027/fixed_task/results/**/noiseless/*.mat
-!itw2027/fixed_task/results/**/noisy/*.mat
+itw2027/fixed_task/results/**/banks**
+itw2027/fixed_task/results/**/.matplotlib
+itw2027/fixed_task/results/pilot
+itw2027/fixed_task/results/replot**
+
 itw2027/fixed_task/__pycache__/

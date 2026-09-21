@@ -1,0 +1,15 @@
+[
+  {
+    "kind": "noiseless",
+    "family": "id",
+    "nt": 46,
+    "messages": 25,
+    "first_message": 1,
+    "seed_group": 2,
+    "first_position": 1,
+    "positions": 262144,
+    "chunk_size": 64,
+    "runtime_limit": 6600,
+    "output": "noiseless/id_46_000_0000001.mat"
+  }
+]

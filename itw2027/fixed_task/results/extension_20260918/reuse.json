@@ -1,0 +1,7 @@
+{
+  "base": "../production",
+  "sha256": {
+    "noisy": "d4c51ff09e8a91e27682b46e272cf0739399decdc5893fbbb78e5744f7bc7f15",
+    "noiseless": "42adfe1a88c681f79af5ecf4bbf7ab2c49373954ee181a8b18e03d4de9b7bfe7"
+  }
+}

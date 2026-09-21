@@ -1,0 +1,5 @@
+smoke=30690937
+banks=30690939
+noisy=30690940
+noiseless=30690941
+plots=30690942
