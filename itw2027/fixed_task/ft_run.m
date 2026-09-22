@@ -3,6 +3,7 @@ ft_setup();
 tasks=jsondecode(fileread(manifest)); task=tasks(index+1);
 fprintf('Task %d: %s\n',index,jsonencode(task));
 switch task.kind
+    case 'conventional_full', ft_conventional_full(task,out);
     case 'bank', ft_bank(task,out);
     case 'noisy', ft_noisy(task,out);
     case 'noiseless', ft_noiseless(task,out);
