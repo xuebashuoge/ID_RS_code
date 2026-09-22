@@ -27,9 +27,13 @@ for family={'id','rank','exact'}
     end
     if strcmp(family{1},'exact')
         noisy.scheme='conventional'; noisy.output='conventional_n_t_60.mat';
+        noisy.ldpc_rate=3/5;
         result=ft_noisy(noisy,out);
-        assert(result.channel.padding_bits==18000 && result.channel.payload_bits==36000);
+        assert(result.channel.Ni==38880 && result.channel.Rc==3/5);
+        assert(result.channel.padding_bits==2880 && result.channel.payload_bits==36000);
         assert(result.metrics.FER==0 && result.metrics.FN==0 && result.metrics.FP==0);
+        noisy.snr_db=-8; noisy.output='conventional_low_n_t_60.mat';
+        result=ft_noisy(noisy,out); assert(result.metrics.FER==1 && result.metrics.FN>0);
     end
 end
 legacy=ft_config('id'); assert(legacy.G==540); % Old default remains unchanged.

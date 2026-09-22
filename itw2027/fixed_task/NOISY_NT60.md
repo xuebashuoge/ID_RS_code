@@ -1,5 +1,21 @@
 # Noisy-only nt=60 campaign
 
+Correction (2026-09-22): new manifests explicitly use conventional LDPC rate
+3/5, with Ni=38880 and 2880 padding bits. The historical rate-5/6 baseline
+below is archived and should be replaced for the paper. Payload rate is
+36000/64800=5/9; 3/5 is the lowest supported DVB-S2 rate that fits it.
+Old manifests lacking ldpc_rate keep their original behavior for reproducibility.
+
+conventional_nt60_corrected.py builds a conventional-only rerun with existing
+source banks and extra SNRs -2:0.1:0. submit_conventional_nt60_corrected.sh
+accepts a second argument `pilot` to submit only five 2500-frame points at
+-1.4,-1.2,-1,-0.8,-0.6 dB for timing and locating the corrected waterfall.
+No million-frame run is automatically submitted. A high-precision follow-up
+needs fresh source/noise streams and larger frame-ID-safe seed spacing;
+do not simply exceed the current 10000-frame namespace or repeat old banks.
+
+## Historical nt=60 campaign
+
 Only physical tag length/packing change from the preceding noisy campaign:
 nt=60, G=360, Nb=64800, neff=180. BFC payload Ni=21600 and LDPC rate 1/3
 are unchanged. Fixed m values remain ID 100000, rank 5000, exact 100.

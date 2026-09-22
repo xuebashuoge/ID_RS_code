@@ -9,12 +9,16 @@ if strcmp(task.scheme,'bfc'), rate=1/3; else
     assert(strcmp(task.scheme,'conventional') && strcmp(task.family,'exact'));
     rate=5/6;
 end
+% Explicit rates identify corrected campaigns; old manifests remain reproducible.
+if isfield(task,'ldpc_rate'), rate=task.ldpc_rate; end
+if strcmp(task.scheme,'bfc'), assert(abs(rate-d.Rc)<1e-12); end
 enc=ldpcEncoderConfig(dvbs2ldpc(rate)); dec=ldpcDecoderConfig(enc,'bp');
 assert(enc.BlockLength==d.Nb);
 if strcmp(task.scheme,'bfc'), payload_length=d.Ni; else, payload_length=d.G*d.m; end
 assert(payload_length<=enc.NumInformationBits);
 if isfile(path)
     saved=load(path); result=saved.result; assert(isequal(result.task,task));
+    assert(abs(result.rate-rate)<1e-12,'Saved result belongs to another LDPC rate.');
     if result.complete, return; end
 else
     result=struct('task',task,'config',d,'complete',false,'frames_done',0, ...
