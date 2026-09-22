@@ -16,5 +16,5 @@ printf 'smoke=%s\n' "$smoke" | tee "$FT_OUT/$job_file"
 export FT_TEST_ONLY=0
 export FT_MANIFEST="$FT_OUT/$manifest"
 last=$(conda run -n torch28 python -c 'import json,sys; print(len(json.load(open(sys.argv[1])))-1)' "$FT_MANIFEST")
-job=$(sbatch --parsable --job-name=itw_conv_rc35 --dependency="afterok:${smoke%%;*}" --array="0-${last}%32" --cpus-per-task=8 --mem=4G --time=01:00:00 --export=ALL itw2027/fixed_task/job.slurm)
+job=$(sbatch --parsable --job-name=itw_conv_rc35 --dependency="afterok:${smoke%%;*}" --array="0-${last}%64" --cpus-per-task=8 --mem=4G --time=01:00:00 --export=ALL itw2027/fixed_task/job.slurm)
 printf 'conventional=%s\n' "$job" | tee -a "$FT_OUT/$job_file"
