@@ -1,5 +1,8 @@
 function result = ft_noiseless(task,out)
-d=ft_config(task.family,task.nt); [support,support_bits]=ft_support(d);
+params=struct();
+if isfield(task,'m'), params.m=task.m; end
+if isfield(task,'rank_threshold'), params.rank_threshold=task.rank_threshold; end
+d=ft_config(task.family,task.nt,540,params); [support,support_bits]=ft_support(d);
 first_position=1;
 if isfield(task,'first_position'), first_position=task.first_position; end
 % Same original messages at every nt; per-message seeds independent of nt.

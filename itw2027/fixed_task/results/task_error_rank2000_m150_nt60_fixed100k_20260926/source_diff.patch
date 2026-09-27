@@ -1,0 +1,172 @@
+diff --git a/itw2027/fixed_task/conventional_full.py b/itw2027/fixed_task/conventional_full.py
+index 39aacbb..3c5f1c8 100644
+--- a/itw2027/fixed_task/conventional_full.py
++++ b/itw2027/fixed_task/conventional_full.py
+@@ -1,4 +1,4 @@
+-"""Fixed one-million-frame conventional FER sweep and exact-binomial report."""
++"""Legacy million-frame sweep; report task error separately from LDPC FER."""
+ import argparse
+ import csv
+ import json
+@@ -58,7 +58,10 @@ def summarize(out):
+             raise ValueError(f'Invalid error counts: {path}')
+         if np.any((a[:,2]+a[:,3]>0)&(a[:,4]==0)):
+             raise ValueError(f'Task error without a frame error: {path}')
+-        group=groups.setdefault(t['snr_db'],dict(counts=np.zeros(7,dtype=np.uint64),ranges=[],runtime=0.))
++        group=groups.setdefault(t['snr_db'],dict(counts=np.zeros(7,dtype=np.uint64),ranges=[],runtime=0.,error_square_sum=0.,task_error_frames=0))
++        frame_error=(a[:,2].astype(float)+a[:,3])/(a[:,0]+a[:,1])
++        group['error_square_sum']+=float(np.dot(frame_error,frame_error))
++        group['task_error_frames']+=int(np.count_nonzero(frame_error))
+         group['counts']+=a.astype(np.uint64).sum(axis=0)
+         group['ranges'].append((t['first_frame'],t['first_frame']+t['frames']-1))
+         group['runtime']+=r['runtime_seconds']
+@@ -77,6 +80,10 @@ def summarize(out):
+                  fp_count=int(c[2]),fn_count=int(c[3]),FP=float(c[2]/c[0]),FN=float(c[3]/c[1]),
+                  balanced_error=float((c[2]+c[3])/(c[0]+c[1])),mean_iterations=float(c[6]/n),
+                  runtime_job_hours=g['runtime']/3600,**bounds(k,n,len(groups)))
++        row['task_error_frames']=g['task_error_frames']
++        row['task_error_se']=float(np.sqrt(max(0.,g['error_square_sum']-n*row['balanced_error']**2)/(n-1)/n))
++        row['task_error_upper95_conservative']=(1. if g['task_error_frames']==n else
++            float(beta.ppf(.95,g['task_error_frames']+1,n-g['task_error_frames'])))
+         rows.append(row)
+     target=design['target_fer']
+     def first(column):
+@@ -90,6 +97,17 @@ def summarize(out):
+         writer=csv.DictWriter(stream,fieldnames=rows[0].keys(),lineterminator='\n')
+         writer.writeheader(); writer.writerows(rows)
+     save_json(out/'fer_threshold_report.json',report)
++    task_report=dict(metric='balanced task error (FP+FN)/(360*frames)',points=rows,
++        targets={str(target):next((r for r in rows if r['balanced_error']<target),None)
++                 for target in (1e-5,1e-6)},
++        uncertainty='SE uses independent frame means, not independent messages. Conservative upper bounds use exact binomial probability of any task error in a frame.')
++    save_json(out/'task_error_report.json',task_report)
++    task_lines=['# Conventional rate-3/5 task error','',
++        'Primary metric: (FP+FN)/(360 × frames). FER is a separate diagnostic.','',
++        '| SNR (dB) | Frames | Task error | Frame-cluster SE | LDPC FER |',
++        '|---:|---:|---:|---:|---:|']
++    task_lines.extend(f'| {r["snr_db"]:.2f} | {r["frames"]} | {r["balanced_error"]:.7g} | {r["task_error_se"]:.7g} | {r["fer"]:.7g} |' for r in rows)
++    (out/'task_error_report.md').write_text('\n'.join(task_lines)+'\n')
+     lines=['# Conventional rate-3/5 FER threshold','',
+            f'Each point contains {design["frames_per_point"]:,} fresh independent frames. The first SNR is -5 dB.',
+            'Metric: any error in the decoded 38880-bit LDPC information block, including padding.','']
+@@ -104,7 +122,10 @@ def summarize(out):
+                   '|---:|---:|---:|---:|---:|---:|'])
+     lines.extend(f'| {r["snr_db"]:.2f} | {r["frame_errors"]} | {r["frames"]} | {r["fer"]:.7g} | {r["fer_upper95"]:.7g} | {r["fer_upper95_simultaneous"]:.7g} |' for r in rows)
+     (out/'fer_threshold_report.md').write_text('\n'.join(lines)+'\n')
+-    print('\n'.join(lines[:9]))
++    print('\n'.join(task_lines[:3]))
++    for target,point in task_report['targets'].items():
++        print(f'Task error < {target}: '+('not reached' if point is None else
++              f'{point["snr_db"]:.2f} dB, P_e={point["balanced_error"]:.7g}'))
+     return report
+ 
+ 
+diff --git a/itw2027/fixed_task/ft_config.m b/itw2027/fixed_task/ft_config.m
+index 61eeb82..9224354 100644
+--- a/itw2027/fixed_task/ft_config.m
++++ b/itw2027/fixed_task/ft_config.m
+@@ -1,14 +1,28 @@
+-function d = ft_config(family, nt, G)
++function d = ft_config(family, nt, G, params)
+ if nargin < 2, nt = 40; end
+ if nargin < 3, G = 540; end
++if nargin < 4, params = struct(); end
+ assert(G>0 && mod(G,2)==0);
+ assert(ismember(family, {'id','rank','exact'}));
+ assert(mod(nt,2)==0 && nt>=4 && nt<=64);
+ d.version = 1; d.family = family; d.nt = nt;
+ switch family
+-    case 'id', d.m=100000; d.S=1; d.family_id=1;
+-    case 'rank', d.m=5000; d.S=21; d.family_id=2;
+-    case 'exact', d.m=100; d.S=nchoosek(d.m,2); d.family_id=3;
++    case 'id'
++        d.m=100000; d.S=1; d.family_id=1;
++    case 'rank'
++        d.m=5000; d.rank_threshold=20; d.family_id=2;
++        if isfield(params,'m'), d.m=params.m; end
++        if isfield(params,'rank_threshold'), d.rank_threshold=params.rank_threshold; end
++        assert(d.m==floor(d.m) && d.m>=1);
++        assert(d.rank_threshold==floor(d.rank_threshold) && d.rank_threshold>=0);
++        assert(log2(double(d.rank_threshold)+1)<=d.m, ...
++            'The rank threshold must fit in the m-bit source alphabet.');
++        d.S=d.rank_threshold+1;
++    case 'exact'
++        d.m=100; d.family_id=3;
++        if isfield(params,'m'), d.m=params.m; end
++        assert(d.m==floor(d.m) && d.m>=2);
++        d.S=nchoosek(d.m,2);
+ end
+ d.r=nt/2; d.T=2^d.r; d.K=ceil(d.m/d.r);
+ assert(d.K<=d.T);
+diff --git a/itw2027/fixed_task/ft_labels.m b/itw2027/fixed_task/ft_labels.m
+index a7564f9..9de5b05 100644
+--- a/itw2027/fixed_task/ft_labels.m
++++ b/itw2027/fixed_task/ft_labels.m
+@@ -3,8 +3,15 @@ assert(size(bits,2)==d.m);
+ switch d.family
+     case 'id', labels=all(bits==target,2);
+     case 'rank'
+-        tail=double(bits(:,end-4:end))*[16;8;4;2;1];
+-        labels=~any(bits(:,1:end-5),2) & tail<=20;
++        width=max(1,ceil(log2(double(d.rank_threshold)+1)));
++        weights=2.^((width-1):-1:0).';
++        tail=double(bits(:,end-width+1:end))*weights;
++        if width<d.m
++            leading_zero=~any(bits(:,1:end-width),2);
++        else
++            leading_zero=true(size(bits,1),1);
++        end
++        labels=leading_zero & tail<=d.rank_threshold;
+     case 'exact', labels=sum(bits,2)==2;
+ end
+ end
+diff --git a/itw2027/fixed_task/ft_run.m b/itw2027/fixed_task/ft_run.m
+index d4dee38..1322a2d 100644
+--- a/itw2027/fixed_task/ft_run.m
++++ b/itw2027/fixed_task/ft_run.m
+@@ -1,9 +1,12 @@
+ function ft_run(manifest,index,out)
+ ft_setup();
+-tasks=jsondecode(fileread(manifest)); task=tasks(index+1);
++tasks=jsondecode(fileread(manifest));
++% Mixed rank/exact manifests have different fields and decode as cell arrays.
++if iscell(tasks), task=tasks{index+1}; else, task=tasks(index+1); end
+ fprintf('Task %d: %s\n',index,jsonencode(task));
+ switch task.kind
+     case 'conventional_full', ft_conventional_full(task,out);
++    case 'task_comparison', ft_task_comparison(task,out);
+     case 'bank', ft_bank(task,out);
+     case 'noisy', ft_noisy(task,out);
+     case 'noiseless', ft_noiseless(task,out);
+diff --git a/itw2027/fixed_task/ft_support.m b/itw2027/fixed_task/ft_support.m
+index eabf475..e267f1e 100644
+--- a/itw2027/fixed_task/ft_support.m
++++ b/itw2027/fixed_task/ft_support.m
+@@ -6,7 +6,11 @@ switch d.family
+         stream=RandStream('mt19937ar','Seed',73129);
+         bits=rand(stream,1,d.m)>0.5;
+     case 'rank'
+-        for j=1:5, bits(:,d.m-5+j)=bitget(uint32((0:20)'),6-j)>0; end
++        width=max(1,ceil(log2(double(d.rank_threshold)+1)));
++        values=uint32((0:d.rank_threshold)');
++        for j=1:width
++            bits(:,d.m-width+j)=bitget(values,width-j+1)>0;
++        end
+     case 'exact'
+         pairs=nchoosek(1:d.m,2); rows=(1:d.S)';
+         bits(sub2ind(size(bits),rows,pairs(:,1)))=true;
+diff --git a/itw2027/fixed_task/job.slurm b/itw2027/fixed_task/job.slurm
+index 115b871..514995b 100644
+--- a/itw2027/fixed_task/job.slurm
++++ b/itw2027/fixed_task/job.slurm
+@@ -14,6 +14,10 @@ if [[ "${FT_TEST_ONLY:-0}" == million ]]; then
+     matlab -batch "addpath('itw2027/fixed_task'); test_conventional_full;"
+     exit 0
+ fi
++if [[ "${FT_TEST_ONLY:-0}" == comparison ]]; then
++    matlab -batch "addpath('itw2027/fixed_task'); test_task_comparison;"
++    exit 0
++fi
+ if [[ "${FT_TEST_ONLY:-0}" == 60 ]]; then
+     matlab -batch "addpath('itw2027/fixed_task'); test_noisy_nt60;"
+     exit 0

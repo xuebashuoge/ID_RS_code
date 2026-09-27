@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Plot vertically separated noiseless and noisy nt=60 results."""
 import argparse
+import csv
 from pathlib import Path
 
 import matplotlib
@@ -13,7 +14,12 @@ from scipy.io import loadmat
 
 FAMILIES = ('id', 'rank', 'exact')
 FAMILY_COLORS = {'id': '#0072B2', 'rank': '#D55E00', 'exact': '#009E73'}
-FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact': 'Exact'}
+FAMILY_LABELS = {
+    'id': r'ID ($m=10^5$)',
+    'rank': r'Rank ($m=150$)',
+    'exact': r'Exact weight ($m=100$)',
+}
+NOISY_FAMILY_LABELS = dict(FAMILY_LABELS)
 FIGSIZE = (3.5, 1.92)
 EXPECTED_NT = tuple(range(28, 47, 2))
 EXPECTED_MESSAGES = {'id': 200, 'rank': 2000, 'exact': 2000}
@@ -26,20 +32,31 @@ def _completed_result(path):
     return result
 
 
-def collect_noiseless(roots):
+def collect_noiseless(roots, rank_root):
     groups = {}
-    for root in roots:
+    sources = [(root, {'id', 'exact'}) for root in roots]
+    sources.append((rank_root, {'rank'}))
+    for root, included_families in sources:
         for path in sorted((root / 'noiseless').glob('*.mat')):
             result = _completed_result(path); task = result['task']
             family, nt = str(task['family']), int(task['nt'])
+            if family not in included_families:
+                continue
             hits = np.atleast_1d(result['hits'])
             first, last = int(task['first_position']), int(task['positions'])
             if int(result['next_position']) != last + 1:
                 raise ValueError(f'Incomplete position shard: {path}')
             config = result['config']
             group = groups.setdefault((family, nt), dict(
-                T=int(config['T']), bound=float(config['bound']), messages=defaultdict(dict)))
-            if (group['T'], group['bound']) != (int(config['T']), float(config['bound'])):
+                T=int(config['T']), bound=float(config['bound']),
+                m=int(config['m']),
+                rank_threshold=(int(config['rank_threshold'])
+                                if family == 'rank' else None),
+                messages=defaultdict(dict)))
+            settings = (int(config['T']), float(config['bound']), int(config['m']),
+                        int(config['rank_threshold']) if family == 'rank' else None)
+            if (group['T'], group['bound'], group['m'],
+                    group['rank_threshold']) != settings:
                 raise ValueError(f'Inconsistent noiseless configuration: {path}')
             for offset, value in enumerate(hits):
                 message = int(task['first_message']) + offset
@@ -50,6 +67,13 @@ def collect_noiseless(roots):
     expected = {(family, nt) for family in FAMILIES for nt in EXPECTED_NT}
     if set(groups) != expected:
         raise ValueError('Noiseless evidence does not cover every family and tag length')
+    expected_functions = {
+        'id': (100000, None), 'rank': (150, 2000), 'exact': (100, None)}
+    for (family, nt), group in groups.items():
+        if (group['m'], group['rank_threshold']) != expected_functions[family]:
+            raise ValueError(
+                f'Wrong noiseless function for {(family, nt)}: '
+                f'm={group["m"]}, rank_threshold={group["rank_threshold"]}')
     table = []
     for family in FAMILIES:
         for nt in EXPECTED_NT:
@@ -118,6 +142,34 @@ def _series(records, family, scheme):
                   key=lambda r: r['snr_db'])
 
 
+def collect_task_comparison(root):
+    """Load the validated, merged rank/exact task-error campaign summary."""
+    path = root / 'task_error_summary.csv'
+    if not path.is_file():
+        raise FileNotFoundError(f'Missing task-error summary: {path}')
+    numeric = ('snr_db', 'frames', 'balanced_error',
+               'task_error_upper95_conservative', 'balanced_fp_bound',
+               'noiseless_balanced_error')
+    records = []
+    with path.open(newline='') as stream:
+        for row in csv.DictReader(stream):
+            if (row['family'], row['scheme']) not in {
+                    ('rank', 'bfc'), ('rank', 'conventional'),
+                    ('exact', 'conventional')}:
+                continue
+            record = dict(row)
+            for key in numeric:
+                record[key] = float(row[key])
+            record['frames'] = int(record['frames'])
+            records.append(record)
+    required = {('rank', 'bfc'), ('rank', 'conventional'),
+                ('exact', 'conventional')}
+    present = {(r['family'], r['scheme']) for r in records}
+    if present != required:
+        raise ValueError(f'Incomplete task-error summary groups: {present}')
+    return records
+
+
 def _clean_axis(ax):
     ax.grid(axis='y', which='major', color='0.88', linewidth=.55)
     ax.tick_params(axis='both', which='both', direction='out', length=3)
@@ -140,9 +192,9 @@ def _plot_noiseless(noiseless_axes, table):
     """Draw the original three-row noiseless panel."""
     styles = {'mean': ('-', 'o', None), 'sample_max': ('--', 's', 'white'),
               'bound': (':', None, None)}
-    limits = {'id': (6e-8, 1.5), 'rank': (1e-6, 1.5),
+    limits = {'id': (6e-8, 1.5), 'rank': (8e-5, 1.5),
               'exact': (3e-4, 1.5)}
-    ticks = {'id': (1e-6, 1e-3, 1.), 'rank': (1e-5, 1e-2, 1.),
+    ticks = {'id': (1e-6, 1e-3, 1.), 'rank': (1e-4, 1e-2, 1.),
              'exact': (1e-3, 1e-1, 1.)}
 
     for ax, family in zip(noiseless_axes, FAMILIES):
@@ -158,7 +210,8 @@ def _plot_noiseless(noiseless_axes, table):
                     markeredgecolor=color, markeredgewidth=.6)
         ax.set(yscale='log', xlim=(27.3, 46.7), ylim=limits[family])
         ax.set_yticks(ticks[family])
-        ax.text(.025, .13, FAMILY_LABELS[family], transform=ax.transAxes,
+        label_y = .025 if family == 'id' else .13
+        ax.text(.025, label_y, FAMILY_LABELS[family], transform=ax.transAxes,
                 color=color, fontsize=5.1, ha='left', va='bottom')
         ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
         _clean_axis(ax)
@@ -216,7 +269,8 @@ def _plot_noisy(noisy_axes, records):
                 ms=1.9, markerfacecolor=color, markeredgecolor=color,
                 markeredgewidth=.6)
         ax.hlines(fp_bound, *bfc_limits, color=color, lw=.7, ls=':')
-        ax.text(.025, .35, FAMILY_LABELS[family], transform=ax.transAxes,
+        ax.text(.025, .35, NOISY_FAMILY_LABELS[family],
+                transform=ax.transAxes,
                 color=color, fontsize=5.1, ha='left', va='bottom',
                 bbox=dict(facecolor='white', edgecolor='none', pad=.15))
 
@@ -286,6 +340,143 @@ def _plot_noisy(noisy_axes, records):
        fontsize=4.2, handlelength=1.1, handletextpad=.22, borderaxespad=0)
 
 
+def _waterfall_rows(records, family):
+    """Select the deliberately refined conventional waterfall interval."""
+    rows = _series(records, family, 'conventional')
+    refined = [r for r in rows if r['frames'] > 1_000]
+    if len(refined) < 2:
+        raise ValueError(f'Missing refined conventional waterfall for {family}')
+    steps = np.diff([r['snr_db'] for r in refined])
+    if not np.allclose(steps, .05, atol=1e-9):
+        raise ValueError(f'Conventional waterfall is not on a 0.05 dB grid: {family}')
+    # The final point in each refined sweep is already below the useful
+    # comparison range; stop one sample earlier in the paper figure.
+    return refined[:-1]
+
+
+def _plot_task_noisy(noisy_axes, records):
+    """Draw updated task-error curves with broken BFC/conventional SNR axes."""
+    id_ax, rank_bfc_ax, rank_conventional_ax, exact_bfc_ax, exact_conventional_ax = noisy_axes
+    bfc_axes = {'id': id_ax, 'rank': rank_bfc_ax, 'exact': exact_bfc_ax}
+    right_axes = {'rank': rank_conventional_ax,
+                  'exact': exact_conventional_ax}
+    low_limits = {family: (-5.05, -4.) for family in FAMILIES}
+
+    for family in FAMILIES:
+        ax = bfc_axes[family]
+        rows = _series(records, family, 'bfc')
+        if not rows:
+            raise ValueError(f'Missing noisy BFC rows for {family}')
+        lo, hi = low_limits[family]
+        rows = [r for r in rows if -5. <= r['snr_db'] <= hi]
+        empirical_floor = max(rows, key=lambda r: r['frames'])[
+            'noiseless_balanced_error']
+        positive = [r for r in rows
+                    if r['balanced_error'] > empirical_floor]
+        if family == 'exact':
+            floor_rows = [r for r in rows
+                          if 0 < r['balanced_error'] <= empirical_floor]
+            if floor_rows:
+                positive.append(floor_rows[0])
+                positive.sort(key=lambda r: r['snr_db'])
+        if not positive:
+            raise ValueError(f'No positive noisy BFC rows for {family}')
+        color = FAMILY_COLORS[family]
+        ax.plot([r['snr_db'] for r in positive],
+                [r['balanced_error'] for r in positive],
+                color=color, lw=.8, ls='-', marker='o', ms=1.9,
+                markerfacecolor=color, markeredgecolor=color,
+                markeredgewidth=.6)
+        fp_bound = positive[0]['balanced_fp_bound']
+        ax.hlines(fp_bound, lo, hi, color=color, lw=.7, ls=':')
+        label_y = .35 if family == 'id' else .075
+        ax.text(.025, label_y, NOISY_FAMILY_LABELS[family],
+                transform=ax.transAxes,
+                color=color, fontsize=5.1, ha='left', va='bottom',
+                bbox=dict(facecolor='white', edgecolor='none', pad=.15))
+
+    # Show the conventional plateau from -5 dB on the same low-SNR
+    # segments; the broken right axes retain the refined waterfalls.
+    for family, ax in (('rank', rank_bfc_ax),
+                       ('exact', exact_bfc_ax)):
+        lo, hi = low_limits[family]
+        rows = [r for r in _series(records, family, 'conventional')
+                if -5. <= r['snr_db'] <= hi and r['balanced_error'] > 0]
+        if not rows or rows[0]['snr_db'] != -5.:
+            raise ValueError(
+                f'Conventional low-SNR curve does not start at -5 dB: {family}')
+        color = FAMILY_COLORS[family]
+        ax.plot([r['snr_db'] for r in rows],
+                [r['balanced_error'] for r in rows],
+                color=color, lw=.8, ls='--', marker='s', ms=1.9,
+                markerfacecolor='white', markeredgecolor=color,
+                markeredgewidth=.6)
+
+    conventional_limits = {}
+    for family, ax in right_axes.items():
+        rows = _waterfall_rows(records, family)
+        lo, hi = rows[0]['snr_db'], rows[-1]['snr_db']
+        conventional_limits[family] = (
+            lo, -.8 if family == 'exact' else 2.2)
+        color = FAMILY_COLORS[family]
+        positive = [r for r in rows if r['balanced_error'] > 0]
+        ax.plot([r['snr_db'] for r in positive],
+                [r['balanced_error'] for r in positive],
+                color=color, lw=.8, ls='--', marker='s', ms=1.9,
+                markerfacecolor='white', markeredgecolor=color,
+                markeredgewidth=.6)
+        for row in rows:
+            if row['balanced_error'] == 0:
+                ax.plot(row['snr_db'],
+                        row['task_error_upper95_conservative'],
+                        color=color, marker='v', ms=2.5, fillstyle='none')
+        ax.hlines(rows[0]['balanced_fp_bound'], lo, hi,
+                  color=color, lw=.7, ls=':')
+
+    for family, ax in bfc_axes.items():
+        ax.set(yscale='log', ylim=(1e-8, .8), xlim=low_limits[family])
+        ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
+        _clean_axis(ax)
+    for family, ax in right_axes.items():
+        ax.set(yscale='log', ylim=(1e-8, .8),
+               xlim=conventional_limits[family])
+        ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
+        _clean_axis(ax)
+
+    id_ax.set_xticks([-5., -4.75, -4.5, -4.25, -4.])
+    for ax in (rank_bfc_ax, exact_bfc_ax):
+        ax.set_xticks([-5., -4.5, -4.])
+    for family, ax in right_axes.items():
+        ticks = ((1.8, 2., 2.2) if family == 'rank'
+                 else (-1.2, -1., -.8))
+        ax.set_xticks(ticks)
+        ax.get_xticklabels()[-1].set_horizontalalignment('right')
+
+    for left, right in ((rank_bfc_ax, rank_conventional_ax),
+                        (exact_bfc_ax, exact_conventional_ax)):
+        left.spines['right'].set_visible(False)
+        right.spines['left'].set_visible(False)
+        right.tick_params(axis='y', which='both', left=False,
+                          labelleft=False)
+        left.get_xticklabels()[-1].set_horizontalalignment('right')
+        right.get_xticklabels()[0].set_horizontalalignment('left')
+        for ax, xpos in ((left, 1), (right, 0)):
+            ax.plot([xpos - .022, xpos + .022], [-.018, .018],
+                    transform=ax.transAxes, color='k', clip_on=False,
+                    lw=.8)
+
+    exact_bfc_ax.set_xlabel('SNR (dB)', x=.84, fontsize=6, labelpad=1)
+    id_ax.legend(handles=[
+        Line2D([], [], color='.25', lw=.8, ls='-', marker='o', ms=2,
+               label='BFC'),
+        Line2D([], [], color='.25', lw=.8, ls='--', marker='s', ms=2,
+               markerfacecolor='white', label='Conventional'),
+        Line2D([], [], color='.25', lw=.7, ls=':', label='Bound'),
+    ], loc='upper right', bbox_to_anchor=(1.02, 1.14), ncol=3,
+       frameon=False, fontsize=4.1, handlelength=1., columnspacing=.45,
+       handletextpad=.2, labelspacing=.05, borderaxespad=0)
+
+
 def plot_combined(records, table, out):
     """Plot two aligned panels, each containing three vertical subfigures."""
     fig = plt.figure(figsize=THREE_PANEL_FIGSIZE)
@@ -297,14 +488,16 @@ def plot_combined(records, table, out):
     noisy_grid = outer[0, 1].subgridspec(
         3, 2, width_ratios=[1.35, 1.], hspace=.32, wspace=.09)
     id_ax = fig.add_subplot(noisy_grid[0, :])
-    rank_ax = fig.add_subplot(noisy_grid[1, :])
+    rank_ax = fig.add_subplot(noisy_grid[1, 0])
+    rank_conventional_ax = fig.add_subplot(
+        noisy_grid[1, 1], sharey=rank_ax)
     exact_bfc_ax = fig.add_subplot(noisy_grid[2, 0])
     exact_conventional_ax = fig.add_subplot(
         noisy_grid[2, 1], sharey=exact_bfc_ax)
 
     _plot_noiseless(noiseless_axes, table)
-    _plot_noisy(
-        (id_ax, rank_ax, exact_bfc_ax, exact_conventional_ax), records)
+    _plot_task_noisy((id_ax, rank_ax, rank_conventional_ax,
+                      exact_bfc_ax, exact_conventional_ax), records)
 
     fig.text(.295, .975, '(a) Noiseless channel', ha='center', va='top',
              fontsize=7.1)
@@ -323,8 +516,16 @@ def main():
                         default=here / 'results/production')
     parser.add_argument('--extension', type=Path,
                         default=here / 'results/extension_20260918')
+    parser.add_argument('--rank-noiseless', type=Path,
+                        default=(here / 'results' /
+                                 'noiseless_rank_m150_rank2000_20260927'),
+                        help='aligned m=150, rank-threshold-2000 noiseless run')
     parser.add_argument('--noisy', type=Path,
                         default=here / 'results/production_n_t_60')
+    parser.add_argument('--task-comparison', type=Path,
+                        default=(here / 'results' /
+                                 'task_error_rank2000_m150_nt60_fixed100k_20260926'),
+                        help='completed rank-2000/exact task-error campaign')
     parser.add_argument('--out', type=Path, default=None)
     args = parser.parse_args()
 
@@ -332,7 +533,13 @@ def main():
     out = default_out if args.out is None else args.out
     out.mkdir(parents=True, exist_ok=True)
     records = collect_noisy(args.noisy)
-    table = collect_noiseless((args.base, args.extension))
+    replacement = collect_task_comparison(args.task_comparison)
+    records = [r for r in records
+               if r['family'] != 'rank'
+               and (r['family'], r['scheme']) != ('exact', 'conventional')]
+    records.extend(replacement)
+    table = collect_noiseless((args.base, args.extension),
+                              args.rank_noiseless)
     plot_combined(records, table, out)
     print(f'Validated {len(records)} noisy nt=60 points and '
           f'{len(table)} noiseless rows; wrote '
