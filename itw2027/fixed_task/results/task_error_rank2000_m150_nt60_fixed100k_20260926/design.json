@@ -1,0 +1,91 @@
+{
+  "stage": "fixed_task_error_comparison",
+  "primary_metric": "balanced_task_error",
+  "targets": [
+    1e-05,
+    1e-06
+  ],
+  "nt": 60,
+  "G": 360,
+  "Nb": 64800,
+  "neff": 180,
+  "rank": {
+    "m": 150,
+    "threshold": 2000,
+    "support": 2001,
+    "K": 5,
+    "noiseless_fp_bound": 7.45430588722229e-06,
+    "balanced_fp_bound": 3.727152943611145e-06,
+    "bfc_rate": 0.3333333333333333,
+    "conventional_rate": 0.8333333333333334,
+    "bfc_payload_bits": 21600,
+    "conventional_payload_bits": 54000
+  },
+  "exact": {
+    "m": 100,
+    "support": 4950,
+    "K": 4,
+    "noiseless_fp_bound": 1.3830140233039856e-05,
+    "balanced_fp_bound": 6.915070116519928e-06,
+    "conventional_rate": 0.6,
+    "conventional_payload_bits": 36000,
+    "conventional_padding_bits": 2880
+  },
+  "frames_per_point": {
+    "rank:bfc": {
+      "-4.8": 100000,
+      "-4.7": 100000,
+      "-4.6": 100000,
+      "-4.5": 100000,
+      "-4.45": 100000,
+      "-4.4": 100000,
+      "-4.35": 100000,
+      "-4.3": 100000,
+      "-4.25": 100000,
+      "-4.2": 100000
+    },
+    "rank:conventional": {
+      "1.8": 10000,
+      "1.9": 10000,
+      "1.95": 20000,
+      "2.0": 50000,
+      "2.02": 100000,
+      "2.04": 250000,
+      "2.06": 500000,
+      "2.08": 1000000,
+      "2.1": 1000000,
+      "2.12": 1000000,
+      "2.14": 1000000,
+      "2.16": 3000000,
+      "2.18": 3000000
+    },
+    "exact:conventional": {
+      "-1.2": 10000,
+      "-1.1": 10000,
+      "-1.0": 10000,
+      "-0.98": 10000,
+      "-0.96": 20000,
+      "-0.94": 50000,
+      "-0.92": 100000,
+      "-0.9": 250000,
+      "-0.88": 500000,
+      "-0.86": 1000000,
+      "-0.85": 3000000,
+      "-0.84": 3000000
+    }
+  },
+  "conventional_shard_frames": 10000,
+  "bfc_shard_frames": 2500,
+  "source_seed": 20261001,
+  "position_seed": 20261002,
+  "noise_seed": 20261003,
+  "snr_definition": "Es/N0",
+  "max_array_concurrency": 128,
+  "recommended_array_concurrency": 64,
+  "cpus_per_task": 8,
+  "memory_gb": 4,
+  "wall_time": "00:45:00",
+  "runtime_limit_seconds": 2400,
+  "fixed_before_sampling": true,
+  "rationale": "Budgets use existing independent campaigns only for design: 10k-500k frames locate each waterfall and 1M-3M frames resolve balanced task error near 1e-5 and 1e-6."
+}

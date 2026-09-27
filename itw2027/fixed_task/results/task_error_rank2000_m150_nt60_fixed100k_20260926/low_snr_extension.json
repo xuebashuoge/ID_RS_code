@@ -1,0 +1,11 @@
+{
+  "reason": "Align BFC starting SNR with ID/exact at -5 dB",
+  "snrs": [
+    -5.0,
+    -4.9
+  ],
+  "frames_per_point": 100000,
+  "original_manifest_unchanged": true,
+  "jobs": 80,
+  "total_frames": 200000
+}

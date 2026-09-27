@@ -19,7 +19,10 @@
     "fer_lo95": 4.115381090751938e-06,
     "fer_hi95": 1.7084734387823754e-05,
     "fer_upper95": 1.5705163768670594e-05,
-    "fer_upper95_simultaneous": 2.177871793921782e-05
+    "fer_upper95_simultaneous": 2.177871793921782e-05,
+    "task_error_frames": 8,
+    "task_error_se": 3.0985583757127786e-07,
+    "task_error_upper95_conservative": 1.4434603274255328e-05
   },
   "first_pointwise95_below": {
     "snr_db": -0.82,
@@ -38,7 +41,10 @@
     "fer_lo95": 2.4220937031600326e-07,
     "fer_hi95": 7.2246687944522814e-06,
     "fer_upper95": 6.295780099210489e-06,
-    "fer_upper95_simultaneous": 1.0574969352098093e-05
+    "fer_upper95_simultaneous": 1.0574969352098093e-05,
+    "task_error_frames": 2,
+    "task_error_se": 2.2395157655610056e-08,
+    "task_error_upper95_conservative": 6.295780099210489e-06
   },
   "first_simultaneous95_below": {
     "snr_db": -0.8,
@@ -57,7 +63,10 @@
     "fer_lo95": 0.0,
     "fer_hi95": 3.6888726502064885e-06,
     "fer_upper95": 2.9957277863525433e-06,
-    "fer_upper95_simultaneous": 6.36300785952011e-06
+    "fer_upper95_simultaneous": 6.36300785952011e-06,
+    "task_error_frames": 0,
+    "task_error_se": 0.0,
+    "task_error_upper95_conservative": 2.9957277863525433e-06
   },
   "confidence_method": "Exact binomial, one-sided 95%; simultaneous bounds use Bonferroni across the fixed SNR grid",
   "grid_resolution_db": 0.02,
@@ -79,7 +88,10 @@
       "fer_lo95": 0.9999963111273498,
       "fer_hi95": 1.0,
       "fer_upper95": 1.0,
-      "fer_upper95_simultaneous": 1.0
+      "fer_upper95_simultaneous": 1.0,
+      "task_error_frames": 1000000,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 1.0
     },
     {
       "snr_db": -4.0,
@@ -98,7 +110,10 @@
       "fer_lo95": 0.9999963111273498,
       "fer_hi95": 1.0,
       "fer_upper95": 1.0,
-      "fer_upper95_simultaneous": 1.0
+      "fer_upper95_simultaneous": 1.0,
+      "task_error_frames": 1000000,
+      "task_error_se": 4.8112506743768965e-09,
+      "task_error_upper95_conservative": 1.0
     },
     {
       "snr_db": -3.0,
@@ -117,7 +132,10 @@
       "fer_lo95": 0.9999963111273498,
       "fer_hi95": 1.0,
       "fer_upper95": 1.0,
-      "fer_upper95_simultaneous": 1.0
+      "fer_upper95_simultaneous": 1.0,
+      "task_error_frames": 1000000,
+      "task_error_se": 2.8597474421121783e-08,
+      "task_error_upper95_conservative": 1.0
     },
     {
       "snr_db": -2.0,
@@ -136,7 +154,10 @@
       "fer_lo95": 0.9999963111273498,
       "fer_hi95": 1.0,
       "fer_upper95": 1.0,
-      "fer_upper95_simultaneous": 1.0
+      "fer_upper95_simultaneous": 1.0,
+      "task_error_frames": 1000000,
+      "task_error_se": 1.414558164686361e-07,
+      "task_error_upper95_conservative": 1.0
     },
     {
       "snr_db": -1.5,
@@ -155,7 +176,10 @@
       "fer_lo95": 0.9999963111273498,
       "fer_hi95": 1.0,
       "fer_upper95": 1.0,
-      "fer_upper95_simultaneous": 1.0
+      "fer_upper95_simultaneous": 1.0,
+      "task_error_frames": 1000000,
+      "task_error_se": 4.1607912461507494e-07,
+      "task_error_upper95_conservative": 1.0
     },
     {
       "snr_db": -1.2,
@@ -174,7 +198,10 @@
       "fer_lo95": 0.9997595985309853,
       "fer_hi95": 0.9998174414793535,
       "fer_upper95": 0.999813252212101,
-      "fer_upper95_simultaneous": 0.9998298715426682
+      "fer_upper95_simultaneous": 0.9998298715426682,
+      "task_error_frames": 999769,
+      "task_error_se": 1.5137510868740546e-05,
+      "task_error_upper95_conservative": 0.9997934159044295
     },
     {
       "snr_db": -1.1,
@@ -193,7 +220,10 @@
       "fer_lo95": 0.8968968640125176,
       "fer_hi95": 0.8980868324907637,
       "fer_upper95": 0.8979915564037034,
-      "fer_upper95_simultaneous": 0.8983781899917156
+      "fer_upper95_simultaneous": 0.8983781899917156,
+      "task_error_frames": 891978,
+      "task_error_se": 0.00018340536474577594,
+      "task_error_upper95_conservative": 0.8924882372912951
     },
     {
       "snr_db": -1.0,
@@ -212,7 +242,10 @@
       "fer_lo95": 0.17728566430778156,
       "fer_hi95": 0.17878620106893875,
       "fer_upper95": 0.1786654143225951,
-      "fer_upper95_simultaneous": 0.17915625045817152
+      "fer_upper95_simultaneous": 0.17915625045817152,
+      "task_error_frames": 171149,
+      "task_error_se": 0.0001413140179805465,
+      "task_error_upper95_conservative": 0.1717697193606822
     },
     {
       "snr_db": -0.98,
@@ -231,7 +264,10 @@
       "fer_lo95": 0.08769373618418397,
       "fer_hi95": 0.08880665012273968,
       "fer_upper95": 0.08871695492142233,
-      "fer_upper95_simultaneous": 0.08908158809415204
+      "fer_upper95_simultaneous": 0.08908158809415204,
+      "task_error_frames": 84237,
+      "task_error_se": 9.73776601479178e-05,
+      "task_error_upper95_conservative": 0.08469523628235631
     },
     {
       "snr_db": -0.96,
@@ -250,7 +286,10 @@
       "fer_lo95": 0.036849818707860166,
       "fer_hi95": 0.037592864930011884,
       "fer_upper95": 0.03753286324690102,
-      "fer_upper95_simultaneous": 0.03777693977438309
+      "fer_upper95_simultaneous": 0.03777693977438309,
+      "task_error_frames": 35230,
+      "task_error_se": 6.069018726923046e-05,
+      "task_error_upper95_conservative": 0.03553474229808501
     },
     {
       "snr_db": -0.94,
@@ -269,7 +308,10 @@
       "fer_lo95": 0.013432414806324096,
       "fer_hi95": 0.013888408631263456,
       "fer_upper95": 0.013851463826095527,
-      "fer_upper95_simultaneous": 0.014001915897424003
+      "fer_upper95_simultaneous": 0.014001915897424003,
+      "task_error_frames": 12853,
+      "task_error_se": 3.5539898044602854e-05,
+      "task_error_upper95_conservative": 0.013039822776978422
     },
     {
       "snr_db": -0.92,
@@ -288,7 +330,10 @@
       "fer_lo95": 0.004082064474762669,
       "fer_hi95": 0.004336820447249736,
       "fer_upper95": 0.004316044416911003,
-      "fer_upper95_simultaneous": 0.004400836940742854
+      "fer_upper95_simultaneous": 0.004400836940742854,
+      "task_error_frames": 3917,
+      "task_error_se": 1.8973462244564216e-05,
+      "task_error_upper95_conservative": 0.004021312854940195
     },
     {
       "snr_db": -0.9,
@@ -307,7 +352,10 @@
       "fer_lo95": 0.0010641302632877442,
       "fer_hi95": 0.0011967864945968641,
       "fer_upper95": 0.00118582146287817,
-      "fer_upper95_simultaneous": 0.001230772657962426
+      "fer_upper95_simultaneous": 0.001230772657962426,
+      "task_error_frames": 1038,
+      "task_error_se": 9.284077597533799e-06,
+      "task_error_upper95_conservative": 0.001092552000421604
     },
     {
       "snr_db": -0.88,
@@ -326,7 +374,10 @@
       "fer_lo95": 0.00025946918803135055,
       "fer_hi95": 0.000327480249391212,
       "fer_upper95": 0.000321707528306561,
-      "fer_upper95_simultaneous": 0.0003455771225080988
+      "fer_upper95_simultaneous": 0.0003455771225080988,
+      "task_error_frames": 266,
+      "task_error_se": 4.241177447843758e-06,
+      "task_error_upper95_conservative": 0.00029442933776309166
     },
     {
       "snr_db": -0.86,
@@ -345,7 +396,10 @@
       "fer_lo95": 5.368650279388261e-05,
       "fer_hi95": 8.732311602857698e-05,
       "fer_upper95": 8.430583190187459e-05,
-      "fer_upper95_simultaneous": 9.699676505528451e-05
+      "fer_upper95_simultaneous": 9.699676505528451e-05,
+      "task_error_frames": 64,
+      "task_error_se": 2.041782178648669e-06,
+      "task_error_upper95_conservative": 7.880437820319641e-05
     },
     {
       "snr_db": -0.84,
@@ -364,7 +418,10 @@
       "fer_lo95": 4.115381090751938e-06,
       "fer_hi95": 1.7084734387823754e-05,
       "fer_upper95": 1.5705163768670594e-05,
-      "fer_upper95_simultaneous": 2.177871793921782e-05
+      "fer_upper95_simultaneous": 2.177871793921782e-05,
+      "task_error_frames": 8,
+      "task_error_se": 3.0985583757127786e-07,
+      "task_error_upper95_conservative": 1.4434603274255328e-05
     },
     {
       "snr_db": -0.82,
@@ -383,7 +440,10 @@
       "fer_lo95": 2.4220937031600326e-07,
       "fer_hi95": 7.2246687944522814e-06,
       "fer_upper95": 6.295780099210489e-06,
-      "fer_upper95_simultaneous": 1.0574969352098093e-05
+      "fer_upper95_simultaneous": 1.0574969352098093e-05,
+      "task_error_frames": 2,
+      "task_error_se": 2.2395157655610056e-08,
+      "task_error_upper95_conservative": 6.295780099210489e-06
     },
     {
       "snr_db": -0.8,
@@ -402,7 +462,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.78,
@@ -421,7 +484,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.76,
@@ -440,7 +506,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.74,
@@ -459,7 +528,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.72,
@@ -478,7 +550,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.7,
@@ -497,7 +572,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.68,
@@ -516,7 +594,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.66,
@@ -535,7 +616,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.64,
@@ -554,7 +638,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.62,
@@ -573,7 +660,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": -0.6,
@@ -592,7 +682,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     },
     {
       "snr_db": 0.0,
@@ -611,7 +704,10 @@
       "fer_lo95": 0.0,
       "fer_hi95": 3.6888726502064885e-06,
       "fer_upper95": 2.9957277863525433e-06,
-      "fer_upper95_simultaneous": 6.36300785952011e-06
+      "fer_upper95_simultaneous": 6.36300785952011e-06,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_conservative": 2.9957277863525433e-06
     }
   ]
 }

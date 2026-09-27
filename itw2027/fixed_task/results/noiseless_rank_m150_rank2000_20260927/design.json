@@ -1,0 +1,41 @@
+{
+  "stage": "aligned_noiseless_rank",
+  "family": "rank",
+  "m": 150,
+  "rank_threshold": 2000,
+  "support": 2001,
+  "messages": 2000,
+  "nt": [
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46
+  ],
+  "source_manifests": [
+    "/home/yangshuo/Git/itw_gpt/itw2027/fixed_task/results/production/noiseless.json",
+    "/home/yangshuo/Git/itw_gpt/itw2027/fixed_task/results/extension_20260918/noiseless.json"
+  ],
+  "preserved_task_fields": [
+    "kind",
+    "family",
+    "nt",
+    "messages",
+    "first_message",
+    "seed_group",
+    "first_position",
+    "positions",
+    "chunk_size",
+    "runtime_limit",
+    "output"
+  ],
+  "only_function_changes": {
+    "m": 150,
+    "rank_threshold": 2000
+  }
+}

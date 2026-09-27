@@ -1,0 +1,202 @@
+{
+  "metric": "balanced task error (FP+FN)/(360*frames)",
+  "points": [
+    {
+      "family": "exact",
+      "scheme": "conventional",
+      "snr_db": -0.9,
+      "frames": 1000,
+      "fp_count": 0,
+      "fn_count": 0,
+      "negative_trials": 180000,
+      "positive_trials": 180000,
+      "FP": 0.0,
+      "FN": 0.0,
+      "balanced_error": 0.0,
+      "task_error_frames": 0,
+      "task_error_se": 0.0,
+      "task_error_upper95_approx": 0.0029912495450953314,
+      "task_error_upper95_conservative": 0.0029912495450952954,
+      "payload_FER": 0.001,
+      "information_FER": 0.001,
+      "noiseless_balanced_error": 0.0,
+      "balanced_fp_bound": 6.915070116519928e-06,
+      "mean_iterations": 29.786,
+      "runtime_job_hours": 0.02553840472222222
+    },
+    {
+      "family": "rank",
+      "scheme": "bfc",
+      "snr_db": -4.6,
+      "frames": 1000,
+      "fp_count": 0,
+      "fn_count": 33493,
+      "negative_trials": 180000,
+      "positive_trials": 180000,
+      "FP": 0.0,
+      "FN": 0.18607222222222222,
+      "balanced_error": 0.09303611111111111,
+      "task_error_frames": 930,
+      "task_error_se": 0.00244778254946619,
+      "task_error_upper95_approx": 0.0970623551155891,
+      "task_error_upper95_conservative": 0.942816532305708,
+      "payload_FER": 0.948,
+      "information_FER": 0.948,
+      "noiseless_balanced_error": 0.0,
+      "balanced_fp_bound": 3.727152943611145e-06,
+      "mean_iterations": 49.983,
+      "runtime_job_hours": 0.05610699694444444
+    },
+    {
+      "family": "rank",
+      "scheme": "bfc",
+      "snr_db": -4.3,
+      "frames": 1000,
+      "fp_count": 0,
+      "fn_count": 9,
+      "negative_trials": 180000,
+      "positive_trials": 180000,
+      "FP": 0.0,
+      "FN": 5e-05,
+      "balanced_error": 2.5e-05,
+      "task_error_frames": 5,
+      "task_error_se": 1.2711160869396808e-05,
+      "task_error_upper95_approx": 4.590799905879097e-05,
+      "task_error_upper95_conservative": 0.010484076911415651,
+      "payload_FER": 0.006,
+      "information_FER": 0.006,
+      "noiseless_balanced_error": 0.0,
+      "balanced_fp_bound": 3.727152943611145e-06,
+      "mean_iterations": 42.089,
+      "runtime_job_hours": 0.06043355805555556
+    },
+    {
+      "family": "rank",
+      "scheme": "conventional",
+      "snr_db": 2.0,
+      "frames": 1000,
+      "fp_count": 0,
+      "fn_count": 11577,
+      "negative_trials": 180000,
+      "positive_trials": 180000,
+      "FP": 0.0,
+      "FN": 0.06431666666666666,
+      "balanced_error": 0.03215833333333333,
+      "task_error_frames": 133,
+      "task_error_se": 0.0029600837787383634,
+      "task_error_upper95_approx": 0.03702723787287135,
+      "task_error_upper95_conservative": 0.15196749526834072,
+      "payload_FER": 0.138,
+      "information_FER": 0.138,
+      "noiseless_balanced_error": 0.0,
+      "balanced_fp_bound": 3.727152943611145e-06,
+      "mean_iterations": 35.955,
+      "runtime_job_hours": 0.02265708
+    },
+    {
+      "family": "rank",
+      "scheme": "conventional",
+      "snr_db": 2.1,
+      "frames": 1000,
+      "fp_count": 0,
+      "fn_count": 153,
+      "negative_trials": 180000,
+      "positive_trials": 180000,
+      "FP": 0.0,
+      "FN": 0.00085,
+      "balanced_error": 0.000425,
+      "task_error_frames": 4,
+      "task_error_se": 0.00029356209198395857,
+      "task_error_upper95_approx": 0.0009078666717352759,
+      "task_error_upper95_conservative": 0.009129952563871467,
+      "payload_FER": 0.004,
+      "information_FER": 0.004,
+      "noiseless_balanced_error": 0.0,
+      "balanced_fp_bound": 3.727152943611145e-06,
+      "mean_iterations": 23.593,
+      "runtime_job_hours": 0.01476877277777778
+    }
+  ],
+  "thresholds": [
+    {
+      "family": "exact",
+      "scheme": "conventional",
+      "target": 1e-05,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": -0.9,
+      "tail_needs_more_frames": true
+    },
+    {
+      "family": "exact",
+      "scheme": "conventional",
+      "target": 1e-06,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": -0.9,
+      "tail_needs_more_frames": true
+    },
+    {
+      "family": "rank",
+      "scheme": "bfc",
+      "target": 1e-05,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": null,
+      "tail_needs_more_frames": false
+    },
+    {
+      "family": "rank",
+      "scheme": "bfc",
+      "target": 1e-06,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": null,
+      "tail_needs_more_frames": false
+    },
+    {
+      "family": "rank",
+      "scheme": "conventional",
+      "target": 1e-05,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": null,
+      "tail_needs_more_frames": false
+    },
+    {
+      "family": "rank",
+      "scheme": "conventional",
+      "target": 1e-06,
+      "crossing_snr_db": null,
+      "first_empirical_below_db": null,
+      "tail_needs_more_frames": false
+    }
+  ],
+  "coding_gains": [
+    {
+      "family": "rank",
+      "target": 1e-05,
+      "bfc_snr_db": null,
+      "conventional_snr_db": null,
+      "coding_gain_db": null
+    },
+    {
+      "family": "rank",
+      "target": 1e-06,
+      "bfc_snr_db": null,
+      "conventional_snr_db": null,
+      "coding_gain_db": null
+    },
+    {
+      "family": "exact",
+      "target": 1e-05,
+      "bfc_snr_db": null,
+      "conventional_snr_db": null,
+      "coding_gain_db": null
+    },
+    {
+      "family": "exact",
+      "target": 1e-06,
+      "bfc_snr_db": null,
+      "conventional_snr_db": null,
+      "coding_gain_db": null
+    }
+  ],
+  "uncertainty": "Messages within one LDPC frame are correlated. SE and approximate normal bounds use independent frame means; normal bounds are unreliable with few error-bearing frames. The conservative exact binomial upper bound uses the probability of any task error in a frame, which bounds the mean task error. Zero observations are upper limits, not zero risk.",
+  "coding_gain_note": "Interpolate only between positive measured probabilities bracketing the target; never extrapolate across the BFC floor."
+}

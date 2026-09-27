@@ -1,0 +1,35 @@
+{
+  "waterfall_step_db": 0.05,
+  "low_snr_step_db": 0.1,
+  "total_frames_per_point": {
+    "rank": {
+      "1.8": 10000,
+      "1.85": 10000,
+      "1.9": 10000,
+      "1.95": 50000,
+      "2.0": 50000,
+      "2.05": 250000,
+      "2.1": 1000000,
+      "2.15": 3000000,
+      "2.2": 3000000
+    },
+    "exact": {
+      "-1.2": 10000,
+      "-1.15": 10000,
+      "-1.1": 10000,
+      "-1.05": 50000,
+      "-1.0": 1000000,
+      "-0.95": 1000000,
+      "-0.9": 3000000,
+      "-0.85": 5000000,
+      "-0.8": 30000000
+    }
+  },
+  "original_manifest": "full_grid_tasks.json",
+  "jobs": 4011,
+  "additional_frames": 40110000,
+  "old_samples_preserved": true,
+  "new_snr_streams_above_original_max": true,
+  "fixed_refinement_budgets": true,
+  "note": "Zero-error endpoints remain upper limits if no errors occur in the enlarged sample."
+}
