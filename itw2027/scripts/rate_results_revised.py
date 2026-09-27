@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 TRADEOFF_N_T = 60
 TRADEOFF_E2 = np.linspace(.01, .25, 97)
-FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact-threshold': 'Exact'}
+FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact-threshold': 'Threshold'}
 
 
 def revised_rate_sequences():
@@ -93,7 +93,7 @@ def figure_rate_results_revised(rows):
         ax.annotate(
             FAMILY_LABELS[family], xy=(label_point['n_t'], label_point['rate']),
             xytext={'id': (-2, 25), 'rank': (2, -10),
-                    'exact-threshold': (0, -7)}[family],
+                    'exact-threshold': (8, -6)}[family],
             textcoords='offset points', color=COLORS[family],
             ha='right', va='center', fontsize=6.3,
         )
@@ -101,6 +101,10 @@ def figure_rate_results_revised(rows):
     ax.set_xlim(19, 1.35e4)
     ax.set_xlabel(r'$n_t$')
     ax.set_xticks([1e2, 1e3, 1e4])
+    ax.axhline(1 / 6, color='0.5', lw=.8, ls=':')
+    ax.text(.98, 0.17, r'Asymptotic $1/6$', color='0.35',
+            transform=ax.get_yaxis_transform(),
+            ha='right', va='bottom', fontsize=6.3, clip_on=True)
 
     ax = axes[1]
     for family in FAMILIES:
@@ -124,9 +128,10 @@ def figure_rate_results_revised(rows):
     ax.set_xticks([.05, .10, .15, .20, .25])
 
     for ax in axes:
-        ax.set_ylim(.08, .64)
-        ax.set_yticks([1 / 6, .3, .4, .5, .6])
-        ax.set_yticklabels([r'$1/6$', r'$0.3$', r'$0.4$', r'$1/2$', r'$0.6$'])
+        ax.set_ylim(.1, .64)
+        ax.set_yticks([.1, .2, .3, .4, .5, .6])
+        ax.set_yticklabels([r'$0.1$', r'$0.2$', r'$0.3$', r'$0.4$',
+                            r'$0.5$', r'$0.6$'])
         clean_axis(ax)
     axes[0].set_ylabel(r'$R_t$')
     savefig(fig, 'rate_results_revised')

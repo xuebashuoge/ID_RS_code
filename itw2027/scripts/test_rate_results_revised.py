@@ -27,6 +27,10 @@ class RevisedRateResults(unittest.TestCase):
             self.assertEqual(len(fig.axes), 2)
             self.assertEqual(fig.axes[1].get_xlabel(), r'$E_2$')
             self.assertIn(rf'$n_t={plotting.TRADEOFF_N_T}$', fig.axes[1].get_title())
+            expected_yticks = [.1, .2, .3, .4, .5, .6]
+            for axis in fig.axes:
+                self.assertEqual(list(axis.get_yticks()), expected_yticks)
+            self.assertNotIn(1 / 6, fig.axes[0].get_yticks())
             self.assertTrue(all(line.get_marker() in ('None', None, '')
                                 for line in fig.axes[1].lines))
         finally:

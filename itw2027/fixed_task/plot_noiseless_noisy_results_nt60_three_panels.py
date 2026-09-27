@@ -13,7 +13,7 @@ from scipy.io import loadmat
 
 FAMILIES = ('id', 'rank', 'exact')
 FAMILY_COLORS = {'id': '#0072B2', 'rank': '#D55E00', 'exact': '#009E73'}
-FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact': 'Exact'}
+FAMILY_LABELS = {'id': r'ID, $m=100{,}000$', 'rank': r'Rank, $m=5{,}000$', 'exact': ' Threshold,\n' + r' $m=100$'}
 FIGSIZE = (3.5, 1.92)
 EXPECTED_NT = tuple(range(28, 47, 2))
 EXPECTED_MESSAGES = {'id': 200, 'rank': 2000, 'exact': 2000}
@@ -158,7 +158,7 @@ def _plot_noiseless(noiseless_axes, table):
                     markeredgecolor=color, markeredgewidth=.6)
         ax.set(yscale='log', xlim=(27.3, 46.7), ylim=limits[family])
         ax.set_yticks(ticks[family])
-        ax.text(.025, .13, FAMILY_LABELS[family], transform=ax.transAxes,
+        ax.text(.025, .05, FAMILY_LABELS[family], transform=ax.transAxes,
                 color=color, fontsize=5.1, ha='left', va='bottom')
         ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
         _clean_axis(ax)
@@ -169,9 +169,9 @@ def _plot_noiseless(noiseless_axes, table):
     noiseless_axes[-1].set_xlabel(r'$n_t$', fontsize=6, labelpad=1)
     noiseless_axes[0].legend(handles=[
         Line2D([], [], color='.25', lw=.8, ls='-', marker='o', ms=2,
-               label='Mean'),
+               label='Avg.'),
         Line2D([], [], color='.25', lw=.8, ls='--', marker='s', ms=2,
-               markerfacecolor='white', label='Max'),
+               markerfacecolor='white', label='Max.'),
         Line2D([], [], color='.25', lw=.8, ls=':', label='Bound'),
     ], loc='upper right', bbox_to_anchor=(.99, 1.05), ncol=3,
        frameon=False, fontsize=4.4, handlelength=1.15, columnspacing=.55,
@@ -188,7 +188,7 @@ def _plot_noisy(noisy_axes, records):
     id_ax, rank_ax, exact_bfc_ax, exact_conventional_ax = noisy_axes
     family_axes = {'id': id_ax, 'rank': rank_ax, 'exact': exact_bfc_ax}
     bfc_limits = (-5.05, -4.)
-    conventional_limits = (1.5, 2.2)
+    conventional_limits = (1.6, 2.2)
 
     for family in FAMILIES:
         ax = family_axes[family]
@@ -254,7 +254,7 @@ def _plot_noisy(noisy_axes, records):
     for ax in (id_ax, rank_ax):
         ax.set_xticks([-5., -4.75, -4.5, -4.25, -4.])
     exact_bfc_ax.set_xticks([-5., -4.5, -4.])
-    exact_conventional_ax.set_xticks([1.5, 1.85, 2.2])
+    exact_conventional_ax.set_xticks([1.6, 1.9, 2.2])
     for ax in (id_ax, rank_ax, exact_bfc_ax):
         ax.get_xticklabels()[-1].set_horizontalalignment('right')
     exact_conventional_ax.get_xticklabels()[0].set_horizontalalignment('left')
