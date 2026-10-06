@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fresh million-frame ID and exact-weight BFC task-error campaign."""
+"""Fresh 100,000-frame ID and exact-weight BFC task-error campaign."""
 import argparse
 from pathlib import Path
 
@@ -8,7 +8,7 @@ from task_comparison import summarize
 
 
 SNR_DB = tuple(round(-5.0 + i / 10, 1) for i in range(9))
-FRAMES_PER_POINT = 1_000_000
+FRAMES_PER_POINT = 100_000
 SHARD_FRAMES = {'id': 1_000, 'exact': 2_500}
 
 
@@ -28,13 +28,13 @@ def generate(out):
                     source_seed=20261006, position_seed=20261007,
                     noise_seed=20261008, runtime_limit=6600,
                     output=(f'results/{family}_bfc_{snr:+06.2f}_'
-                            f'{shard:03d}_million.mat')))
+                            f'{shard:03d}_100k.mat')))
     tasks.sort(key=lambda t: (t['first_frame'], t['family'], t['snr_db']))
     save_json(out / 'tasks.json', tasks)
     for family in SHARD_FRAMES:
         save_json(out / f'{family}_tasks.json',
                   [task for task in tasks if task['family'] == family])
-    save_json(out / 'design.json', dict(stage='id_exact_bfc_million',
+    save_json(out / 'design.json', dict(stage='id_exact_bfc_100k',
         families={'id': {'m': 100_000}, 'exact': {'m': 100, 'weight': 2}},
         scheme='bfc', snr_db=SNR_DB, frames_per_point=FRAMES_PER_POINT,
         shard_frames=SHARD_FRAMES, total_frames=sum(t['frames'] for t in tasks),

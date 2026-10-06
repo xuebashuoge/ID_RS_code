@@ -1,9 +1,9 @@
-# ID and exact-weight BFC million-frame campaign
+# ID and exact-weight BFC 100,000-frame campaign
 
 The combined nt=60 figure currently reads 10,000 archived frames per SNR for
 ID and exact-weight BFC. The newer rank BFC comparison uses 100,000 frames
 per SNR; its conventional waterfall has selected million-frame points. This
-campaign independently samples 1,000,000 frames per point for ID and
+campaign independently samples 100,000 frames per point for ID and
 exact-weight BFC on the same -5.0 to -4.2 dB, 0.1 dB grid as rank BFC.
 Conventional and rank tasks are unchanged.
 
@@ -11,18 +11,19 @@ Each frame contains 180 positive and 180 negative messages, uses one 64,800-bit
 DVB-S2 LDPC block at rate 1/3, and records false positives, false negatives,
 payload errors, information-block errors, and noiseless false positives.
 Fresh Threefry source, position, and noise streams are shared across SNRs
-within each family. ID uses 1,000-frame shards (9,000 jobs); exact weight two
-uses 2,500-frame shards (3,600 jobs). Two arrays cap combined concurrency at
+within each family. ID uses 1,000-frame shards (900 jobs); exact weight two
+uses 2,500-frame shards (360 jobs). Two arrays cap combined concurrency at
 64 by default. A MATLAB smoke test gates both arrays; the report waits for
 both arrays to succeed.
 
 From the repository root on unimelb:
 
 ```sh
-conda run -n torch28 python itw2027/fixed_task/bfc_million.py generate \
-  --out itw2027/fixed_task/results/id_exact_bfc_million_20261006
-bash itw2027/fixed_task/submit_bfc_million.sh \
-  itw2027/fixed_task/results/id_exact_bfc_million_20261006 64
+conda run -p /data/gpfs/projects/punim2792/anaconda3/envs/torch28 \
+  python itw2027/fixed_task/bfc_100k.py generate \
+  --out itw2027/fixed_task/results/id_exact_bfc_100k_20261006
+bash itw2027/fixed_task/submit_bfc_100k.sh \
+  itw2027/fixed_task/results/id_exact_bfc_100k_20261006 64
 ```
 
 `tasks.json` is the combined reporting manifest. `id_tasks.json` and

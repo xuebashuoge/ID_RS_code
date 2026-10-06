@@ -1,6 +1,7 @@
 #!/bin/bash
 # Submit fresh ID and exact-weight BFC samples from the repository root.
 set -euo pipefail
+module load Anaconda3
 export FT_OUT="$(cd "${1:?Supply campaign directory}" && pwd)"
 concurrency="${2:-64}"
 [[ "$concurrency" =~ ^[0-9]+$ ]] && ((concurrency>=2 && concurrency<=128)) || {
@@ -15,16 +16,16 @@ cp itw2027/fixed_task/*.m itw2027/fixed_task/*.py itw2027/fixed_task/*.sh \
 git rev-parse HEAD > "$FT_OUT/source_commit.txt"
 sha256sum "$FT_OUT/tasks.json" "$FT_OUT/id_tasks.json" "$FT_OUT/exact_tasks.json" \
     "$FT_OUT/source_snapshot/"* > "$FT_OUT/source_sha256.txt"
-smoke=$(sbatch --parsable --job-name=itw_bfc_million_test \
+smoke=$(sbatch --parsable --job-name=itw_bfc_100k_test \
     --cpus-per-task=8 --mem=4G --time=00:20:00 --export=ALL \
-    itw2027/fixed_task/bfc_million_test.slurm)
+    itw2027/fixed_task/bfc_100k_test.slurm)
 printf 'smoke=%s\n' "$smoke" | tee "$FT_OUT/jobs.txt"
 export FT_TEST_ONLY=0
 dependencies=()
 for family in id exact; do
     export FT_MANIFEST="$FT_OUT/${family}_tasks.json"
-    last=$(conda run -n torch28 python -c 'import json,sys; print(len(json.load(open(sys.argv[1])))-1)' "$FT_MANIFEST")
-    run=$(sbatch --parsable --job-name="itw_${family}_bfc_million" \
+    last=$(conda run -p /data/gpfs/projects/punim2792/anaconda3/envs/torch28 python -c 'import json,sys; print(len(json.load(open(sys.argv[1])))-1)' "$FT_MANIFEST")
+    run=$(sbatch --parsable --job-name="itw_${family}_bfc_100k" \
         --dependency="afterok:${smoke%%;*}" --array="0-${last}%${each}" \
         --cpus-per-task=8 --mem=4G --time=02:00:00 --export=ALL \
         itw2027/fixed_task/job.slurm)
@@ -32,7 +33,7 @@ for family in id exact; do
     dependencies+=("${run%%;*}")
 done
 printf 'concurrency_per_family=%s\n' "$each" | tee -a "$FT_OUT/jobs.txt"
-report=$(sbatch --parsable --job-name=itw_bfc_million_report \
+report=$(sbatch --parsable --job-name=itw_bfc_100k_report \
     --dependency="afterok:${dependencies[0]}:${dependencies[1]}" --export=ALL \
-    itw2027/fixed_task/bfc_million_report.slurm)
+    itw2027/fixed_task/bfc_100k_report.slurm)
 printf 'report=%s\n' "$report" | tee -a "$FT_OUT/jobs.txt"

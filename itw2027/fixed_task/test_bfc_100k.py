@@ -4,17 +4,17 @@ import unittest
 from collections import defaultdict
 from pathlib import Path
 
-from bfc_million import FRAMES_PER_POINT, SHARD_FRAMES, SNR_DB, generate
+from bfc_100k import FRAMES_PER_POINT, SHARD_FRAMES, SNR_DB, generate
 
 
-class BfcMillionManifestTest(unittest.TestCase):
+class Bfc100kManifestTest(unittest.TestCase):
     def test_exact_coverage_and_separate_arrays(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory) / 'campaign'
             generate(out)
             tasks = json.loads((out / 'tasks.json').read_text())
-            self.assertEqual(len(tasks), 12_600)
-            self.assertEqual(sum(t['frames'] for t in tasks), 18_000_000)
+            self.assertEqual(len(tasks), 1_260)
+            self.assertEqual(sum(t['frames'] for t in tasks), 1_800_000)
             self.assertEqual(len({t['output'] for t in tasks}), len(tasks))
             for family in SHARD_FRAMES:
                 selected = json.loads((out / f'{family}_tasks.json').read_text())
