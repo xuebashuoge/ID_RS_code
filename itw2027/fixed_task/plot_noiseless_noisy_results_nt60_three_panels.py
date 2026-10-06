@@ -16,8 +16,8 @@ FAMILIES = ('id', 'rank', 'exact')
 FAMILY_COLORS = {'id': '#0072B2', 'rank': '#D55E00', 'exact': '#009E73'}
 FAMILY_LABELS = {
     'id': r'ID ($m=10^5$)',
-    'rank': r'Rank ($m=150$)',
-    'exact': r'Exact weight ($m=100$)',
+    'rank': 'Rank\n'+r'($m=150$)',
+    'exact': 'Exact weight\n'+r'($m=100$)',
 }
 NOISY_FAMILY_LABELS = dict(FAMILY_LABELS)
 FIGSIZE = (3.5, 1.92)
@@ -195,7 +195,7 @@ def _plot_noiseless(noiseless_axes, table):
     limits = {'id': (6e-8, 1.5), 'rank': (8e-5, 1.5),
               'exact': (3e-4, 1.5)}
     ticks = {'id': (1e-6, 1e-3, 1.), 'rank': (1e-4, 1e-2, 1.),
-             'exact': (1e-3, 1e-1, 1.)}
+             'exact': (1e-3, 1e-2, 1e-1, 1.)}
 
     for ax, family in zip(noiseless_axes, FAMILIES):
         rows = sorted((r for r in table if r['family'] == family),
@@ -268,8 +268,8 @@ def _plot_noisy(noisy_axes, records):
         ax.plot(x[mask], y[mask], color=color, lw=.8, ls='-', marker='o',
                 ms=1.9, markerfacecolor=color, markeredgecolor=color,
                 markeredgewidth=.6)
-        ax.hlines(fp_bound, *bfc_limits, color=color, lw=.7, ls=':')
-        ax.text(.025, .35, NOISY_FAMILY_LABELS[family],
+        # ax.hlines(fp_bound, *bfc_limits, color=color, lw=.7, ls=':')
+        ax.text(.025, .13, NOISY_FAMILY_LABELS[family],
                 transform=ax.transAxes,
                 color=color, fontsize=5.1, ha='left', va='bottom',
                 bbox=dict(facecolor='white', edgecolor='none', pad=.15))
@@ -294,11 +294,11 @@ def _plot_noisy(noisy_axes, records):
                 markeredgecolor=FAMILY_COLORS['exact'], markeredgewidth=.6)
 
     for ax in (id_ax, rank_ax, exact_bfc_ax):
-        ax.set(yscale='log', ylim=(1e-7, .8), xlim=bfc_limits)
+        ax.set(yscale='log', ylim=(1e-7, .95), xlim=bfc_limits)
         ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
         _clean_axis(ax)
     exact_conventional_ax.set(
-        yscale='log', ylim=(1e-7, .8), xlim=conventional_limits)
+        yscale='log', ylim=(1e-7, .95), xlim=conventional_limits)
     exact_conventional_ax.tick_params(
         axis='both', which='both', labelsize=4.5, pad=1.2)
     _clean_axis(exact_conventional_ax)
@@ -360,7 +360,7 @@ def _plot_task_noisy(noisy_axes, records):
     bfc_axes = {'id': id_ax, 'rank': rank_bfc_ax, 'exact': exact_bfc_ax}
     right_axes = {'rank': rank_conventional_ax,
                   'exact': exact_conventional_ax}
-    low_limits = {family: (-5.05, -4.) for family in FAMILIES}
+    low_limits = {family: (-5.05, -4.1) for family in FAMILIES}
 
     for family in FAMILIES:
         ax = bfc_axes[family]
@@ -387,13 +387,14 @@ def _plot_task_noisy(noisy_axes, records):
                 color=color, lw=.8, ls='-', marker='o', ms=1.9,
                 markerfacecolor=color, markeredgecolor=color,
                 markeredgewidth=.6)
-        fp_bound = positive[0]['balanced_fp_bound']
-        ax.hlines(fp_bound, lo, hi, color=color, lw=.7, ls=':')
-        label_y = .35 if family == 'id' else .075
-        ax.text(.025, label_y, NOISY_FAMILY_LABELS[family],
+        # fp_bound = positive[0]['balanced_fp_bound']
+        # ax.hlines(fp_bound, lo, hi, color=color, lw=.7, ls=':')
+        # if family is not 'exact':
+        ax.text(0.025, 0.13, NOISY_FAMILY_LABELS[family],
                 transform=ax.transAxes,
-                color=color, fontsize=5.1, ha='left', va='bottom',
-                bbox=dict(facecolor='white', edgecolor='none', pad=.15))
+                color=color, fontsize=5.1,
+                ha='left', va='bottom',
+                )
 
     # Show the conventional plateau from -5 dB on the same low-SNR
     # segments; the broken right axes retain the refined waterfalls.
@@ -430,22 +431,24 @@ def _plot_task_noisy(noisy_axes, records):
                 ax.plot(row['snr_db'],
                         row['task_error_upper95_conservative'],
                         color=color, marker='v', ms=2.5, fillstyle='none')
-        ax.hlines(rows[0]['balanced_fp_bound'], lo, hi,
-                  color=color, lw=.7, ls=':')
+        # ax.hlines(rows[0]['balanced_fp_bound'], lo, hi, color=color, lw=.7, ls=':')
 
     for family, ax in bfc_axes.items():
-        ax.set(yscale='log', ylim=(1e-8, .8), xlim=low_limits[family])
+        ax.set(yscale='log', ylim=(1e-7, .95), xlim=low_limits[family])
         ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
         _clean_axis(ax)
     for family, ax in right_axes.items():
-        ax.set(yscale='log', ylim=(1e-8, .8),
+        ax.set(yscale='log', ylim=(1e-7, .95),
                xlim=conventional_limits[family])
         ax.tick_params(axis='both', which='both', labelsize=4.5, pad=1.2)
         _clean_axis(ax)
+    
+    for family, ax in bfc_axes.items():
+        ax.set_yticks((1e-7, 1e-5, 1e-3, 1e-1))
 
     id_ax.set_xticks([-5., -4.75, -4.5, -4.25, -4.])
     for ax in (rank_bfc_ax, exact_bfc_ax):
-        ax.set_xticks([-5., -4.5, -4.])
+        ax.set_xticks([-5., -4.7, -4.4, -4.1])
     for family, ax in right_axes.items():
         ticks = ((1.8, 2., 2.2) if family == 'rank'
                  else (-1.2, -1., -.8))
@@ -471,8 +474,8 @@ def _plot_task_noisy(noisy_axes, records):
                label='BFC'),
         Line2D([], [], color='.25', lw=.8, ls='--', marker='s', ms=2,
                markerfacecolor='white', label='Conventional'),
-        Line2D([], [], color='.25', lw=.7, ls=':', label='Bound'),
-    ], loc='upper right', bbox_to_anchor=(1.02, 1.14), ncol=3,
+        # Line2D([], [], color='.25', lw=.7, ls=':', label='Noiseless bound'),
+    ], loc='upper right', bbox_to_anchor=(1.02, 1.14), ncol=2,
        frameon=False, fontsize=4.1, handlelength=1., columnspacing=.45,
        handletextpad=.2, labelspacing=.05, borderaxespad=0)
 
