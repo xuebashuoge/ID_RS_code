@@ -109,7 +109,7 @@ positive=find(labels); negative=find(~labels);
 bits(positive,:)=support_bits(randi(stream,d.S,numel(positive),1),:);
 while ~isempty(negative)
     proposals=rand(stream,numel(negative),d.m)>.5;
-    accepted=~ft_labels(proposals,d,[]);
+    accepted=~ft_labels(proposals,d,support_bits(1,:));
     bits(negative(accepted),:)=proposals(accepted,:);
     negative=negative(~accepted);
 end
