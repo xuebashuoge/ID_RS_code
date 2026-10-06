@@ -183,8 +183,8 @@ THREE_PANEL_FIGSIZE = (FIGSIZE[0], 2.18)
 def _save_three_panels(fig, out):
     """Save without overwriting the two-axis version of the figure."""
     stem = out / 'combined_results_three_panels'
-    fig.savefig(stem.with_suffix('.pdf'))
-    fig.savefig(stem.with_suffix('.png'), dpi=300)
+    fig.savefig(stem.with_suffix('.pdf'), bbox_inches='tight', pad_inches=0.02)
+    fig.savefig(stem.with_suffix('.png'), bbox_inches='tight', pad_inches=0.02, dpi=300)
     plt.close(fig)
 
 
@@ -224,7 +224,7 @@ def _plot_noiseless(noiseless_axes, table):
         Line2D([], [], color='.25', lw=.8, ls='-', marker='o', ms=2,
                label='Avg.'),
         Line2D([], [], color='.25', lw=.8, ls='--', marker='s', ms=2,
-               markerfacecolor='white', label='Max.'),
+               markerfacecolor='white', label='Sample max.'),
         Line2D([], [], color='.25', lw=.8, ls=':', label='Bound'),
     ], loc='upper right', bbox_to_anchor=(.99, 1.05), ncol=3,
        frameon=False, fontsize=4.4, handlelength=1.15, columnspacing=.55,

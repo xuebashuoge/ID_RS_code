@@ -67,7 +67,7 @@ def comparison_data():
 def figure_rate_reliability_comparison(rows):
     """Draw the finite tradeoff and the asymptotic rate comparison."""
     fig, axes = plt.subplots(1, 2, figsize=(3.5, 1.5))
-    fig.subplots_adjust(left=.13, right=.995, bottom=.22, top=.88, wspace=.35)
+    fig.subplots_adjust(left=.13, right=.995, bottom=.22, top=.88, wspace=.4)
 
     ax = axes[0]
     for family in FAMILIES:
@@ -88,12 +88,12 @@ def figure_rate_reliability_comparison(rows):
             ha='right', va='center', fontsize=6.3,
         )
 
-    ax.set_title(rf'(a) Error exp./rate tradeoff',
-                 fontsize=9, pad=3)
+    ax.set_title(rf'(a) Rate/error exp. tradeoff',
+                 fontsize=9, pad=3, x=.35)
     ax.set_xlim(0, .26)
     ax.set_ylim(.08, .64)
     ax.set_xlabel(r'Error exponent $E_2$')
-    ax.set_ylabel(r'Computation rate')
+    ax.set_ylabel(r'$\log(m)/n_t$')
     ax.set_xticks([0, 0.1, 0.2])
     ax.set_yticks([0.1, 0.2, .3, .4, .5, .6])
     # ax.set_yticklabels([r'$1/6$', r'$0.3$', r'$0.4$', r'$1/2$', r'$0.6$'])
@@ -116,12 +116,12 @@ def figure_rate_reliability_comparison(rows):
     ax.plot(task_a, rs_asymptotic_rate(task_a), ls='none', marker='s', ms=3.2,
             color=RS_COLOR)
     ax.axvline(2.0, color='0.72', ls=':', lw=.75)
-    ax.text(.07, .95, 'ID / rank\n$a=0$', transform=ax.transAxes,
+    ax.text(.1, .95, 'ID / rank\n$a=0$', transform=ax.transAxes,
             fontsize=6.1, ha='left', va='top')
     ax.text(.54, .35, 'Exact-weight\n$a=2$', transform=ax.transAxes,
             fontsize=6.1, ha='left', va='top')
 
-    ax.set_title(r'(b) Small-weight regime', fontsize=9, pad=3)
+    ax.set_title(r'(b) Small-weight regime', fontsize=9, pad=3, x=.35)
     ax.set_xlim(-0.2, MAX_A+0.2)
     ax.set_ylim(0.07, 1.03)
     ax.set_xlabel(r'Parameter $a$')
