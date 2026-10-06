@@ -1,8 +1,8 @@
 function result=ft_task_comparison(task,out)
-% Stream fresh rank/exact messages for task-error BFC/conventional comparison.
+% Stream fresh ID/rank/exact messages for task-error BFC/conventional comparison.
 assert(strcmp(task.kind,'task_comparison'));
 assert(task.nt==60 && task.G==360);
-assert(ismember(task.family,{'rank','exact'}));
+assert(ismember(task.family,{'id','rank','exact'}));
 assert(ismember(task.scheme,{'bfc','conventional'}));
 params=struct('m',task.m);
 if strcmp(task.family,'rank'), params.rank_threshold=task.rank_threshold; end
@@ -13,12 +13,13 @@ enc=ldpcEncoderConfig(dvbs2ldpc(task.ldpc_rate));
 dec=ldpcDecoderConfig(enc,'bp');
 assert(enc.BlockLength==64800);
 if strcmp(task.scheme,'bfc')
-    assert(abs(task.ldpc_rate-1/3)<1e-12 && strcmp(task.family,'rank'));
+    assert(abs(task.ldpc_rate-1/3)<1e-12);
     payload=d.G*d.nt;
 else
     if strcmp(task.family,'rank')
         assert(abs(task.ldpc_rate-5/6)<1e-12);
     else
+        assert(strcmp(task.family,'exact'));
         assert(abs(task.ldpc_rate-3/5)<1e-12);
     end
     payload=d.G*d.m;
