@@ -19,7 +19,7 @@ from rate_results import _finite_rate
 from rate_results_revised import TRADEOFF_E2, TRADEOFF_N_T
 from results_common import COLORS, clean_axis, csv_write, savefig
 
-FAMILY_LABELS = {'id': 'ID', 'rank': 'Rank', 'exact-threshold': 'Exact weight'}
+FAMILY_LABELS = {'id': r'ID, $S(m)=1$', 'rank': 'Rank,\n'+r'$S(m)=2001$', 'exact-threshold': 'Exact weight,\n'+r'$S(m)=\binom{m}{2}$'}
 
 OUTPUT_NAME = 'rate_reliability_comparison'
 EXPONENT_POINTS = 401
@@ -81,11 +81,12 @@ def figure_rate_reliability_comparison(rows):
         ax.annotate(
             FAMILY_LABELS[family],
             xy=(label_point['E_2'], label_point['R_exp']),
-            xytext=({'id': -4, 'rank': -4,
-                         'exact-threshold': 8}[family], {'id': 8, 'rank': -5,
+            xytext=({'id': -20, 'rank': -32,
+                         'exact-threshold': -8}[family], 
+                         {'id': 12, 'rank': -2,
                          'exact-threshold': 8}[family]),
             textcoords='offset points', color=COLORS[family],
-            ha='right', va='center', fontsize=6.3,
+            ha='left', va='center', fontsize=6,
         )
 
     ax.set_title(rf'(a) Rate/error exp. tradeoff',
